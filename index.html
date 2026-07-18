@@ -727,12 +727,12 @@ function renderMap() {
     const hasOnsite = list.some(r => r.onsite);
     if (list.length > 0) reviewedPlaces++;
 
-    // 리뷰 없는 곳: 작고 연하게(정보용) / 리뷰 있는 곳: 크게 + 개수 칩
-    const dim = list.length === 0;
-    const size = poi.cat === "stay" ? 44 : (dim ? 30 : 38);
+    // 숙소(stay)는 항상 표시 / 나머지는 리뷰 있을 때만 표시
+    if (list.length === 0 && poi.cat !== "stay") return;
+    const size = poi.cat === "stay" ? 44 : 38;
     const icon = L.divIcon({
       className: "",
-      html: `<div class="cat-marker${dim ? ' dim' : ''}" style="background:${c.bg};
+      html: `<div class="cat-marker" style="background:${c.bg};
         width:${size}px;height:${size}px;font-size:${Math.round(size*0.48)}px;
         ${hasOnsite ? 'box-shadow:0 0 0 3px rgba(43,122,140,.55), 0 3px 10px rgba(35,39,45,.35);' : ''}">
         ${c.emoji}
@@ -741,7 +741,7 @@ function renderMap() {
       </div>`,
       iconSize: [size, size], iconAnchor: [size/2, size/2],
     });
-    const m = L.marker([poi.lat, poi.lng], { icon, zIndexOffset: poi.cat === "stay" ? 500 : (dim ? 0 : 200) })
+    const m = L.marker([poi.lat, poi.lng], { icon, zIndexOffset: poi.cat === "stay" ? 500 : 200 })
       .addTo(map)
       .on('click', () => openViewSheet(poi));
     markers.push(m);
