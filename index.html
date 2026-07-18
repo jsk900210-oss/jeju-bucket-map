@@ -1,1 +1,1545 @@
-<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>제주 리뷰맵 — 게스트 여행정보 플랫폼</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script><style>:root{--basalt:#23272d;--basalt-soft:#3a4048;--gamgyul:#f4841f;--sea:#2b7a8c;--sand:#f7f3ea;--white:#ffffff;--verified:#2e9e5b;--reject:#d64545;--shadow:0 8px 24px rgba(35,39,45,.18)}*{margin:0;padding:0;box-sizing:border-box}body,html{height:100%;font-family:'Apple SD Gothic Neo',Pretendard,'Noto Sans KR',sans-serif;background:var(--sand);color:var(--basalt)}body{-webkit-tap-highlight-color:transparent;overscroll-behavior:none;-webkit-text-size-adjust:100%}#app{position:fixed;inset:0;height:100dvh;overflow:hidden}#map{position:absolute;inset:0;z-index:1}button{touch-action:manipulation}header{position:absolute;top:0;left:0;right:0;z-index:20;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:linear-gradient(to bottom,rgba(247,243,234,.97) 60%,rgba(247,243,234,0));pointer-events:none}header>*{pointer-events:auto}.brand{display:flex;align-items:baseline;gap:8px}.brand h1{font-size:19px;font-weight:800;letter-spacing:-.5px}.brand h1 .dot{color:var(--gamgyul)}.brand span{font-size:11px;color:var(--basalt-soft)}.stat-line{margin-top:5px;font-size:12px;color:var(--basalt-soft)}.stat-line b{color:var(--gamgyul)}.tabbar{position:absolute;bottom:0;left:0;right:0;z-index:26;display:flex;align-items:stretch;background:var(--white);border-top:1px solid rgba(35,39,45,.08);box-shadow:0 -4px 20px rgba(35,39,45,.1);padding-bottom:env(safe-area-inset-bottom)}.tab{flex:1;border:none;background:0 0;cursor:pointer;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:700;color:var(--basalt-soft);font-family:inherit}.tab .t-ico{font-size:21px;line-height:1}.tab.active{color:var(--gamgyul)}.tab.primary{position:relative}.tab.primary .t-ico{width:52px;height:52px;margin-top:-22px;background:var(--gamgyul);color:var(--white);border-radius:50%;border:4px solid var(--sand);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 5px 14px rgba(244,132,31,.45)}.tab.primary{color:var(--gamgyul)}.empty-card{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);z-index:15;background:var(--white);border-radius:16px;box-shadow:var(--shadow);padding:26px 24px;text-align:center;width:min(320px,84vw)}.empty-card .icon{font-size:34px}.empty-card h3{font-size:16px;font-weight:800;margin-top:10px;letter-spacing:-.3px}.empty-card p{font-size:13px;color:var(--basalt-soft);line-height:1.6;margin-top:8px}.empty-card p b{color:var(--sea)}.pipeline-note{position:absolute;z-index:20;bottom:calc(70px + env(safe-area-inset-bottom));left:12px;background:var(--white);border-radius:10px;box-shadow:var(--shadow);padding:7px 11px;font-size:10.5px;color:var(--basalt-soft);display:flex;align-items:center;gap:6px;max-width:190px;line-height:1.4}.pipeline-note .shield{color:var(--verified);font-size:13px}.cat-marker{position:relative;border-radius:50% 50% 50% 8px;border:3px solid var(--white);box-shadow:0 3px 10px rgba(35,39,45,.35);display:flex;align-items:center;justify-content:center;transform:rotate(-6deg)}.cat-marker.dim{opacity:.82;border-width:2px}.cat-marker .cnt{position:absolute;top:-8px;right:-8px;background:var(--basalt);color:var(--white);font-size:10px;font-weight:800;line-height:1;padding:3px 6px;border-radius:8px;transform:rotate(6deg);border:1.5px solid var(--white)}.cat-marker .pin{position:absolute;bottom:-10px;left:-9px;font-size:13px;transform:rotate(6deg)}.gamgyul-marker{position:relative;width:38px;height:38px;border-radius:50% 50% 50% 6px;background:var(--gamgyul);border:3px solid var(--white);box-shadow:0 3px 10px rgba(35,39,45,.35);display:flex;align-items:center;justify-content:center;color:var(--white);font-weight:800;font-size:13px;transform:rotate(-8deg)}.sheet{position:absolute;left:0;right:0;bottom:0;z-index:30;background:var(--white);border-radius:20px 20px 0 0;box-shadow:0 -8px 30px rgba(35,39,45,.25);max-height:78dvh;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom);transform:translateY(105%);transition:transform .3s cubic-bezier(.3,.9,.3,1);touch-action:pan-y}.sheet.open{transform:translateY(0)}.sheet-handle{flex:0 0 auto;padding:10px 0 6px;cursor:grab}.sheet-handle::before{content:"";display:block;width:44px;height:4px;border-radius:2px;background:rgba(35,39,45,.18);margin:0 auto}.sheet-head{padding:4px 18px 12px;border-bottom:1px solid rgba(35,39,45,.08);flex:0 0 auto}.sheet-head .row{display:flex;align-items:center;justify-content:space-between}.sheet-head h2{font-size:18px;font-weight:800;letter-spacing:-.3px}.sheet-head .meta{font-size:12px;color:var(--basalt-soft);margin-top:3px}.close-btn{border:none;background:var(--sand);width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;color:var(--basalt-soft)}.official{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:11px;font-weight:700;color:var(--sea);background:rgba(43,122,140,.1);padding:4px 9px;border-radius:6px}.sheet-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 18px 24px}.review{padding:12px 0;border-bottom:1px solid rgba(35,39,45,.07)}.review:last-child{border-bottom:none}.review .top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.flag{font-size:16px}.nick{font-weight:700;font-size:13px}.stars{color:var(--gamgyul);font-size:12px;letter-spacing:1px}.badge-verified{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:var(--verified);background:rgba(46,158,91,.1);padding:2px 7px;border-radius:5px}.review p{font-size:13px;line-height:1.55;margin-top:6px}.review .time{font-size:11px;color:rgba(35,39,45,.4);margin-top:5px}.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--verified);margin-right:4px;animation:pulse 1.6s infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}#fPlaceSearch{width:100%;padding:12px;border:1.5px solid rgba(35,39,45,.14);border-radius:10px;font-size:16px;font-family:inherit}#fPlaceSearch:focus{outline:2px solid var(--gamgyul);border-color:transparent}#placeSuggest{margin-top:4px}.sg-item{display:block;width:100%;text-align:left;border:none;cursor:pointer;background:var(--sand);border-radius:9px;padding:11px 12px;margin-top:5px;font-family:inherit;font-size:14px;font-weight:700}.sg-item small{display:block;font-weight:500;font-size:11px;color:var(--basalt-soft);margin-top:2px}.sg-none{font-size:12px;color:var(--basalt-soft);padding:8px 2px}.native-file{width:100%;padding:12px;border:1.5px dashed rgba(35,39,45,.25);border-radius:10px;font-size:14px;font-family:inherit;background:var(--sand)}.native-file::file-selector-button{border:none;background:var(--gamgyul);color:#fff;font-weight:800;font-size:13px;font-family:inherit;padding:9px 14px;border-radius:8px;margin-right:10px;cursor:pointer}.media-btn{width:100%;border:1.5px dashed rgba(35,39,45,.25);background:0 0;border-radius:10px;padding:13px;font-size:13px;font-weight:700;color:var(--basalt-soft);cursor:pointer;font-family:inherit}.media-msg{font-size:11px;color:var(--reject);margin-top:6px;line-height:1.5}.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.thumb{position:relative;width:74px;height:74px;border-radius:10px;overflow:hidden;background:var(--sand);flex:0 0 auto}.thumb img,.thumb video{width:100%;height:100%;object-fit:cover}.thumb .vid-mark{position:absolute;left:5px;bottom:5px;font-size:10px;font-weight:800;background:rgba(0,0,0,.65);color:#fff;padding:2px 6px;border-radius:5px}.thumb .rm{position:absolute;top:3px;right:3px;width:22px;height:22px;border:none;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:12px;cursor:pointer;line-height:1}.rev-media{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.rev-media img{width:86px;height:86px;object-fit:cover;border-radius:9px;cursor:pointer}.rev-media video{width:178px;height:118px;object-fit:cover;border-radius:9px;background:#000}.lightbox{position:fixed;inset:0;z-index:99;background:rgba(20,22,25,.92);display:none;align-items:center;justify-content:center;padding:20px}.lightbox.on{display:flex}.lightbox img{max-width:100%;max-height:88dvh;border-radius:12px}.field{margin-bottom:14px}.field label{display:block;font-size:12px;font-weight:700;color:var(--basalt-soft);margin-bottom:6px}.field input[type=text],.field select,.field textarea{width:100%;padding:12px;border:1.5px solid rgba(35,39,45,.14);border-radius:10px;font-size:16px;font-family:inherit;background:var(--white);-webkit-appearance:none;appearance:none}.field textarea{resize:none;height:84px}.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--gamgyul);border-color:transparent}.star-row{display:flex;gap:2px}.star-btn{border:none;background:0 0;font-size:30px;cursor:pointer;color:rgba(35,39,45,.18);padding:4px 7px}.star-btn.on{color:var(--gamgyul)}.checkin{display:flex;align-items:center;gap:10px;background:var(--sand);border-radius:10px;padding:13px 12px;cursor:pointer;border:1.5px solid transparent;font-size:13px;min-height:52px}.checkin.done{border-color:var(--verified);background:rgba(46,158,91,.08)}.checkin .qr{font-size:20px}.checkin small{display:block;color:var(--basalt-soft);font-size:11px;margin-top:2px}.submit-btn{width:100%;border:none;cursor:pointer;background:var(--basalt);color:var(--white);font-size:16px;font-weight:800;padding:15px;border-radius:12px;margin-top:4px;min-height:52px}.submit-btn:disabled{opacity:.4;cursor:not-allowed}.audit-steps{margin-top:6px}.audit-step{display:flex;align-items:center;gap:10px;padding:11px 0;font-size:13px;border-bottom:1px solid rgba(35,39,45,.06)}.audit-step:last-child{border-bottom:none}.audit-step .st-icon{width:24px;text-align:center;font-size:15px}.audit-step.wait{color:rgba(35,39,45,.35)}.audit-step.pass .st-icon{color:var(--verified)}.audit-step.fail{color:var(--reject)}.audit-result{margin-top:14px;padding:12px;border-radius:10px;font-size:13px;font-weight:700;text-align:center;line-height:1.5}.audit-result.ok{background:rgba(46,158,91,.1);color:var(--verified)}.audit-result.no{background:rgba(214,69,69,.08);color:var(--reject)}.spin{display:inline-block;animation:rot 1s linear infinite}@keyframes rot{to{transform:rotate(360deg)}}.route-title{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800}.route-title .arrow{color:var(--gamgyul)}.bus-card{border:1.5px solid rgba(35,39,45,.1);border-radius:14px;padding:14px;margin-bottom:12px;background:var(--white)}.bus-card .bus-no{display:inline-flex;align-items:center;gap:6px;background:var(--gamgyul);color:var(--white);font-weight:800;font-size:14px;padding:5px 12px;border-radius:8px}.bus-card .bus-no.alt{background:var(--sea)}.bus-card .tag{font-size:11px;font-weight:700;color:var(--basalt-soft);margin-left:7px}.bus-rows{margin-top:11px}.bus-row{display:flex;gap:10px;font-size:13px;padding:5px 0;line-height:1.5}.bus-row .k{flex:0 0 64px;color:var(--basalt-soft);font-weight:700;font-size:12px;padding-top:1px}.bus-row .v b{color:var(--gamgyul)}.stop-line{font-size:12px;color:var(--basalt-soft);line-height:1.7;margin-top:4px}.stop-line b{color:var(--basalt)}.src-note{margin-top:4px;padding:10px 12px;border-radius:10px;background:rgba(43,122,140,.07);font-size:11.5px;line-height:1.6;color:var(--sea)}.src-note b{font-weight:800}.leaflet-bottom{bottom:calc(66px + env(safe-area-inset-bottom))}@media (prefers-reduced-motion:reduce){.sheet{transition:none}.live-dot,.spin{animation:none}}</style></head><body><div id="app"><div id="map"></div><header><div class="brand"><h1>제주 리뷰맵<span class="dot">.</span></h1><span>게스트가 직접 만드는 실시간 지도</span></div><div class="stat-line" id="statLine">리뷰 불러오는 중…</div></header><div class="empty-card" id="emptyCard" style="display:none"><div class="icon">🍊</div><h3>아직 지도가 비어 있어요</h3><p>이 지도는 <b>게스트가 직접 남긴 리뷰</b>로만 채워집니다.<br>첫 번째 리뷰를 남기면 그 장소에<br>감귤 마커가 생겨요!</p></div><div class="pipeline-note"><span class="shield">🛡</span> <span>검수 에이전트를 통과한<br><b>실방문 인증 리뷰</b>만 표시</span></div><nav class="tabbar"><button class="tab active" id="tabMap" onclick='switchTab("map")'><span class="t-ico">🗺️</span>지도</button> <button class="tab primary" onclick='switchTab("write")'><span class="t-ico">✏️</span>리뷰 남기기</button> <button class="tab" id="tabBus" onclick='switchTab("bus")'><span class="t-ico">🚌</span>공항버스</button></nav><div class="sheet" id="viewSheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="row"><h2 id="placeName"></h2><button class="close-btn" onclick="closeSheets()">✕</button></div><div class="meta" id="placeMeta"></div><div class="official" id="placeOfficial"></div></div><div class="sheet-body" id="reviewList"></div></div><div class="sheet" id="writeSheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="row"><h2>리뷰 남기기</h2><button class="close-btn" onclick="closeSheets()">✕</button></div><div class="meta">개인정보 없이 · 닉네임만으로 참여</div></div><div class="sheet-body" id="writeBody"><div class="field"><label>방문한 장소 — 업체명으로 검색</label> <input type="text" id="fPlaceSearch" placeholder="예: 제주당, 우진해장국, 함덕…" autocomplete="off"><div id="placeSuggest"></div><input type="hidden" id="fPlace" value=""><div id="placePicked" style="display:none;margin-top:8px;font-size:13px;font-weight:700;color:var(--sea)"></div><button class="media-btn" style="margin-top:8px" onclick="requestOnsite()" id="onsiteBtn">📍 현장 인증 받기 (선택 · GPS로 위치 확인)</button><div class="media-msg" id="onsiteMsg" style="color:var(--basalt-soft)"></div></div><div class="field"><label>닉네임 · 국적</label><div style="display:flex;gap:8px"><input type="text" id="fNick" placeholder="닉네임" maxlength="12" style="flex:1"> <select id="fFlag" style="width:96px"></select></div></div><div class="field"><label>별점</label><div class="star-row" id="fStars"></div></div><div class="field"><label>리뷰 내용</label> <textarea id="fText" placeholder="실제 방문 경험을 알려주세요 (10자 이상)" maxlength="300"></textarea></div><div class="field"><label>사진 · 영상 (최대 10개, 영상은 30초 이하) <span id="mediaCount"></span></label> <input type="file" id="fMedia" accept="image/*,video/*" multiple="multiple" class="native-file"><div class="thumbs" id="mediaThumbs"></div><div class="media-msg" id="mediaMsg"></div></div><div class="field"><label>실방문 인증 — 검수 에이전트 A 필수 조건</label><div class="checkin" id="fCheckin" onclick="toggleCheckin()"><span class="qr">📷</span><div><b id="checkinLabel">게스트하우스 QR 체크인 스캔</b> <small>개인정보 수집 없이 '현재 투숙 중' 여부만 확인합니다</small></div></div></div><button class="submit-btn" id="fSubmit" onclick="submitReview()">검수 요청 → 지도에 올리기</button></div></div><div class="sheet" id="busSheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="row"><div class="route-title">🚌 모슬포항(운진항) <span class="arrow">→</span> 제주국제공항</div><button class="close-btn" onclick="closeSheets()">✕</button></div><div class="meta"><span class="live-dot"></span>운행 중인 버스 위치 실시간 표시 · 소요 약 1시간 10분</div><div class="official">✓ 출처: 제주버스정보시스템 (bus.jeju.go.kr)</div></div><div class="sheet-body"><div class="bus-card"><span class="bus-no">급행 151</span><span class="tag">대정 · 영어교육도시 경유</span><div class="bus-rows"><div class="bus-row"><span class="k">배차</span> <span class="v">모슬포 출발 기준 <b>20~70분</b> 간격</span></div><div class="bus-row"><span class="k">소요시간</span> <span class="v">운진항 → 공항 약 <b>1시간 10분</b></span></div><div class="bus-row"><span class="k">요금</span> <span class="v">거리비례 2,000원~<b>최대 3,000원</b> (성인)</span></div></div><div class="stop-line"><b>운진항</b> → 하모체육공원 → 대정읍(하모3리) → 인성리 → 보성초 → 구억리 → 한국국제학교 → 오설록 → 제주신화월드 → 동광환승센터 → 한라병원 → 제주도청 → <b>제주국제공항</b></div></div><div class="bus-card"><span class="bus-no alt">급행 152</span><span class="tag">사계 · 화순 · 안덕 경유 (1일 7회)</span><div class="bus-rows"><div class="bus-row"><span class="k">첫차</span> <span class="v">운진항 <b>07:30</b> 출발</span></div><div class="bus-row"><span class="k">운행횟수</span> <span class="v">하루 <b>7회</b>만 운행 — 시간 확인 필수</span></div><div class="bus-row"><span class="k">소요시간</span> <span class="v">운진항 → 공항 약 <b>1시간 10분</b></span></div></div><div class="stop-line"><b>운진항</b> → 하모체육공원 → 사계리 → 화순환승정류장 → 안덕면사무소 → 서광리 → 동광환승센터 → 한라병원 → 제주도청 → <b>제주국제공항</b></div></div><div class="src-note">🛡 <b>검수 에이전트 B 통과 정보</b> — 시간표는 제주버스정보시스템 공공데이터와 대조된 값입니다. 막차·상세 시각은 운행 사정에 따라 달라질 수 있어요.</div><div class="bus-card" style="margin-top:12px"><span class="bus-no" style="background:#2e9e5b">📡 실시간 위치</span> <span class="tag" id="liveStatus">시뮬레이션 모드</span><div class="bus-rows"><div style="font-size:12px;color:var(--basalt-soft);line-height:1.6;margin-bottom:10px">국토교통부 TAGO <b>버스위치정보 API</b>(자동승인·무료)의 서비스키를 입력하면 실제 운행 중인 151번 버스의 GPS 위치로 전환됩니다.</div><div style="display:flex;gap:6px"><input type="text" id="apiKeyInput" placeholder="data.go.kr 서비스키 붙여넣기" style="flex:1;min-width:0;padding:11px;border:1.5px solid rgba(35,39,45,.14);border-radius:9px;font-size:16px;font-family:inherit"> <button onclick="connectRealApi()" style="border:none;background:var(--basalt);color:#fff;font-weight:800;font-size:12px;padding:0 16px;border-radius:9px;cursor:pointer">연결</button></div><div id="apiLog" style="font-size:11px;color:var(--basalt-soft);margin-top:8px;line-height:1.6"></div></div></div></div></div><div class="sheet" id="auditSheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="row"><h2>검수 에이전트 A 작동 중</h2><button class="close-btn" onclick="closeSheets()">✕</button></div><div class="meta">리뷰가 DB에 저장되기 전, 입구에서 검증합니다</div></div><div class="sheet-body"><div class="audit-steps" id="auditSteps"></div><div id="auditResult"></div></div></div></div><div class="lightbox" id="lightbox" onclick='this.classList.remove("on")'><img id="lightboxImg" alt="리뷰 사진 크게 보기"></div><script>const POI=[{id:"bucket",cat:"stay",name:"버킷제주 게스트하우스",lat:33.2125,lng:126.2599,src:"구글 플레이스 확인 · ★4.8 (103) · 우리 숙소!"},{id:"hamdeok",cat:"hot",name:"함덕해수욕장",lat:33.5434,lng:126.6697,src:"비짓제주 공식 POI"},{id:"seongsan",cat:"oreum",name:"성산일출봉",lat:33.4587,lng:126.9425,src:"유네스코 세계자연유산"},{id:"hyeopjae",cat:"hot",name:"협재해수욕장",lat:33.394,lng:126.2397,src:"비짓제주 공식 POI"},{id:"dongmun",cat:"food",name:"동문재래시장",lat:33.5121,lng:126.5279,src:"제주시 공식 시장 정보"},{id:"osulloc",cat:"hot",name:"오설록 티뮤지엄",lat:33.306,lng:126.2895,src:"공식 홈페이지 확인"},{id:"udo",cat:"hot",name:"우도",lat:33.506,lng:126.9525,src:"도항선 공공데이터"},{id:"manjang",cat:"hot",name:"만장굴",lat:33.5283,lng:126.7713,src:"유네스코 세계자연유산"},{id:"jusang",cat:"hot",name:"주상절리대",lat:33.2377,lng:126.4253,src:"비짓제주 공식 POI"},{id:"saryeoni",cat:"hot",name:"사려니숲길",lat:33.4225,lng:126.6595,src:"산림청 공식 정보"},{id:"aewol",cat:"hot",name:"애월 한담해안산책로",lat:33.4636,lng:126.3103,src:"비짓제주 공식 POI"},{id:"jejudang",cat:"food",name:"제주당 (애월)",lat:33.3542,lng:126.3559,src:"구글 플레이스 확인 · 매일 10~21시"},{id:"ujin",cat:"food",name:"우진해장국",lat:33.5115,lng:126.52,src:"구글 플레이스 확인 · 고사리육개장 맛집"},{id:"jamae",cat:"food",name:"자매국수",lat:33.4986,lng:126.4588,src:"구글 플레이스 확인 · 수요일 휴무"},{id:"monsant",cat:"hot",name:"몽상드애월",lat:33.4629,lng:126.3093,src:"구글 플레이스 확인 · 애월 오션뷰 카페"},{id:"camellia",cat:"hot",name:"카멜리아힐",lat:33.2898,lng:126.3683,src:"구글 플레이스 확인 · 8:30~18시"},{id:"ecoland",cat:"hot",name:"에코랜드 테마파크",lat:33.4466,lng:126.6671,src:"구글 플레이스 확인 · 8:30~19시"},{id:"snoopy",cat:"hot",name:"스누피가든",lat:33.4442,lng:126.7783,src:"구글 플레이스 확인 · 9~18시"},{id:"park981",cat:"hot",name:"9.81파크",lat:33.3899,lng:126.3663,src:"구글 플레이스 확인 · 9~20시"},{id:"saebyeol",cat:"oreum",name:"새별오름",lat:33.3659,lng:126.3564,src:"구글 플레이스 확인 · 상시 개방"},{id:"camforest",cat:"hot",name:"동백포레스트",lat:33.3003,lng:126.6362,src:"구글 플레이스 확인 · 9~17시"},{id:"okmanine",cat:"food",name:"옥만이네 (협재)",lat:33.4165,lng:126.2635,src:"구글 플레이스 확인 · 해물갈비찜"},{id:"sagye",cat:"fish",name:"사계해변 (해루질 포인트)",lat:33.2312,lng:126.3105,src:"구글 플레이스 확인 · 조개·보말 해루질 명소"},{id:"hyeongje",cat:"boat",name:"형제섬 (배낚시)",lat:33.21,lng:126.3143,src:"구글 플레이스 확인 · 낚시꾼들의 성지"},{id:"unjin",cat:"fish",name:"운진항 방파제 (낚시)",lat:33.2111,lng:126.2574,src:"구글 플레이스 확인 · 방파제 낚시 · 마라도 배편"}],FLAGS=["🇰🇷","🇺🇸","🇯🇵","🇨🇳","🇹🇼","🇫🇷","🇩🇪","🇬🇧","🇪🇸","🇨🇦","🇦🇺","🇻🇳","🇹🇭","🇮🇩"],STORAGE_KEY="jeju-reviews-v1";let reviews=[],storageMode="memory",memStore={};async function initStore(){try{if(window.storage)return await window.storage.set("jb-probe","1",!1),void(storageMode="cloud")}catch(e){}try{return localStorage.setItem("jb-probe","1"),localStorage.removeItem("jb-probe"),void(storageMode="local")}catch(e){}storageMode="memory"}async function kvSet(e,t,n){"cloud"===storageMode?await window.storage.set(e,t,n):"local"===storageMode?localStorage.setItem("jb:"+e,t):memStore[e]=t}async function kvGet(e,t){if("cloud"===storageMode){const n=await window.storage.get(e,t);return n?n.value:null}return"local"===storageMode?localStorage.getItem("jb:"+e):memStore[e]??null}async function loadReviews(){try{const e=await kvGet(STORAGE_KEY,!0);reviews=e?JSON.parse(e):[]}catch(e){reviews=[]}}async function saveReviews(){try{await kvSet(STORAGE_KEY,JSON.stringify(reviews),!0)}catch(e){console.error("저장 실패:",e)}}const map=L.map("map",{zoomControl:!1}).setView([33.38,126.55],10);L.control.zoom({position:"bottomright"}).addTo(map),function(){let e=0,t=!1;const n=L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{attribution:"&copy; OpenStreetMap &copy; CARTO",maxZoom:18});n.on("tileerror",()=>{if(++e<3||t)return;t=!0,map.removeLayer(n);let a=0;const o=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"&copy; OpenStreetMap",maxZoom:19});o.on("tileerror",()=>{if(3===++a){const e=document.getElementById("statLine");e&&(e.innerHTML+=" · <span style='color:var(--reject)'>이 환경은 지도 이미지를 차단해요 — 배포 주소에서는 정상 표시됩니다</span>")}}),o.addTo(map)}),n.addTo(map)}(),setTimeout(()=>map.invalidateSize(),400),window.addEventListener("resize",()=>map.invalidateSize());let markers=[];function exposureScore(e){return(e.onsite?2:0)+(e.mediaCount>0?1:0)}function reviewsOf(e){return reviews.filter(t=>t.poiId===e).sort((e,t)=>exposureScore(t)-exposureScore(e)||t.ts-e.ts)}function renderMap(){markers.forEach(e=>map.removeLayer(e)),markers=[];const e={stay:{emoji:"🏠",bg:"#2b6cb0"},fish:{emoji:"🐟",bg:"#2b7a8c"},boat:{emoji:"🚤",bg:"#1d4e89"},food:{emoji:"🍴",bg:"#c05621"},hot:{emoji:"🍊",bg:"#f4841f"},oreum:{emoji:"⛰️",bg:"#4a7c59"}};let t=0;POI.forEach(n=>{const a=reviewsOf(n.id),o=e[n.cat]||e.hot,s=a.some(e=>e.onsite);a.length>0&&t++;const i=0===a.length,r="stay"===n.cat?44:i?30:38,c=L.divIcon({className:"",html:`<div class="cat-marker${i?" dim":""}" style="background:${o.bg};\n        width:${r}px;height:${r}px;font-size:${Math.round(.48*r)}px;\n        ${s?"box-shadow:0 0 0 3px rgba(43,122,140,.55), 0 3px 10px rgba(35,39,45,.35);":""}">\n        ${o.emoji}\n        ${a.length>0?`<span class="cnt">${a.length}</span>`:""}\n        ${s?'<span class="pin">📍</span>':""}\n      </div>`,iconSize:[r,r],iconAnchor:[r/2,r/2]}),d=L.marker([n.lat,n.lng],{icon:c,zIndexOffset:"stay"===n.cat?500:i?0:200}).addTo(map).on("click",()=>openViewSheet(n));markers.push(d)});const n="cloud"===storageMode?"":"local"===storageMode?" · <span style='color:var(--sea)'>이 기기에 저장됨</span>":" · <span style='color:var(--reject)'>임시 모드 — 화면을 닫으면 사라져요</span>";document.getElementById("statLine").innerHTML=0===reviews.length?`리뷰 <b>0건</b> · 장소 ${POI.length}곳 준비됨 — 첫 리뷰를 기다리는 중${n}`:`누적 리뷰 <b>${reviews.length}건</b> · 리뷰 장소 <b>${t}곳</b>/${POI.length}${n}`,document.getElementById("emptyCard").style.display=0===reviews.length?"block":"none"}const sheets=["viewSheet","writeSheet","auditSheet","busSheet"];function closeSheets(){sheets.forEach(e=>document.getElementById(e).classList.remove("open")),hideBusRoute();const e=document.getElementById("tabMap"),t=document.getElementById("tabBus");e&&(e.classList.add("active"),t.classList.remove("active"))}map.on("click",closeSheets);const BUS_ROUTE_151=[{pos:[33.2141,126.2511],name:"모슬포 운진항"},{pos:[33.2235,126.2543],name:"하모체육공원"},{pos:[33.2496,126.2688],name:"인성리"},{pos:[33.29,126.287],name:"한국국제학교"},{pos:[33.306,126.2895],name:"오설록"},{pos:[33.3163,126.321],name:"제주신화월드"},{pos:[33.3237,126.3555],name:"동광환승센터"},{pos:[33.452,126.434],name:"평화로"},{pos:[33.489,126.48],name:"한라병원"},{pos:[33.5066,126.4928],name:"제주국제공항"}],ROUTE_LATLNGS=BUS_ROUTE_151.map(e=>e.pos);let busLine=null,busCasing=null,busEndpoints=[],stopDots=[];function showBusRoute(){hideBusRoute(),busCasing=L.polyline(ROUTE_LATLNGS,{color:"#23272d",weight:9,opacity:.9,lineCap:"round",lineJoin:"round"}).addTo(map),busLine=L.polyline(ROUTE_LATLNGS,{color:"#f4841f",weight:5,opacity:1,lineCap:"round",lineJoin:"round"}).addTo(map),BUS_ROUTE_151.forEach(e=>{const t=POI.map(t=>({name:t.name,d:distanceM(e.pos[0],e.pos[1],t.lat,t.lng)})).filter(e=>e.d<=2500).sort((e,t)=>e.d-t.d).slice(0,3),n=`<b>${e.name}</b>`+(t.length?`<br><span style="font-size:10px">주변: ${t.map(e=>`${e.name}(${fmtDist(e.d)})`).join(", ")}</span>`:""),a=L.circleMarker(e.pos,{radius:5,color:"#23272d",weight:2.5,fillColor:"#fff",fillOpacity:1}).addTo(map).bindTooltip(n,{direction:"top",offset:[0,-6]});stopDots.push(a)});const e=(e,t)=>L.marker(e,{icon:L.divIcon({className:"",html:`<div style="background:#23272d;color:#fff;font-size:11px;font-weight:800;\n             padding:4px 9px;border-radius:7px;white-space:nowrap;\n             box-shadow:0 3px 8px rgba(0,0,0,.3)">${t}</div>`,iconAnchor:[30,26]})}).addTo(map);busEndpoints=[e(ROUTE_LATLNGS[0],"🚌 모슬포항"),e(ROUTE_LATLNGS[9],"✈️ 제주공항")],map.fitBounds(busLine.getBounds(),{paddingTopLeft:[30,110],paddingBottomRight:[30,320]}),startBusTracking()}function hideBusRoute(){[busLine,busCasing].forEach(e=>e&&map.removeLayer(e)),busLine=busCasing=null,[...busEndpoints,...stopDots].forEach(e=>map.removeLayer(e)),busEndpoints=[],stopDots=[],realMarkers.forEach(e=>map.removeLayer(e)),realMarkers=[],stopBusTracking()}function openBusSheet(){closeSheets(),showBusRoute(),document.getElementById("busSheet").classList.add("open")}let busMarkers=[],busTimer=null,liveBuses=[{id:"제주79자1151",progress:.1,dir:1},{id:"제주79자1152",progress:.72,dir:-1}];const TICK_MS=100,SPEED_PER_TICK=.0011;function progressToPos(e,t){const n=ROUTE_LATLNGS.length-1,a=Math.min(Math.max(e,0),.9999)*n,o=Math.floor(a),s=a-o,[i,r]=ROUTE_LATLNGS[o],[c,d]=ROUTE_LATLNGS[o+1];return{lat:i+(c-i)*s,lng:r+(d-r)*s,nextStop:t>0?BUS_ROUTE_151[o+1].name:BUS_ROUTE_151[o].name}}function busIcon(e,t,n){const a=n>0?"✈️ 공항방면":"⛵ 모슬포방면";return L.divIcon({className:"",html:`<div style="display:flex;flex-direction:column;align-items:center;gap:2px">\n      <div style="background:#fff;border:2px solid #f4841f;border-radius:8px;\n        padding:2px 7px;font-size:10px;font-weight:800;color:#23272d;\n        white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);line-height:1.4;text-align:center">\n        <span style="color:#f4841f">151</span> ${a}<br>\n        <span style="font-weight:600;color:#3a4048">다음: ${t}</span></div>\n      <div style="font-size:24px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4));\n        transform:scaleX(${n>0?1:-1})">🚌</div>\n    </div>`,iconAnchor:[52,52]})}function startBusTracking(){stopBusTracking(),liveBuses.forEach(e=>{const t=progressToPos(e.progress,e.dir);e.lastStop=t.nextStop,e.marker=L.marker([t.lat,t.lng],{icon:busIcon(e,t.nextStop,e.dir),zIndexOffset:1e3}).addTo(map),busMarkers.push(e.marker)}),busTimer=setInterval(()=>{liveBuses.forEach(e=>{e.progress+=SPEED_PER_TICK*e.dir,e.progress>=1&&(e.progress=1,e.dir=-1),e.progress<=0&&(e.progress=0,e.dir=1);const t=progressToPos(e.progress,e.dir);e.marker.setLatLng([t.lat,t.lng]),t.nextStop!==e.lastStop&&(e.marker.setIcon(busIcon(e,t.nextStop,e.dir)),e.lastStop=t.nextStop)})},TICK_MS)}function stopBusTracking(){busTimer&&(clearInterval(busTimer),busTimer=null),realTimer&&(clearInterval(realTimer),realTimer=null),busMarkers.forEach(e=>map.removeLayer(e)),busMarkers=[],liveBuses.forEach(e=>e.marker=null)}const TAGO={cityList:"https://apis.data.go.kr/1613000/BusLcInfoInqireService/getCtyCodeList",routeList:"https://apis.data.go.kr/1613000/BusRouteInfoInqireService/getRouteNoList",busLoc:"https://apis.data.go.kr/1613000/BusLcInfoInqireService/getRouteAcctoBusLcList"};let realTimer=null,realMarkers=[];function apiLog(e){document.getElementById("apiLog").innerHTML+=e+"<br>"}async function tagoFetch(e,t){const n=new URLSearchParams({...t,_type:"json",numOfRows:50}),a=await fetch(e+"?serviceKey="+encodeURIComponent(t.serviceKey)+"&"+n.toString()),o=await a.json(),s=o?.response?.body?.items?.item;if(!s)throw new Error("응답에 데이터가 없어요 (서비스키 확인 필요)");return Array.isArray(s)?s:[s]}async function connectRealApi(){const e=document.getElementById("apiKeyInput").value.trim();if(document.getElementById("apiLog").innerHTML="",e)try{apiLog("① 제주 도시코드 조회 중…");const t=(await tagoFetch(TAGO.cityList,{serviceKey:e})).find(e=>String(e.cityname).includes("제주"));if(!t)throw new Error("도시 목록에서 제주를 찾지 못했어요.");apiLog(`　✓ 제주 도시코드: ${t.citycode}`),apiLog("② 급행 151번 노선ID 조회 중…");const n=await tagoFetch(TAGO.routeList,{serviceKey:e,cityCode:t.citycode,routeNo:"151"}),a=n.find(e=>"151"===String(e.routeno))||n[0];apiLog(`　✓ 노선ID: ${a.routeid}`),stopBusTracking(),document.getElementById("liveStatus").textContent="실시간 연결됨 (10초 갱신)",apiLog("③ 실시간 위치 수신 시작 🚌");const o=async()=>{const n=await tagoFetch(TAGO.busLoc,{serviceKey:e,cityCode:t.citycode,routeId:a.routeid});realMarkers.forEach(e=>map.removeLayer(e)),realMarkers=n.map(e=>L.marker([e.gpslati,e.gpslong],{icon:busIcon({id:e.vehicleno},e.nodenm||"이동 중",1),zIndexOffset:1e3}).addTo(map)),document.getElementById("liveStatus").textContent=`실시간 연결됨 · 운행 중 ${n.length}대`};await o(),realTimer=setInterval(()=>o().catch(e=>apiLog("⚠️ "+e.message)),1e4)}catch(e){apiLog(`⚠️ 연결 실패: ${e.message}`),apiLog("이 미리보기 환경은 외부 API 호출이 제한돼요.<br>파일을 <b>다운로드해 브라우저에서 직접 열거나</b>, 실서비스에서는 서버(프록시)를 통해 호출하면 정상 작동합니다. 지금은 시뮬레이션 모드로 계속 표시할게요."),busTimer||startBusTracking()}else apiLog("⚠️ 서비스키를 입력해 주세요.")}function nearestStop(e,t){let n=null;return BUS_ROUTE_151.forEach(a=>{const o=distanceM(e,t,a.pos[0],a.pos[1]);(!n||o<n.d)&&(n={name:a.name,d:o})}),n}function fmtDist(e){return e>=1e3?(e/1e3).toFixed(1)+"km":Math.round(e)+"m"}function openViewSheet(e){closeSheets();const t=reviewsOf(e.id);document.getElementById("placeName").textContent=e.name,document.getElementById("placeMeta").innerHTML=`<span class="live-dot"></span>실시간 리뷰 ${t.length}건 · 📍 현장 인증 리뷰 우선 노출`;const n=nearestStop(e.lat,e.lng),a=n.d<=1e3?`🚌 급행151 <b>${n.name}</b> 정류장에서 도보 ${fmtDist(n.d)}`:n.d<=4e3?`🚌 급행151 <b>${n.name}</b> 정류장에서 ${fmtDist(n.d)} (택시·자전거 권장)`:`🚌 151 노선 <b>${n.name}</b>에서 ${fmtDist(n.d)} — 다른 노선 환승 필요`;document.getElementById("placeOfficial").innerHTML=`✓ 장소 정보: ${e.src}<br>${a}`,document.getElementById("reviewList").innerHTML=t.map(e=>`\n    <div class="review">\n      <div class="top">\n        <span class="flag">${e.flag}</span>\n        <span class="nick">${escapeHtml(e.nick)}</span>\n        <span class="stars">${"★".repeat(e.stars)}${"☆".repeat(5-e.stars)}</span>\n        <span class="badge-verified">🛡 실방문 인증</span>\n        ${e.onsite?'<span class="badge-verified" style="color:var(--sea);background:rgba(43,122,140,.1)">📍 현장 인증</span>':""}\n      </div>\n      <p>${escapeHtml(e.text)}</p>\n      ${e.mediaCount>0?`<div class="rev-media" id="med-${e.id}">\n             <span style="font-size:11px;color:rgba(35,39,45,.4)">📸 첨부 ${e.mediaCount}개 불러오는 중…</span>\n           </div>`:""}\n      <div class="time">${timeAgo(e.ts)}</div>\n    </div>\n  `).join(""),t.filter(e=>e.mediaCount>0).forEach(e=>loadReviewMedia(e.id)),document.getElementById("viewSheet").classList.add("open"),map.panTo([e.lat-.05,e.lng])}const MEDIA_MAX=10,VIDEO_MAX_SEC=30,BYTES_BUDGET=45e5;let formMedia=[],mediaCache={};function mediaMsg(e){document.getElementById("mediaMsg").textContent=e}function mediaBytes(){return formMedia.reduce((e,t)=>e+t.data.length,0)}function compressImage(e){return new Promise((t,n)=>{const a=new Image;a.onload=()=>{const e=Math.min(1,900/Math.max(a.width,a.height)),n=document.createElement("canvas");n.width=Math.round(a.width*e),n.height=Math.round(a.height*e),n.getContext("2d").drawImage(a,0,0,n.width,n.height),t(n.toDataURL("image/jpeg",.72)),URL.revokeObjectURL(a.src)},a.onerror=n,a.src=URL.createObjectURL(e)})}function videoDuration(e){return new Promise((t,n)=>{const a=document.createElement("video");a.preload="metadata",a.onloadedmetadata=()=>{t(a.duration),URL.revokeObjectURL(a.src)},a.onerror=n,a.src=URL.createObjectURL(e)})}function fileToDataURL(e){return new Promise((t,n)=>{const a=new FileReader;a.onload=()=>t(a.result),a.onerror=n,a.readAsDataURL(e)})}function renderThumbs(){document.getElementById("mediaThumbs").innerHTML=formMedia.map((e,t)=>`\n    <div class="thumb">\n      ${"img"===e.kind?`<img src="${e.data}" alt="첨부 사진">`:`<video src="${e.data}" muted playsinline></video>\n           <span class="vid-mark">▶ ${e.dur}초</span>`}\n      <button class="rm" onclick="removeMedia(${t})">✕</button>\n    </div>`).join(""),document.getElementById("mediaCount").textContent=formMedia.length?`(${formMedia.length}/10)`:""}function removeMedia(e){formMedia.splice(e,1),mediaMsg(""),renderThumbs()}function openLightbox(e,t){const n=mediaCache[e];n&&(document.getElementById("lightboxImg").src=n[t].data,document.getElementById("lightbox").classList.add("on"))}async function loadReviewMedia(e){const t=document.getElementById("med-"+e);if(t)try{if(!mediaCache[e]){const t=await kvGet("jb-media:"+e,!0);if(!t)throw new Error("no media");mediaCache[e]=JSON.parse(t)}t.innerHTML=mediaCache[e].map((t,n)=>"img"===t.kind?`<img src="${t.data}" alt="리뷰 사진" onclick="openLightbox('${e}',${n})">`:`<video src="${t.data}" controls playsinline preload="metadata"></video>`).join("")}catch(e){t.innerHTML='<span style="font-size:11px;color:rgba(35,39,45,.4)">첨부를 불러오지 못했어요</span>'}}document.getElementById("fMedia").addEventListener("change",async e=>{mediaMsg("");for(const t of e.target.files){if(formMedia.length>=10){mediaMsg("최대 10개까지 첨부할 수 있어요.");break}try{if(t.type.startsWith("image/")){const e=await compressImage(t);if(mediaBytes()+e.length>45e5){mediaMsg("저장 공간이 가득 찼어요. 사진 몇 장을 빼주세요.");continue}formMedia.push({kind:"img",data:e})}else if(t.type.startsWith("video/")){const e=await videoDuration(t);if(e>30.5){mediaMsg(`영상은 30초 이하만 가능해요 (선택한 영상: ${Math.round(e)}초).`);continue}if(t.size>4194304){mediaMsg("영상 용량이 4MB를 넘어요. 화질을 낮춰 다시 시도해 주세요.");continue}const n=await fileToDataURL(t);if(mediaBytes()+n.length>45e5){mediaMsg("저장 공간이 가득 찼어요. 다른 첨부를 줄여주세요.");continue}formMedia.push({kind:"vid",data:n,dur:Math.round(e)})}}catch(e){mediaMsg("파일을 읽지 못했어요: "+t.name)}}e.target.value="",renderThumbs()});let onsiteVerified=!1;const ONSITE_RADIUS_M=500;function distanceM(e,t,n,a){const o=e=>e*Math.PI/180,s=o(n-e),i=o(a-t),r=Math.sin(s/2)**2+Math.cos(o(e))*Math.cos(o(n))*Math.sin(i/2)**2;return 12742e3*Math.atan2(Math.sqrt(r),Math.sqrt(1-r))}function requestOnsite(){const e=document.getElementById("onsiteMsg");if(!navigator.geolocation)return void(e.textContent="이 기기에서는 위치 확인을 지원하지 않아요.");e.textContent="위치 확인 중…";const t=POI.find(e=>e.id===document.getElementById("fPlace").value);t?navigator.geolocation.getCurrentPosition(n=>{const a=Math.round(distanceM(n.coords.latitude,n.coords.longitude,t.lat,t.lng));a<=500?(onsiteVerified=!0,document.getElementById("onsiteBtn").textContent=`✅ 현장 인증 완료 (${t.name}에서 ${a}m)`,e.textContent=""):(onsiteVerified=!1,e.textContent=`현재 위치가 ${t.name}에서 ${a>=1e3?(a/1e3).toFixed(1)+"km":a+"m"} 떨어져 있어요. 현장 배지 없이도 리뷰는 올릴 수 있습니다.`)},t=>{e.textContent="위치 권한이 거부됐거나 확인에 실패했어요. 현장 배지 없이 진행됩니다."},{enableHighAccuracy:!0,timeout:8e3}):e.textContent="먼저 위에서 장소를 검색해 선택해 주세요."}let formStars=0,checkedIn=!1,checkinToken=null;const CHECKIN_KEY="jb-checkin";function readUrlToken(){const e=new URLSearchParams(location.search).get("checkin"),t=(location.hash.match(/checkin=([\w-]+)/)||[])[1],n=e||t;return n&&/^JB-/.test(n)?n:null}async function saveCheckin(e){checkinToken=e,checkedIn=!0;try{await kvSet(CHECKIN_KEY,JSON.stringify({token:e,ts:Date.now()}),!1)}catch(e){}}async function loadCheckin(){try{const e=await kvGet(CHECKIN_KEY,!1);if(!e)return;const t=JSON.parse(e);checkinToken=t.token,checkedIn=!0}catch(e){}}function renderCheckinState(){const e=document.getElementById("fCheckin"),t=document.getElementById("checkinLabel");checkedIn?(e.classList.add("done"),t.textContent=`✓ 인증된 게스트 (코드 ${checkinToken||"JB-DEMO"})`):(e.classList.remove("done"),t.textContent="게스트하우스 QR 체크인 스캔")}function openWriteSheet(){closeSheets(),formStars=0,document.getElementById("fText").value="",document.getElementById("fPlaceSearch").value="",document.getElementById("fPlace").value="",document.getElementById("placeSuggest").innerHTML="",document.getElementById("placePicked").style.display="none",formMedia=[],mediaMsg(""),renderThumbs(),onsiteVerified=!1,document.getElementById("onsiteBtn").textContent="📍 현장 인증 받기 (선택 · GPS로 위치 확인)",document.getElementById("onsiteMsg").textContent="",drawStars(),renderCheckinState(),document.getElementById("writeSheet").classList.add("open")}async function toggleCheckin(){checkedIn||(await saveCheckin("JB-DEMO"),renderCheckinState())}function drawStars(){const e=document.getElementById("fStars");e.innerHTML="";for(let t=1;t<=5;t++){const n=document.createElement("button");n.className="star-btn"+(t<=formStars?" on":""),n.textContent="★",n.onclick=()=>{formStars=t,drawStars()},e.appendChild(n)}}async function submitReview(){const e=document.getElementById("fPlace").value,t=document.getElementById("fNick").value.trim(),n=document.getElementById("fFlag").value,a=document.getElementById("fText").value.trim();closeSheets();const o=document.getElementById("auditSteps"),s=document.getElementById("auditResult");s.innerHTML="";const i=[["실방문 인증 확인 (QR 체크인)",()=>checkedIn,"투숙 인증이 없어 반려됐어요. QR 체크인 후 다시 시도해 주세요."],["스팸·광고 필터 (금칙어, 최소 길이)",()=>a.length>=10&&!/(광고|홍보|dm주세요|http|www\.|팔로우)/i.test(a)&&t.length>=1&&formStars>=1,"내용이 너무 짧거나 광고성 문구가 감지됐어요. (닉네임·별점·10자 이상 필수)"],["공식 POI 대조 (장소 실존 여부)",()=>POI.some(t=>t.id===e),"공식 장소 목록에서 확인되지 않는 장소예요."]];o.innerHTML=i.map((e,t)=>`<div class="audit-step wait" id="step${t}">\n       <span class="st-icon"><span class="spin">◌</span></span><span>${e[0]}</span>\n     </div>`).join(""),document.getElementById("auditSheet").classList.add("open");for(let e=0;e<i.length;e++){await new Promise(e=>setTimeout(e,650));const t=document.getElementById("step"+e),n=i[e][1]();if(t.className="audit-step "+(n?"pass":"fail"),t.querySelector(".st-icon").innerHTML=n?"✓":"✕",!n)return void(s.innerHTML=`<div class="audit-result no">검수 반려<br><span style="font-weight:500">${i[e][2]}</span></div>`)}const r="r"+Date.now()+Math.floor(900*Math.random()+100);if(reviews.push({id:r,poiId:e,nick:t,flag:n,text:a,stars:formStars,mediaCount:formMedia.length,onsite:onsiteVerified,ts:Date.now()}),await saveReviews(),formMedia.length>0)try{await kvSet("jb-media:"+r,JSON.stringify(formMedia),!0),mediaCache[r]=formMedia}catch(e){console.error("미디어 저장 실패:",e)}renderMap();const c=POI.find(t=>t.id===e).name;s.innerHTML=`<div class="audit-result ok">검수 통과 · 지도에 등록 완료 🍊<br>\n     <span style="font-weight:500">${c}에 감귤 마커가 생겼어요!</span></div>`,setTimeout(()=>{closeSheets();openViewSheet(POI.find(t=>t.id===e))},1600)}function escapeHtml(e){return e.replace(/[&<>"']/g,e=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[e]))}function timeAgo(e){const t=Math.floor((Date.now()-e)/6e4);if(t<1)return"방금 전";if(t<60)return t+"분 전";const n=Math.floor(t/60);return n<24?n+"시간 전":Math.floor(n/24)+"일 전"}const searchInput=document.getElementById("fPlaceSearch"),suggestBox=document.getElementById("placeSuggest");function pickPlace(e){const t=POI.find(t=>t.id===e);document.getElementById("fPlace").value=e,searchInput.value=t.name,suggestBox.innerHTML="";const n=document.getElementById("placePicked");n.style.display="block",n.textContent=`✓ ${t.name} — ${t.src}`}function switchTab(e){document.getElementById("tabMap").classList.toggle("active","map"===e),document.getElementById("tabBus").classList.toggle("active","bus"===e),"map"===e&&closeSheets(),"write"===e&&openWriteSheet(),"bus"===e&&openBusSheet()}searchInput.addEventListener("input",()=>{const e=searchInput.value.trim().toLowerCase();if(document.getElementById("fPlace").value="",document.getElementById("placePicked").style.display="none",!e)return void(suggestBox.innerHTML="");const t=POI.filter(t=>t.name.toLowerCase().includes(e)).slice(0,6);suggestBox.innerHTML=t.length?t.map(e=>`<button class="sg-item" onclick="pickPlace('${e.id}')">${e.name}<small>${e.src}</small></button>`).join(""):'<div class="sg-none">검색 결과가 없어요. 실서비스에서는 구글 플레이스 연동으로 모든 업체 검색이 가능해집니다.</div>'}),document.getElementById("fFlag").innerHTML=FLAGS.map(e=>`<option value="${e}">${e}</option>`).join(""),drawStars(),sheets.forEach(e=>{const t=document.getElementById(e);let n=null,a=0;[t.querySelector(".sheet-handle"),t.querySelector(".sheet-head")].forEach(e=>{e&&(e.addEventListener("touchstart",e=>{n=e.touches[0].clientY,a=0,t.style.transition="none"},{passive:!0}),e.addEventListener("touchmove",e=>{null!==n&&(a=Math.max(0,e.touches[0].clientY-n),t.style.transform=`translateY(${a}px)`)},{passive:!0}),e.addEventListener("touchend",()=>{t.style.transition="",t.style.transform="",a>60&&closeSheets(),n=null}))})}),(async()=>{await initStore(),await loadCheckin();const e=readUrlToken();e&&await saveCheckin(e),await loadReviews(),renderMap()})()</script></body></html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제주 리뷰맵 — 게스트 여행정보 플랫폼</title>
+<!-- Leaflet 지도 라이브러리 (오픈소스 지도 엔진) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  /* ── 디자인 토큰: 제주 소재에서 가져온 색 ──
+     현무암(짙은 회흑), 감귤(주황), 제주 바다(청록), 모래(웜 아이보리) */
+  :root {
+    --basalt: #23272d;      /* 현무암 — 텍스트, 패널 */
+    --basalt-soft: #3a4048;
+    --gamgyul: #f4841f;     /* 감귤 — 마커, 강조 */
+    --sea: #2b7a8c;         /* 제주 바다 — 보조 강조 */
+    --sand: #f7f3ea;        /* 모래 — 배경 */
+    --white: #ffffff;
+    --verified: #2e9e5b;    /* 검수 통과 */
+    --reject: #d64545;      /* 검수 반려 */
+    --shadow: 0 8px 24px rgba(35,39,45,.18);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; font-family: 'Apple SD Gothic Neo','Pretendard','Noto Sans KR',sans-serif; background: var(--sand); color: var(--basalt); }
+  body {
+    -webkit-tap-highlight-color: transparent;  /* 터치 시 회색 깜빡임 제거 */
+    overscroll-behavior: none;                 /* 당겨서 새로고침 방지 */
+    -webkit-text-size-adjust: 100%;
+  }
+  /* 모바일 주소창이 늘었다 줄었다 해도 화면이 밀리지 않게 고정 */
+  #app { position: fixed; inset: 0; height: 100dvh; overflow: hidden; }
+  #map { position: absolute; inset: 0; z-index: 1; }
+  button { touch-action: manipulation; }       /* 더블탭 확대 방지 */
+
+  /* ── 상단 헤더 (노치 영역 대응) ── */
+  header {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 20;
+    padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+    background: linear-gradient(to bottom, rgba(247,243,234,.97) 60%, rgba(247,243,234,0));
+    pointer-events: none;
+  }
+  header > * { pointer-events: auto; }
+  .brand { display: flex; align-items: baseline; gap: 8px; }
+  .brand h1 { font-size: 19px; font-weight: 800; letter-spacing: -0.5px; }
+  .brand h1 .dot { color: var(--gamgyul); }
+  .brand span { font-size: 11px; color: var(--basalt-soft); }
+  .stat-line { margin-top: 5px; font-size: 12px; color: var(--basalt-soft); }
+  .stat-line b { color: var(--gamgyul); }
+
+  /* ── 하단 탭바 (앱 네비게이션, 홈바 대응) ── */
+  .tabbar {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 26;
+    display: flex; align-items: stretch;
+    background: var(--white);
+    border-top: 1px solid rgba(35,39,45,.08);
+    box-shadow: 0 -4px 20px rgba(35,39,45,.1);
+    padding-bottom: env(safe-area-inset-bottom);   /* 아이폰 홈바 영역 확보 */
+  }
+  .tab {
+    flex: 1; border: none; background: none; cursor: pointer;
+    min-height: 58px;                              /* 터치 타깃 44px 이상 확보 */
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px; font-size: 11px; font-weight: 700; color: var(--basalt-soft);
+    font-family: inherit;
+  }
+  .tab .t-ico { font-size: 21px; line-height: 1; }
+  .tab.active { color: var(--gamgyul); }
+  /* 가운데 리뷰 버튼: 감귤색 원형으로 강조 */
+  .tab.primary { position: relative; }
+  .tab.primary .t-ico {
+    width: 52px; height: 52px; margin-top: -22px;
+    background: var(--gamgyul); color: var(--white);
+    border-radius: 50%; border: 4px solid var(--sand);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; box-shadow: 0 5px 14px rgba(244,132,31,.45);
+  }
+  .tab.primary { color: var(--gamgyul); }
+
+  /* ── 빈 상태 안내 카드 ── */
+  .empty-card {
+    position: absolute; top: 42%; left: 50%; transform: translate(-50%,-50%);
+    z-index: 15; background: var(--white); border-radius: 16px; box-shadow: var(--shadow);
+    padding: 26px 24px; text-align: center; width: min(320px, 84vw);
+  }
+  .empty-card .icon { font-size: 34px; }
+  .empty-card h3 { font-size: 16px; font-weight: 800; margin-top: 10px; letter-spacing: -0.3px; }
+  .empty-card p { font-size: 13px; color: var(--basalt-soft); line-height: 1.6; margin-top: 8px; }
+  .empty-card p b { color: var(--sea); }
+
+  /* ── 검수 안내 배지 (탭바 바로 위) ── */
+  .pipeline-note {
+    position: absolute; z-index: 20;
+    bottom: calc(70px + env(safe-area-inset-bottom));
+    left: 12px;
+    background: var(--white); border-radius: 10px; box-shadow: var(--shadow);
+    padding: 7px 11px; font-size: 10.5px; color: var(--basalt-soft);
+    display: flex; align-items: center; gap: 6px; max-width: 190px; line-height: 1.4;
+  }
+  .pipeline-note .shield { color: var(--verified); font-size: 13px; }
+
+  /* ── 감귤 마커 ── */
+  .cat-marker {
+    position: relative;
+    border-radius: 50% 50% 50% 8px;
+    border: 3px solid var(--white);
+    box-shadow: 0 3px 10px rgba(35,39,45,.35);
+    display: flex; align-items: center; justify-content: center;
+    transform: rotate(-6deg);
+  }
+  .cat-marker.dim { opacity: .82; border-width: 2px; }
+  .cat-marker .cnt {
+    position: absolute; top: -8px; right: -8px;
+    background: var(--basalt); color: var(--white);
+    font-size: 10px; font-weight: 800; line-height: 1;
+    padding: 3px 6px; border-radius: 8px; transform: rotate(6deg);
+    border: 1.5px solid var(--white);
+  }
+  .cat-marker .pin {
+    position: absolute; bottom: -10px; left: -9px;
+    font-size: 13px; transform: rotate(6deg);
+  }
+  .gamgyul-marker {
+    position: relative;
+    width: 38px; height: 38px; border-radius: 50% 50% 50% 6px;
+    background: var(--gamgyul); border: 3px solid var(--white);
+    box-shadow: 0 3px 10px rgba(35,39,45,.35);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--white); font-weight: 800; font-size: 13px;
+    transform: rotate(-8deg);
+  }
+
+  /* ── 하단 시트 공통 (홈바 대응 + 스와이프 닫기) ── */
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 30;
+    background: var(--white); border-radius: 20px 20px 0 0;
+    box-shadow: 0 -8px 30px rgba(35,39,45,.25);
+    max-height: 78dvh; display: flex; flex-direction: column;
+    padding-bottom: env(safe-area-inset-bottom);
+    transform: translateY(105%); transition: transform .3s cubic-bezier(.3,.9,.3,1);
+    touch-action: pan-y;
+  }
+  .sheet.open { transform: translateY(0); }
+  /* 핸들: 실제 터치 영역을 넓게 잡아 스와이프하기 쉽게 */
+  .sheet-handle {
+    flex: 0 0 auto; padding: 10px 0 6px; cursor: grab;
+  }
+  .sheet-handle::before {
+    content: ""; display: block; width: 44px; height: 4px;
+    border-radius: 2px; background: rgba(35,39,45,.18); margin: 0 auto;
+  }
+  .sheet-head { padding: 4px 18px 12px; border-bottom: 1px solid rgba(35,39,45,.08); flex: 0 0 auto; }
+  .sheet-head .row { display: flex; align-items: center; justify-content: space-between; }
+  .sheet-head h2 { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+  .sheet-head .meta { font-size: 12px; color: var(--basalt-soft); margin-top: 3px; }
+  .close-btn {
+    border: none; background: var(--sand); width: 36px; height: 36px;
+    border-radius: 50%; font-size: 16px; cursor: pointer; color: var(--basalt-soft);
+  }
+  .official {
+    display: inline-flex; align-items: center; gap: 4px; margin-top: 8px;
+    font-size: 11px; font-weight: 700; color: var(--sea);
+    background: rgba(43,122,140,.1); padding: 4px 9px; border-radius: 6px;
+  }
+  .sheet-body { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px 18px 24px; }
+
+  /* ── 리뷰 목록 ── */
+  .review { padding: 12px 0; border-bottom: 1px solid rgba(35,39,45,.07); }
+  .review:last-child { border-bottom: none; }
+  .review .top { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .flag { font-size: 16px; }
+  .nick { font-weight: 700; font-size: 13px; }
+  .stars { color: var(--gamgyul); font-size: 12px; letter-spacing: 1px; }
+  .badge-verified {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 10px; font-weight: 700; color: var(--verified);
+    background: rgba(46,158,91,.1); padding: 2px 7px; border-radius: 5px;
+  }
+  .review p { font-size: 13px; line-height: 1.55; margin-top: 6px; }
+  .review .time { font-size: 11px; color: rgba(35,39,45,.4); margin-top: 5px; }
+  .live-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--verified); margin-right: 4px; animation: pulse 1.6s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+  /* ── 장소 검색 제안 목록 ── */
+  #fPlaceSearch {
+    width: 100%; padding: 12px; border: 1.5px solid rgba(35,39,45,.14);
+    border-radius: 10px; font-size: 16px; font-family: inherit;
+  }
+  #fPlaceSearch:focus { outline: 2px solid var(--gamgyul); border-color: transparent; }
+  #placeSuggest { margin-top: 4px; }
+  .sg-item {
+    display: block; width: 100%; text-align: left; border: none; cursor: pointer;
+    background: var(--sand); border-radius: 9px; padding: 11px 12px;
+    margin-top: 5px; font-family: inherit; font-size: 14px; font-weight: 700;
+  }
+  .sg-item small { display: block; font-weight: 500; font-size: 11px; color: var(--basalt-soft); margin-top: 2px; }
+  .sg-none { font-size: 12px; color: var(--basalt-soft); padding: 8px 2px; }
+
+  /* 네이티브 파일 입력: 순정 버튼을 감귤 스타일 상자 안에 노출 */
+  .native-file {
+    width: 100%; padding: 12px;
+    border: 1.5px dashed rgba(35,39,45,.25); border-radius: 10px;
+    font-size: 14px; font-family: inherit; background: var(--sand);
+  }
+  .native-file::file-selector-button {
+    border: none; background: var(--gamgyul); color: #fff;
+    font-weight: 800; font-size: 13px; font-family: inherit;
+    padding: 9px 14px; border-radius: 8px; margin-right: 10px; cursor: pointer;
+  }
+
+  /* ── 리뷰 미디어 (사진·영상) ── */
+  .media-btn {
+    width: 100%; border: 1.5px dashed rgba(35,39,45,.25); background: none;
+    border-radius: 10px; padding: 13px; font-size: 13px; font-weight: 700;
+    color: var(--basalt-soft); cursor: pointer; font-family: inherit;
+  }
+  .media-msg { font-size: 11px; color: var(--reject); margin-top: 6px; line-height: 1.5; }
+  .thumbs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .thumb {
+    position: relative; width: 74px; height: 74px; border-radius: 10px;
+    overflow: hidden; background: var(--sand); flex: 0 0 auto;
+  }
+  .thumb img, .thumb video { width: 100%; height: 100%; object-fit: cover; }
+  .thumb .vid-mark {
+    position: absolute; left: 5px; bottom: 5px; font-size: 10px; font-weight: 800;
+    background: rgba(0,0,0,.65); color: #fff; padding: 2px 6px; border-radius: 5px;
+  }
+  .thumb .rm {
+    position: absolute; top: 3px; right: 3px; width: 22px; height: 22px;
+    border: none; border-radius: 50%; background: rgba(0,0,0,.6); color: #fff;
+    font-size: 12px; cursor: pointer; line-height: 1;
+  }
+  /* 리뷰 카드 안 미디어 그리드 */
+  .rev-media { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .rev-media img {
+    width: 86px; height: 86px; object-fit: cover; border-radius: 9px; cursor: pointer;
+  }
+  .rev-media video {
+    width: 178px; height: 118px; object-fit: cover; border-radius: 9px; background: #000;
+  }
+  /* 사진 크게 보기 */
+  .lightbox {
+    position: fixed; inset: 0; z-index: 99; background: rgba(20,22,25,.92);
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .lightbox.on { display: flex; }
+  .lightbox img { max-width: 100%; max-height: 88dvh; border-radius: 12px; }
+
+  /* ── 리뷰 작성 폼 ──
+     input 글꼴을 16px 이상으로: iOS는 16px 미만 입력창 포커스 시
+     화면을 강제 확대하므로 이를 방지 */
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; font-weight: 700; color: var(--basalt-soft); margin-bottom: 6px; }
+  .field select, .field input[type=text], .field textarea {
+    width: 100%; padding: 12px; border: 1.5px solid rgba(35,39,45,.14);
+    border-radius: 10px; font-size: 16px; font-family: inherit; background: var(--white);
+    -webkit-appearance: none; appearance: none;
+  }
+  .field textarea { resize: none; height: 84px; }
+  .field select:focus, .field input:focus, .field textarea:focus { outline: 2px solid var(--gamgyul); border-color: transparent; }
+  .star-row { display: flex; gap: 2px; }
+  .star-btn {
+    border: none; background: none; font-size: 30px; cursor: pointer;
+    color: rgba(35,39,45,.18); padding: 4px 7px;   /* 터치 영역 44px 확보 */
+  }
+  .star-btn.on { color: var(--gamgyul); }
+  .checkin {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--sand); border-radius: 10px; padding: 13px 12px; cursor: pointer;
+    border: 1.5px solid transparent; font-size: 13px; min-height: 52px;
+  }
+  .checkin.done { border-color: var(--verified); background: rgba(46,158,91,.08); }
+  .checkin .qr { font-size: 20px; }
+  .checkin small { display: block; color: var(--basalt-soft); font-size: 11px; margin-top: 2px; }
+  .submit-btn {
+    width: 100%; border: none; cursor: pointer;
+    background: var(--basalt); color: var(--white);
+    font-size: 16px; font-weight: 800; padding: 15px; border-radius: 12px;
+    margin-top: 4px; min-height: 52px;
+  }
+  .submit-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ── 검수 진행 상태 표시 ── */
+  .audit-steps { margin-top: 6px; }
+  .audit-step {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 0; font-size: 13px; border-bottom: 1px solid rgba(35,39,45,.06);
+  }
+  .audit-step:last-child { border-bottom: none; }
+  .audit-step .st-icon { width: 24px; text-align: center; font-size: 15px; }
+  .audit-step.wait { color: rgba(35,39,45,.35); }
+  .audit-step.pass .st-icon { color: var(--verified); }
+  .audit-step.fail { color: var(--reject); }
+  .audit-result {
+    margin-top: 14px; padding: 12px; border-radius: 10px;
+    font-size: 13px; font-weight: 700; text-align: center; line-height: 1.5;
+  }
+  .audit-result.ok { background: rgba(46,158,91,.1); color: var(--verified); }
+  .audit-result.no { background: rgba(214,69,69,.08); color: var(--reject); }
+  .spin { display: inline-block; animation: rot 1s linear infinite; }
+  @keyframes rot { to { transform: rotate(360deg); } }
+
+  /* ── 교통 정보 카드 ── */
+  .route-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; }
+  .route-title .arrow { color: var(--gamgyul); }
+  .bus-card {
+    border: 1.5px solid rgba(35,39,45,.1); border-radius: 14px;
+    padding: 14px; margin-bottom: 12px; background: var(--white);
+  }
+  .bus-card .bus-no {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--gamgyul); color: var(--white);
+    font-weight: 800; font-size: 14px; padding: 5px 12px; border-radius: 8px;
+  }
+  .bus-card .bus-no.alt { background: var(--sea); }
+  .bus-card .tag { font-size: 11px; font-weight: 700; color: var(--basalt-soft); margin-left: 7px; }
+  .bus-rows { margin-top: 11px; }
+  .bus-row { display: flex; gap: 10px; font-size: 13px; padding: 5px 0; line-height: 1.5; }
+  .bus-row .k { flex: 0 0 64px; color: var(--basalt-soft); font-weight: 700; font-size: 12px; padding-top: 1px; }
+  .bus-row .v b { color: var(--gamgyul); }
+  .stop-line { font-size: 12px; color: var(--basalt-soft); line-height: 1.7; margin-top: 4px; }
+  .stop-line b { color: var(--basalt); }
+  .src-note {
+    margin-top: 4px; padding: 10px 12px; border-radius: 10px;
+    background: rgba(43,122,140,.07); font-size: 11.5px; line-height: 1.6; color: var(--sea);
+  }
+  .src-note b { font-weight: 800; }
+
+  /* Leaflet 줌 버튼이 탭바에 가려지지 않게 위로 */
+  .leaflet-bottom { bottom: calc(66px + env(safe-area-inset-bottom)); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sheet { transition: none; }
+    .live-dot, .spin { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="map"></div>
+
+  <header>
+    <div class="brand">
+      <h1>제주 리뷰맵<span class="dot">.</span></h1>
+      <span>게스트가 직접 만드는 실시간 지도</span>
+    </div>
+    <div class="stat-line" id="statLine">리뷰 불러오는 중…</div>
+  </header>
+
+  <!-- 리뷰가 하나도 없을 때 보이는 빈 상태 카드 -->
+  <div class="empty-card" id="emptyCard" style="display:none">
+    <div class="icon">🍊</div>
+    <h3>아직 지도가 비어 있어요</h3>
+    <p>이 지도는 <b>게스트가 직접 남긴 리뷰</b>로만 채워집니다.<br>
+    첫 번째 리뷰를 남기면 그 장소에<br>감귤 마커가 생겨요!</p>
+  </div>
+
+  <div class="pipeline-note">
+    <span class="shield">🛡</span>
+    <span>검수 에이전트를 통과한<br><b>실방문 인증 리뷰</b>만 표시</span>
+  </div>
+
+  <!-- 하단 탭바: 지도 / 리뷰 남기기(강조) / 공항버스 -->
+  <nav class="tabbar">
+    <button class="tab active" id="tabMap" onclick="switchTab('map')">
+      <span class="t-ico">🗺️</span>지도
+    </button>
+    <button class="tab primary" onclick="switchTab('write')">
+      <span class="t-ico">✏️</span>리뷰 남기기
+    </button>
+    <button class="tab" id="tabBus" onclick="switchTab('bus')">
+      <span class="t-ico">🚌</span>공항버스
+    </button>
+  </nav>
+
+  <!-- 시트 1: 장소 리뷰 보기 -->
+  <div class="sheet" id="viewSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="row">
+        <h2 id="placeName"></h2>
+        <button class="close-btn" onclick="closeSheets()">✕</button>
+      </div>
+      <div class="meta" id="placeMeta"></div>
+      <div class="official" id="placeOfficial"></div>
+    </div>
+    <div class="sheet-body" id="reviewList"></div>
+  </div>
+
+  <!-- 시트 2: 리뷰 작성 -->
+  <div class="sheet" id="writeSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="row">
+        <h2>리뷰 남기기</h2>
+        <button class="close-btn" onclick="closeSheets()">✕</button>
+      </div>
+      <div class="meta">개인정보 없이 · 닉네임만으로 참여</div>
+    </div>
+    <div class="sheet-body" id="writeBody">
+      <!-- 작성 폼 (JS에서 상태 관리) -->
+      <div class="field">
+        <label>방문한 장소 — 업체명으로 검색</label>
+        <input type="text" id="fPlaceSearch" placeholder="예: 제주당, 우진해장국, 함덕…" autocomplete="off">
+        <div id="placeSuggest"></div>
+        <input type="hidden" id="fPlace" value="">
+        <div id="placePicked" style="display:none; margin-top:8px; font-size:13px; font-weight:700; color:var(--sea)"></div>
+        <button class="media-btn" style="margin-top:8px" onclick="requestOnsite()" id="onsiteBtn">
+          📍 현장 인증 받기 (선택 · GPS로 위치 확인)
+        </button>
+        <div class="media-msg" id="onsiteMsg" style="color:var(--basalt-soft)"></div>
+      </div>
+      <div class="field">
+        <label>닉네임 · 국적</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="fNick" placeholder="닉네임" maxlength="12" style="flex:1">
+          <select id="fFlag" style="width:96px"></select>
+        </div>
+      </div>
+      <div class="field">
+        <label>별점</label>
+        <div class="star-row" id="fStars"></div>
+      </div>
+      <div class="field">
+        <label>리뷰 내용</label>
+        <textarea id="fText" placeholder="실제 방문 경험을 알려주세요 (10자 이상)" maxlength="300"></textarea>
+      </div>
+      <div class="field">
+        <label>사진 · 영상 (최대 10개, 영상은 30초 이하) <span id="mediaCount"></span></label>
+        <!-- 네이티브 파일 입력을 직접 노출: 브라우저 순정 버튼이라
+             어떤 환경에서도 탭이 차단되지 않는 가장 확실한 방식 -->
+        <input type="file" id="fMedia" accept="image/*,video/*" multiple class="native-file">
+        <div class="thumbs" id="mediaThumbs"></div>
+        <div class="media-msg" id="mediaMsg"></div>
+      </div>
+      <div class="field">
+        <label>실방문 인증 — 검수 에이전트 A 필수 조건</label>
+        <div class="checkin" id="fCheckin" onclick="toggleCheckin()">
+          <span class="qr">📷</span>
+          <div>
+            <b id="checkinLabel">게스트하우스 QR 체크인 스캔</b>
+            <small>개인정보 수집 없이 '현재 투숙 중' 여부만 확인합니다</small>
+          </div>
+        </div>
+      </div>
+      <button class="submit-btn" id="fSubmit" onclick="submitReview()">검수 요청 → 지도에 올리기</button>
+    </div>
+  </div>
+
+  <!-- 시트 4: 교통 정보 (공식 출처 기반) -->
+  <div class="sheet" id="busSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="row">
+        <div class="route-title">🚌 모슬포항(운진항) <span class="arrow">→</span> 제주국제공항</div>
+        <button class="close-btn" onclick="closeSheets()">✕</button>
+      </div>
+      <div class="meta"><span class="live-dot"></span>운행 중인 버스 위치 실시간 표시 · 소요 약 1시간 10분</div>
+      <div class="official">✓ 출처: 제주버스정보시스템 (bus.jeju.go.kr)</div>
+    </div>
+    <div class="sheet-body">
+      <!-- 151번: 대정·영어교육도시 경유 -->
+      <div class="bus-card">
+        <span class="bus-no">급행 151</span><span class="tag">대정 · 영어교육도시 경유</span>
+        <div class="bus-rows">
+          <div class="bus-row"><span class="k">배차</span>
+            <span class="v">모슬포 출발 기준 <b>20~70분</b> 간격</span></div>
+          <div class="bus-row"><span class="k">소요시간</span>
+            <span class="v">운진항 → 공항 약 <b>1시간 10분</b></span></div>
+          <div class="bus-row"><span class="k">요금</span>
+            <span class="v">거리비례 2,000원~<b>최대 3,000원</b> (성인)</span></div>
+        </div>
+        <div class="stop-line">
+          <b>운진항</b> → 하모체육공원 → 대정읍(하모3리) → 인성리 → 보성초 →
+          구억리 → 한국국제학교 → 오설록 → 제주신화월드 → 동광환승센터 →
+          한라병원 → 제주도청 → <b>제주국제공항</b>
+        </div>
+      </div>
+      <!-- 152번: 사계·화순·안덕 경유 -->
+      <div class="bus-card">
+        <span class="bus-no alt">급행 152</span><span class="tag">사계 · 화순 · 안덕 경유 (1일 7회)</span>
+        <div class="bus-rows">
+          <div class="bus-row"><span class="k">첫차</span>
+            <span class="v">운진항 <b>07:30</b> 출발</span></div>
+          <div class="bus-row"><span class="k">운행횟수</span>
+            <span class="v">하루 <b>7회</b>만 운행 — 시간 확인 필수</span></div>
+          <div class="bus-row"><span class="k">소요시간</span>
+            <span class="v">운진항 → 공항 약 <b>1시간 10분</b></span></div>
+        </div>
+        <div class="stop-line">
+          <b>운진항</b> → 하모체육공원 → 사계리 → 화순환승정류장 → 안덕면사무소 →
+          서광리 → 동광환승센터 → 한라병원 → 제주도청 → <b>제주국제공항</b>
+        </div>
+      </div>
+      <div class="src-note">
+        🛡 <b>검수 에이전트 B 통과 정보</b> — 시간표는 제주버스정보시스템
+        공공데이터와 대조된 값입니다. 막차·상세 시각은 운행 사정에 따라
+        달라질 수 있어요.
+      </div>
+      <!-- 실시간 API 연결: 공공데이터포털 서비스키 입력 -->
+      <div class="bus-card" style="margin-top:12px">
+        <span class="bus-no" style="background:#2e9e5b">📡 실시간 위치</span>
+        <span class="tag" id="liveStatus">시뮬레이션 모드</span>
+        <div class="bus-rows">
+          <div style="font-size:12px; color:var(--basalt-soft); line-height:1.6; margin-bottom:10px">
+            국토교통부 TAGO <b>버스위치정보 API</b>(자동승인·무료)의
+            서비스키를 입력하면 실제 운행 중인 151번 버스의
+            GPS 위치로 전환됩니다.
+          </div>
+          <div style="display:flex; gap:6px">
+            <input type="text" id="apiKeyInput" placeholder="data.go.kr 서비스키 붙여넣기"
+              style="flex:1; min-width:0; padding:11px; border:1.5px solid rgba(35,39,45,.14);
+              border-radius:9px; font-size:16px; font-family:inherit">
+            <button onclick="connectRealApi()"
+              style="border:none; background:var(--basalt); color:#fff; font-weight:800;
+              font-size:12px; padding:0 16px; border-radius:9px; cursor:pointer">연결</button>
+          </div>
+          <div id="apiLog" style="font-size:11px; color:var(--basalt-soft);
+            margin-top:8px; line-height:1.6"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 시트 3: 검수 진행 과정 -->
+  <div class="sheet" id="auditSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="row">
+        <h2>검수 에이전트 A 작동 중</h2>
+        <button class="close-btn" onclick="closeSheets()">✕</button>
+      </div>
+      <div class="meta">리뷰가 DB에 저장되기 전, 입구에서 검증합니다</div>
+    </div>
+    <div class="sheet-body">
+      <div class="audit-steps" id="auditSteps"></div>
+      <div id="auditResult"></div>
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('on')">
+  <img id="lightboxImg" alt="리뷰 사진 크게 보기">
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// 1) 공식 장소 목록 (POI 카탈로그)
+//    - 리뷰 '데이터'가 아니라, 비짓제주/공공데이터 기준의
+//      공식 장소 좌표 목록입니다. 리뷰가 달려야만 지도에 표시됩니다.
+// ═══════════════════════════════════════════════════
+const POI = [
+  { id:"bucket", cat:"stay", alias:["제주버킷","버킷제주","게스트하우스","숙소","bucket"], name:"버킷제주 게스트하우스", lat:33.2125, lng:126.2599, src:"구글 플레이스 확인 · ★4.8 (103) · 우리 숙소!" },
+  { id:"hamdeok", cat:"hot",  name:"함덕해수욕장",   lat:33.5434, lng:126.6697, src:"비짓제주 공식 POI" },
+  { id:"seongsan", cat:"oreum", name:"성산일출봉",     lat:33.4587, lng:126.9425, src:"유네스코 세계자연유산" },
+  { id:"hyeopjae", cat:"hot", name:"협재해수욕장",   lat:33.3940, lng:126.2397, src:"비짓제주 공식 POI" },
+  { id:"dongmun", cat:"food",  name:"동문재래시장",   lat:33.5121, lng:126.5279, src:"제주시 공식 시장 정보" },
+  { id:"osulloc", cat:"hot",  name:"오설록 티뮤지엄", lat:33.3060, lng:126.2895, src:"공식 홈페이지 확인" },
+  { id:"udo", cat:"hot",      name:"우도",           lat:33.5060, lng:126.9525, src:"도항선 공공데이터" },
+  { id:"manjang", cat:"hot",  name:"만장굴",         lat:33.5283, lng:126.7713, src:"유네스코 세계자연유산" },
+  { id:"jusang", cat:"hot",   name:"주상절리대",     lat:33.2377, lng:126.4253, src:"비짓제주 공식 POI" },
+  { id:"saryeoni", cat:"hot", name:"사려니숲길",     lat:33.4225, lng:126.6595, src:"산림청 공식 정보" },
+  { id:"aewol", cat:"hot",    name:"애월 한담해안산책로", lat:33.4636, lng:126.3103, src:"비짓제주 공식 POI" },
+  { id:"jejudang", cat:"food", name:"제주당 (애월)",    lat:33.3542, lng:126.3559, src:"구글 플레이스 확인 · 매일 10~21시" },
+  { id:"ujin", cat:"food",     name:"우진해장국",      lat:33.5115, lng:126.5200, src:"구글 플레이스 확인 · 고사리육개장 맛집" },
+  { id:"jamae", cat:"food",    name:"자매국수",        lat:33.4986, lng:126.4588, src:"구글 플레이스 확인 · 수요일 휴무" },
+  { id:"monsant", cat:"hot",  name:"몽상드애월",      lat:33.4629, lng:126.3093, src:"구글 플레이스 확인 · 애월 오션뷰 카페" },
+  { id:"camellia", cat:"hot", name:"카멜리아힐",      lat:33.2898, lng:126.3683, src:"구글 플레이스 확인 · 8:30~18시" },
+  { id:"ecoland", cat:"hot",  name:"에코랜드 테마파크", lat:33.4466, lng:126.6671, src:"구글 플레이스 확인 · 8:30~19시" },
+  { id:"snoopy", cat:"hot",   name:"스누피가든",      lat:33.4442, lng:126.7783, src:"구글 플레이스 확인 · 9~18시" },
+  { id:"park981", cat:"hot",  name:"9.81파크",        lat:33.3899, lng:126.3663, src:"구글 플레이스 확인 · 9~20시" },
+  { id:"saebyeol", cat:"oreum", name:"새별오름",        lat:33.3659, lng:126.3564, src:"구글 플레이스 확인 · 상시 개방" },
+  { id:"camforest", cat:"hot",name:"동백포레스트",    lat:33.3003, lng:126.6362, src:"구글 플레이스 확인 · 9~17시" },
+  { id:"okmanine", cat:"food", name:"옥만이네 (협재)", lat:33.4165, lng:126.2635, src:"구글 플레이스 확인 · 해물갈비찜" },
+  { id:"saebyeolf", cat:"hot", alias:["새별 프렌즈","동물원","알파카"], name:"새별프렌즈 동물원", lat:33.3623, lng:126.3639, src:"구글 플레이스 확인 · ★4.2 (65) · 동물 교감 체험" },
+  { id:"sagye",    cat:"fish", name:"사계해변 (해루질 포인트)", lat:33.2312, lng:126.3105, src:"구글 플레이스 확인 · 조개·보말 해루질 명소" },
+  { id:"hyeongje", cat:"boat", name:"형제섬 (배낚시)",         lat:33.2100, lng:126.3143, src:"구글 플레이스 확인 · 낚시꾼들의 성지" },
+  { id:"unjin",    cat:"fish", name:"운진항 방파제 (낚시)",    lat:33.2111, lng:126.2574, src:"구글 플레이스 확인 · 방파제 낚시 · 마라도 배편" },
+];
+
+const FLAGS = ["🇰🇷","🇺🇸","🇯🇵","🇨🇳","🇹🇼","🇫🇷","🇩🇪","🇬🇧","🇪🇸","🇨🇦","🇦🇺","🇻🇳","🇹🇭","🇮🇩"];
+const STORAGE_KEY = "jeju-reviews-v1";   // 모든 리뷰를 이 키 하나에 모아 저장
+
+// ═══════════════════════════════════════════════════
+// 2) 리뷰 저장소 — 3단계 자동 선택
+//    ① cloud : window.storage (공유) → 팀원끼리 리뷰가 서로 보임
+//    ② local : localStorage (이 기기) → 앱을 닫아도 유지되지만 나만 보임
+//    ③ memory: 임시 → 이번 화면에서만 유지 (환경이 저장을 막을 때)
+//    시작할 때 실제로 써보고(프로브) 되는 단계를 자동 선택합니다.
+// ═══════════════════════════════════════════════════
+let reviews = [];              // 현재 화면이 알고 있는 전체 리뷰
+let storageMode = "memory";    // 'cloud' | 'local' | 'memory'
+let memStore = {};             // 메모리 모드용 임시 보관함
+
+async function initStore() {
+  // ① 클라우드(공유) 저장소가 되는지 실제로 테스트
+  try {
+    if (window.storage) {
+      await window.storage.set("jb-probe", "1", false);
+      storageMode = "cloud";
+      return;
+    }
+  } catch (e) { /* 다음 단계로 */ }
+  // ② 브라우저 기기 저장소(localStorage) 테스트
+  try {
+    localStorage.setItem("jb-probe", "1");
+    localStorage.removeItem("jb-probe");
+    storageMode = "local";
+    return;
+  } catch (e) { /* 다음 단계로 */ }
+  storageMode = "memory";      // ③ 둘 다 안 되면 임시 모드
+}
+
+// 저장/불러오기 공통 통로 — 모드에 따라 알아서 라우팅
+async function kvSet(key, value, shared) {
+  if (storageMode === "cloud") {
+    await window.storage.set(key, value, shared);
+  } else if (storageMode === "local") {
+    localStorage.setItem("jb:" + key, value);
+  } else {
+    memStore[key] = value;
+  }
+}
+async function kvGet(key, shared) {
+  if (storageMode === "cloud") {
+    const res = await window.storage.get(key, shared);
+    return res ? res.value : null;
+  } else if (storageMode === "local") {
+    return localStorage.getItem("jb:" + key);
+  }
+  return memStore[key] ?? null;
+}
+
+async function loadReviews() {
+  try {
+    const raw = await kvGet(STORAGE_KEY, true);
+    reviews = raw ? JSON.parse(raw) : [];
+  } catch (e) { reviews = []; }
+}
+
+async function saveReviews() {
+  try {
+    await kvSet(STORAGE_KEY, JSON.stringify(reviews), true);
+  } catch (e) { console.error("저장 실패:", e); }
+}
+
+// ═══════════════════════════════════════════════════
+// 3) 지도 초기화
+// ═══════════════════════════════════════════════════
+const map = L.map('map', { zoomControl: false }).setView([33.38, 126.55], 10);
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+// ═══════════════════════════════════════════════════
+// 지도 타일 2단 폴백
+// ─ 1차: CARTO 밝은 지도 (감귤 마커가 잘 보임)
+// ─ 1차 서버가 차단·실패하면 → 2차 OpenStreetMap으로 자동 전환
+// ─ 둘 다 막히면(일부 미리보기 환경) 안내 문구 표시
+// ═══════════════════════════════════════════════════
+(function addTiles() {
+  let cartoFails = 0, switched = false;
+  const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 18
+  });
+  carto.on('tileerror', () => {
+    if (++cartoFails < 3 || switched) return;   // 산발적 실패는 무시, 연속 실패 시 전환
+    switched = true;
+    map.removeLayer(carto);
+    let osmFails = 0;
+    const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap', maxZoom: 19
+    });
+    osm.on('tileerror', () => {
+      if (++osmFails === 3) {
+        const s = document.getElementById('statLine');
+        if (s) s.innerHTML += " · <span style='color:var(--reject)'>이 환경은 지도 이미지를 차단해요 — 배포 주소에서는 정상 표시됩니다</span>";
+      }
+    });
+    osm.addTo(map);
+  });
+  carto.addTo(map);
+})();
+
+// 화면 크기가 늦게 잡히는 환경(웹뷰·회전) 대비: 지도 크기 재계산
+setTimeout(() => map.invalidateSize(), 400);
+window.addEventListener('resize', () => map.invalidateSize());
+
+let markers = [];
+
+// 특정 장소에 달린 리뷰를 '노출 점수' 순으로 정렬
+// ─ 규칙 엔진 방식: 점수 = 현장 인증 +2점, 사진·영상 첨부 +1점
+// ─ 같은 점수끼리는 최신순
+// ─ 사후 리뷰도 올릴 수 있되, 현장 인증 리뷰가 위에 노출됨
+function exposureScore(r) {
+  return (r.onsite ? 2 : 0) + (r.mediaCount > 0 ? 1 : 0);
+}
+function reviewsOf(poiId) {
+  return reviews.filter(r => r.poiId === poiId)
+                .sort((a, b) =>
+                  exposureScore(b) - exposureScore(a) ||  // 1순위: 노출 점수
+                  b.ts - a.ts                             // 2순위: 최신순
+                );
+}
+
+// ═══════════════════════════════════════════════════
+// 4) 마커 렌더링 — 리뷰가 1건 이상인 장소만 지도에 표시
+// ═══════════════════════════════════════════════════
+function renderMap() {
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+
+  // ═══ 카테고리별 마커 스타일 ═══
+  // stay=숙소(파란 집) fish=낚시·해루질(물고기) boat=배낚시(배)
+  // food=식당(수저포크) hot=핫플(감귤) oreum=오름(산)
+  const CAT = {
+    stay:  { emoji:"🏠", bg:"#2b6cb0" },
+    fish:  { emoji:"🐟", bg:"#2b7a8c" },
+    boat:  { emoji:"🚤", bg:"#1d4e89" },
+    food:  { emoji:"🍴", bg:"#c05621" },
+    hot:   { emoji:"🍊", bg:"#f4841f" },
+    oreum: { emoji:"⛰️", bg:"#4a7c59" },
+  };
+
+  let reviewedPlaces = 0;
+  POI.forEach(poi => {
+    const list = reviewsOf(poi.id);
+    const c = CAT[poi.cat] || CAT.hot;
+    const hasOnsite = list.some(r => r.onsite);
+    if (list.length > 0) reviewedPlaces++;
+
+    // 리뷰 없는 곳: 작고 연하게(정보용) / 리뷰 있는 곳: 크게 + 개수 칩
+    const dim = list.length === 0;
+    const size = poi.cat === "stay" ? 44 : (dim ? 30 : 38);
+    const icon = L.divIcon({
+      className: "",
+      html: `<div class="cat-marker${dim ? ' dim' : ''}" style="background:${c.bg};
+        width:${size}px;height:${size}px;font-size:${Math.round(size*0.48)}px;
+        ${hasOnsite ? 'box-shadow:0 0 0 3px rgba(43,122,140,.55), 0 3px 10px rgba(35,39,45,.35);' : ''}">
+        ${c.emoji}
+        ${list.length > 0 ? `<span class="cnt">${list.length}</span>` : ''}
+        ${hasOnsite ? '<span class="pin">📍</span>' : ''}
+      </div>`,
+      iconSize: [size, size], iconAnchor: [size/2, size/2],
+    });
+    const m = L.marker([poi.lat, poi.lng], { icon, zIndexOffset: poi.cat === "stay" ? 500 : (dim ? 0 : 200) })
+      .addTo(map)
+      .on('click', () => openViewSheet(poi));
+    markers.push(m);
+  });
+
+  // 상단 통계 + 빈 상태 카드 갱신
+  const modeLabel =
+    storageMode === "cloud"  ? "" :
+    storageMode === "local"  ? " · <span style='color:var(--sea)'>이 기기에 저장됨</span>" :
+    " · <span style='color:var(--reject)'>임시 모드 — 화면을 닫으면 사라져요</span>";
+  document.getElementById('statLine').innerHTML =
+    reviews.length === 0
+      ? `리뷰 <b>0건</b> · 장소 ${POI.length}곳 준비됨 — 첫 리뷰를 기다리는 중${modeLabel}`
+      : `누적 리뷰 <b>${reviews.length}건</b> · 리뷰 장소 <b>${reviewedPlaces}곳</b>/${POI.length}${modeLabel}`;
+  document.getElementById('emptyCard').style.display =
+    reviews.length === 0 ? "block" : "none";
+}
+
+// ═══════════════════════════════════════════════════
+// 5) 시트 열고 닫기
+// ═══════════════════════════════════════════════════
+const sheets = ["viewSheet","writeSheet","auditSheet","busSheet"];
+function closeSheets() {
+  sheets.forEach(id => document.getElementById(id).classList.remove('open'));
+  hideBusRoute();   // 시트를 닫으면 노선 표시도 제거
+  // 탭바 상태를 '지도'로 복귀
+  const tm = document.getElementById('tabMap'), tb = document.getElementById('tabBus');
+  if (tm) { tm.classList.add('active'); tb.classList.remove('active'); }
+}
+map.on('click', closeSheets);
+
+// ═══════════════════════════════════════════════════
+// 교통 정보: 모슬포항(운진항) → 제주공항 노선 표시
+// 좌표는 주요 정류장의 대략적 위치 (데모용 시각화)
+// ═══════════════════════════════════════════════════
+const BUS_ROUTE_151 = [
+  { pos: [33.2141, 126.2511], name: "모슬포 운진항" },
+  { pos: [33.2235, 126.2543], name: "하모체육공원" },
+  { pos: [33.2496, 126.2688], name: "인성리" },
+  { pos: [33.2900, 126.2870], name: "한국국제학교" },
+  { pos: [33.3060, 126.2895], name: "오설록" },
+  { pos: [33.3163, 126.3210], name: "제주신화월드" },
+  { pos: [33.3237, 126.3555], name: "동광환승센터" },
+  { pos: [33.4520, 126.4340], name: "평화로" },
+  { pos: [33.4890, 126.4800], name: "한라병원" },
+  { pos: [33.5066, 126.4928], name: "제주국제공항" },
+];
+const ROUTE_LATLNGS = BUS_ROUTE_151.map(s => s.pos);
+let busLine = null, busCasing = null, busEndpoints = [], stopDots = [];
+
+function showBusRoute() {
+  hideBusRoute();
+  // ── 버스 노선선: 어두운 밑선 + 감귤색 본선 (교통지도 스타일) ──
+  busCasing = L.polyline(ROUTE_LATLNGS, {
+    color: '#23272d', weight: 9, opacity: .9, lineCap: 'round', lineJoin: 'round'
+  }).addTo(map);
+  busLine = L.polyline(ROUTE_LATLNGS, {
+    color: '#f4841f', weight: 5, opacity: 1, lineCap: 'round', lineJoin: 'round'
+  }).addTo(map);
+
+  // ── 정류장 점: 노선 위 흰 원 (탭하면 정류장 이름 + 주변 장소) ──
+  BUS_ROUTE_151.forEach(stop => {
+    // 이 정류장에서 2.5km 이내의 카탈로그 장소들을 찾아 연결
+    const near = POI
+      .map(p => ({ name: p.name, d: distanceM(stop.pos[0], stop.pos[1], p.lat, p.lng) }))
+      .filter(x => x.d <= 2500)
+      .sort((a, b) => a.d - b.d)
+      .slice(0, 3);
+    const tip = `<b>${stop.name}</b>` +
+      (near.length
+        ? `<br><span style="font-size:10px">주변: ${near.map(x => `${x.name}(${fmtDist(x.d)})`).join(', ')}</span>`
+        : "");
+    const dot = L.circleMarker(stop.pos, {
+      radius: 5, color: '#23272d', weight: 2.5, fillColor: '#fff', fillOpacity: 1
+    }).addTo(map).bindTooltip(tip, { direction: 'top', offset: [0, -6] });
+    stopDots.push(dot);
+  });
+
+  // ── 출발·도착 라벨 ──
+  const mk = (pos, label) => L.marker(pos, {
+    icon: L.divIcon({
+      className: "",
+      html: `<div style="background:#23272d;color:#fff;font-size:11px;font-weight:800;
+             padding:4px 9px;border-radius:7px;white-space:nowrap;
+             box-shadow:0 3px 8px rgba(0,0,0,.3)">${label}</div>`,
+      iconAnchor: [30, 26],
+    })
+  }).addTo(map);
+  busEndpoints = [ mk(ROUTE_LATLNGS[0], "🚌 모슬포항"), mk(ROUTE_LATLNGS[9], "✈️ 제주공항") ];
+
+  map.fitBounds(busLine.getBounds(), { paddingTopLeft: [30, 110], paddingBottomRight: [30, 320] });
+  startBusTracking();   // 실시간 버스 주행 시작
+}
+function hideBusRoute() {
+  [busLine, busCasing].forEach(l => l && map.removeLayer(l));
+  busLine = busCasing = null;
+  [...busEndpoints, ...stopDots].forEach(m => map.removeLayer(m));
+  busEndpoints = []; stopDots = [];
+  realMarkers.forEach(m => map.removeLayer(m));
+  realMarkers = [];
+  stopBusTracking();
+}
+function openBusSheet() {
+  closeSheets();
+  showBusRoute();
+  document.getElementById('busSheet').classList.add('open');
+}
+
+// ═══════════════════════════════════════════════════
+// 실시간 버스 위치 (데모 시뮬레이션)
+// ─ 노선 위를 실제 주행하듯 부드럽게(0.1초 단위) 이동
+// ─ 양방향 운행: 공항방면(+1) / 모슬포방면(-1), 종점에서 회차
+// ─ 실서비스에서는 이 움직임이 TAGO API의 실차량 GPS로 대체됨
+// ═══════════════════════════════════════════════════
+let busMarkers = [], busTimer = null;
+// progress: 노선 진행률(0=모슬포항, 1=공항) / dir: 진행 방향
+let liveBuses = [
+  { id: "제주79자1151", progress: 0.10, dir: +1 },   // 공항방면
+  { id: "제주79자1152", progress: 0.72, dir: -1 },   // 모슬포방면
+];
+const TICK_MS = 100;             // 화면 갱신 주기 (부드러운 이동)
+const SPEED_PER_TICK = 0.0011;   // 한 틱당 진행량 (전체 노선 약 90초 주파)
+
+// 진행률(0~1) → 노선 위 좌표 + 방향에 맞는 '다음 정류장'
+function progressToPos(t, dir) {
+  const segs = ROUTE_LATLNGS.length - 1;
+  const f = Math.min(Math.max(t, 0), 0.9999) * segs;
+  const i = Math.floor(f), r = f - i;
+  const [aLat, aLng] = ROUTE_LATLNGS[i];
+  const [bLat, bLng] = ROUTE_LATLNGS[i + 1];
+  return {
+    lat: aLat + (bLat - aLat) * r,
+    lng: aLng + (bLng - aLng) * r,
+    // 공항방면이면 앞(i+1) 정류장, 모슬포방면이면 뒤(i) 정류장이 다음 정차지
+    nextStop: dir > 0 ? BUS_ROUTE_151[i + 1].name : BUS_ROUTE_151[i].name,
+  };
+}
+
+function busIcon(bus, next, dir) {
+  const dest = dir > 0 ? "✈️ 공항방면" : "⛵ 모슬포방면";
+  return L.divIcon({
+    className: "",
+    html: `<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+      <div style="background:#fff;border:2px solid #f4841f;border-radius:8px;
+        padding:2px 7px;font-size:10px;font-weight:800;color:#23272d;
+        white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);line-height:1.4;text-align:center">
+        <span style="color:#f4841f">151</span> ${dest}<br>
+        <span style="font-weight:600;color:#3a4048">다음: ${next}</span></div>
+      <div style="font-size:24px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4));
+        transform:scaleX(${dir > 0 ? 1 : -1})">🚌</div>
+    </div>`,
+    iconAnchor: [52, 52],
+  });
+}
+
+function startBusTracking() {
+  stopBusTracking();
+  // 첫 렌더링
+  liveBuses.forEach(bus => {
+    const p = progressToPos(bus.progress, bus.dir);
+    bus.lastStop = p.nextStop;
+    bus.marker = L.marker([p.lat, p.lng],
+      { icon: busIcon(bus, p.nextStop, bus.dir), zIndexOffset: 1000 }).addTo(map);
+    busMarkers.push(bus.marker);
+  });
+  // 0.1초마다 조금씩 전진 → 선 위를 미끄러지듯 주행
+  busTimer = setInterval(() => {
+    liveBuses.forEach(bus => {
+      bus.progress += SPEED_PER_TICK * bus.dir;
+      // 종점 도착 → 방향 전환(회차)
+      if (bus.progress >= 1) { bus.progress = 1; bus.dir = -1; }
+      if (bus.progress <= 0) { bus.progress = 0; bus.dir = +1; }
+      const p = progressToPos(bus.progress, bus.dir);
+      bus.marker.setLatLng([p.lat, p.lng]);
+      // 아이콘(라벨)은 다음 정류장이 바뀔 때만 다시 그림 → 성능 절약
+      if (p.nextStop !== bus.lastStop) {
+        bus.marker.setIcon(busIcon(bus, p.nextStop, bus.dir));
+        bus.lastStop = p.nextStop;
+      }
+    });
+  }, TICK_MS);
+}
+function stopBusTracking() {
+  if (busTimer) { clearInterval(busTimer); busTimer = null; }
+  if (realTimer) { clearInterval(realTimer); realTimer = null; }
+  busMarkers.forEach(m => map.removeLayer(m));
+  busMarkers = [];
+  liveBuses.forEach(b => b.marker = null);
+}
+
+// ═══════════════════════════════════════════════════
+// 실제 TAGO 버스위치 API 연동
+// ─ 국토교통부 국가대중교통정보센터(TAGO) 공식 API
+// ─ 발급: data.go.kr → "국토교통부_(TAGO)_버스위치정보" 활용신청(자동승인)
+// ─ 흐름: ①도시코드 조회 → ②151번 노선ID 조회 → ③10초마다 위치 폴링
+// ═══════════════════════════════════════════════════
+const TAGO = {
+  cityList: "https://apis.data.go.kr/1613000/BusLcInfoInqireService/getCtyCodeList",
+  routeList: "https://apis.data.go.kr/1613000/BusRouteInfoInqireService/getRouteNoList",
+  busLoc:   "https://apis.data.go.kr/1613000/BusLcInfoInqireService/getRouteAcctoBusLcList",
+};
+let realTimer = null, realMarkers = [];
+
+function apiLog(msg) {
+  document.getElementById('apiLog').innerHTML += msg + "<br>";
+}
+
+async function tagoFetch(url, params) {
+  // TAGO 공통 호출: JSON 형식으로 응답받아 items 배열 반환
+  const q = new URLSearchParams({ ...params, _type: "json", numOfRows: 50 });
+  const res = await fetch(url + "?serviceKey=" + encodeURIComponent(params.serviceKey) + "&" + q.toString());
+  const data = await res.json();
+  const items = data?.response?.body?.items?.item;
+  if (!items) throw new Error("응답에 데이터가 없어요 (서비스키 확인 필요)");
+  return Array.isArray(items) ? items : [items];  // 1건이면 객체로 오므로 배열화
+}
+
+async function connectRealApi() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  const logEl = document.getElementById('apiLog');
+  logEl.innerHTML = "";
+  if (!key) { apiLog("⚠️ 서비스키를 입력해 주세요."); return; }
+
+  try {
+    // ① 도시코드 목록에서 '제주' 찾기
+    apiLog("① 제주 도시코드 조회 중…");
+    const cities = await tagoFetch(TAGO.cityList, { serviceKey: key });
+    const jeju = cities.find(c => String(c.cityname).includes("제주"));
+    if (!jeju) throw new Error("도시 목록에서 제주를 찾지 못했어요.");
+    apiLog(`　✓ 제주 도시코드: ${jeju.citycode}`);
+
+    // ② 151번 노선 ID 조회
+    apiLog("② 급행 151번 노선ID 조회 중…");
+    const routes = await tagoFetch(TAGO.routeList,
+      { serviceKey: key, cityCode: jeju.citycode, routeNo: "151" });
+    const route = routes.find(r => String(r.routeno) === "151") || routes[0];
+    apiLog(`　✓ 노선ID: ${route.routeid}`);
+
+    // ③ 실시간 위치 폴링 시작 (10초 주기)
+    stopBusTracking();          // 시뮬레이션 중단
+    document.getElementById('liveStatus').textContent = "실시간 연결됨 (10초 갱신)";
+    apiLog("③ 실시간 위치 수신 시작 🚌");
+
+    const poll = async () => {
+      const buses = await tagoFetch(TAGO.busLoc,
+        { serviceKey: key, cityCode: jeju.citycode, routeId: route.routeid });
+      // 기존 실시간 마커 제거 후 새 위치로 다시 그림
+      realMarkers.forEach(m => map.removeLayer(m));
+      realMarkers = buses.map(b =>
+        L.marker([b.gpslati, b.gpslong], {
+          icon: busIcon({ id: b.vehicleno }, b.nodenm || "이동 중", +1),
+          zIndexOffset: 1000,
+        }).addTo(map)
+      );
+      document.getElementById('liveStatus').textContent =
+        `실시간 연결됨 · 운행 중 ${buses.length}대`;
+    };
+    await poll();
+    realTimer = setInterval(() => poll().catch(e => apiLog("⚠️ " + e.message)), 10000);
+
+  } catch (e) {
+    // 브라우저 보안 정책(CORS)이나 미리보기 환경 제한으로 직접 호출이
+    // 막힐 수 있음 — 이 경우 시뮬레이션을 유지하고 해결 방법 안내
+    apiLog(`⚠️ 연결 실패: ${e.message}`);
+    apiLog("이 미리보기 환경은 외부 API 호출이 제한돼요.<br>" +
+      "파일을 <b>다운로드해 브라우저에서 직접 열거나</b>, 실서비스에서는 " +
+      "서버(프록시)를 통해 호출하면 정상 작동합니다. " +
+      "지금은 시뮬레이션 모드로 계속 표시할게요.");
+    if (!busTimer) startBusTracking();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// 버스 노선 ↔ 장소 연결
+// ─ 각 장소에서 가장 가까운 151번 정류장과 거리를 자동 계산
+// ─ 장소 시트: "이 곳은 어느 정류장에서 가깝다" 표시
+// ─ 정류장 탭: "이 정류장 주변에 어떤 장소가 있다" 표시
+// ═══════════════════════════════════════════════════
+function nearestStop(lat, lng) {
+  let best = null;
+  BUS_ROUTE_151.forEach(s => {
+    const d = distanceM(lat, lng, s.pos[0], s.pos[1]);
+    if (!best || d < best.d) best = { name: s.name, d };
+  });
+  return best;
+}
+function fmtDist(m) {
+  return m >= 1000 ? (m / 1000).toFixed(1) + "km" : Math.round(m) + "m";
+}
+
+// ── 5-1. 장소 리뷰 보기 시트 ──
+function openViewSheet(poi) {
+  closeSheets();
+  const list = reviewsOf(poi.id);
+  document.getElementById('placeName').textContent = poi.name;
+  document.getElementById('placeMeta').innerHTML =
+    `<span class="live-dot"></span>실시간 리뷰 ${list.length}건 · 📍 현장 인증 리뷰 우선 노출`;
+
+  // 가장 가까운 151번 정류장 계산 → 버스 접근성 안내
+  const ns = nearestStop(poi.lat, poi.lng);
+  const busLine2 =
+    ns.d <= 1000 ? `🚌 급행151 <b>${ns.name}</b> 정류장에서 도보 ${fmtDist(ns.d)}` :
+    ns.d <= 4000 ? `🚌 급행151 <b>${ns.name}</b> 정류장에서 ${fmtDist(ns.d)} (택시·자전거 권장)` :
+    `🚌 151 노선 <b>${ns.name}</b>에서 ${fmtDist(ns.d)} — 다른 노선 환승 필요`;
+  document.getElementById('placeOfficial').innerHTML =
+    `✓ 장소 정보: ${poi.src}<br>${busLine2}`;
+  document.getElementById('reviewList').innerHTML = list.map(r => `
+    <div class="review">
+      <div class="top">
+        <span class="flag">${r.flag}</span>
+        <span class="nick">${escapeHtml(r.nick)}</span>
+        <span class="stars">${"★".repeat(r.stars)}${"☆".repeat(5-r.stars)}</span>
+        <span class="badge-verified">🛡 실방문 인증</span>
+        ${r.onsite ? '<span class="badge-verified" style="color:var(--sea);background:rgba(43,122,140,.1)">📍 현장 인증</span>' : ''}
+      </div>
+      <p>${escapeHtml(r.text)}</p>
+      ${r.mediaCount > 0
+        ? `<div class="rev-media" id="med-${r.id}">
+             <span style="font-size:11px;color:rgba(35,39,45,.4)">📸 첨부 ${r.mediaCount}개 불러오는 중…</span>
+           </div>`
+        : ""}
+      <div class="time">${timeAgo(r.ts)}</div>
+    </div>
+  `).join('');
+  // 첨부가 있는 리뷰는 화면에 카드가 그려진 뒤 미디어를 채워넣음
+  list.filter(r => r.mediaCount > 0).forEach(r => loadReviewMedia(r.id));
+  document.getElementById('viewSheet').classList.add('open');
+  map.panTo([poi.lat - 0.05, poi.lng]);
+}
+
+// ═══════════════════════════════════════════════════
+// 리뷰 미디어 (사진·영상) 처리
+// ─ 규칙: 리뷰당 최대 10개, 영상은 30초 이하
+// ─ 사진: 캔버스로 900px·JPEG 압축 (저장 공간 절약)
+// ─ 영상: 길이 30초 초과 반려, 용량 4MB 초과 반려
+//   (저장소가 리뷰당 약 5MB 제한 → 실서비스 배포 시
+//    전용 미디어 스토리지로 교체하면 제한 완화 가능)
+// ═══════════════════════════════════════════════════
+const MEDIA_MAX = 10;              // 리뷰당 최대 개수
+const VIDEO_MAX_SEC = 30;          // 영상 최대 길이(초)
+const BYTES_BUDGET = 4500000;      // 리뷰당 미디어 총량(문자 수 기준 ≈ 4.5MB)
+let formMedia = [];                // {kind:'img'|'vid', data, dur}
+let mediaCache = {};               // 열어본 리뷰의 미디어 캐시
+
+function mediaMsg(t) { document.getElementById('mediaMsg').textContent = t; }
+function mediaBytes() { return formMedia.reduce((s, m) => s + m.data.length, 0); }
+
+// 사진 압축: 긴 변 900px로 줄여 JPEG로 변환
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, 900 / Math.max(img.width, img.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * scale);
+      cv.height = Math.round(img.height * scale);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      resolve(cv.toDataURL('image/jpeg', 0.72));
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// 영상 길이(초) 알아내기
+function videoDuration(file) {
+  return new Promise((resolve, reject) => {
+    const v = document.createElement('video');
+    v.preload = 'metadata';
+    v.onloadedmetadata = () => { resolve(v.duration); URL.revokeObjectURL(v.src); };
+    v.onerror = reject;
+    v.src = URL.createObjectURL(file);
+  });
+}
+
+// 파일 → base64 문자열
+function fileToDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+// 파일 선택 시 검증 → 통과분만 첨부 목록에 추가
+document.getElementById('fMedia').addEventListener('change', async (e) => {
+  mediaMsg("");
+  for (const file of e.target.files) {
+    if (formMedia.length >= MEDIA_MAX) {
+      mediaMsg(`최대 ${MEDIA_MAX}개까지 첨부할 수 있어요.`); break;
+    }
+    try {
+      if (file.type.startsWith('image/')) {
+        const data = await compressImage(file);
+        if (mediaBytes() + data.length > BYTES_BUDGET) {
+          mediaMsg("저장 공간이 가득 찼어요. 사진 몇 장을 빼주세요."); continue;
+        }
+        formMedia.push({ kind: 'img', data });
+      } else if (file.type.startsWith('video/')) {
+        const dur = await videoDuration(file);
+        if (dur > VIDEO_MAX_SEC + 0.5) {
+          mediaMsg(`영상은 ${VIDEO_MAX_SEC}초 이하만 가능해요 (선택한 영상: ${Math.round(dur)}초).`); continue;
+        }
+        if (file.size > 4 * 1024 * 1024) {
+          mediaMsg("영상 용량이 4MB를 넘어요. 화질을 낮춰 다시 시도해 주세요."); continue;
+        }
+        const data = await fileToDataURL(file);
+        if (mediaBytes() + data.length > BYTES_BUDGET) {
+          mediaMsg("저장 공간이 가득 찼어요. 다른 첨부를 줄여주세요."); continue;
+        }
+        formMedia.push({ kind: 'vid', data, dur: Math.round(dur) });
+      }
+    } catch (err) { mediaMsg("파일을 읽지 못했어요: " + file.name); }
+  }
+  e.target.value = "";   // 같은 파일 재선택 가능하도록 초기화
+  renderThumbs();
+});
+
+// 첨부 썸네일 그리기 (X 버튼으로 제거)
+function renderThumbs() {
+  const box = document.getElementById('mediaThumbs');
+  box.innerHTML = formMedia.map((m, i) => `
+    <div class="thumb">
+      ${m.kind === 'img'
+        ? `<img src="${m.data}" alt="첨부 사진">`
+        : `<video src="${m.data}" muted playsinline></video>
+           <span class="vid-mark">▶ ${m.dur}초</span>`}
+      <button class="rm" onclick="removeMedia(${i})">✕</button>
+    </div>`).join('');
+  document.getElementById('mediaCount').textContent =
+    formMedia.length ? `(${formMedia.length}/${MEDIA_MAX})` : "";
+}
+function removeMedia(i) { formMedia.splice(i, 1); mediaMsg(""); renderThumbs(); }
+
+// 리뷰 사진 크게 보기
+function openLightbox(revId, idx) {
+  const arr = mediaCache[revId];
+  if (!arr) return;
+  document.getElementById('lightboxImg').src = arr[idx].data;
+  document.getElementById('lightbox').classList.add('on');
+}
+
+// 장소 시트를 열 때 미디어를 뒤늦게(lazy) 불러와 카드에 채움
+async function loadReviewMedia(revId) {
+  const el = document.getElementById('med-' + revId);
+  if (!el) return;
+  try {
+    if (!mediaCache[revId]) {
+      const raw = await kvGet('jb-media:' + revId, true);
+      if (!raw) throw new Error("no media");
+      mediaCache[revId] = JSON.parse(raw);
+    }
+    el.innerHTML = mediaCache[revId].map((m, i) =>
+      m.kind === 'img'
+        ? `<img src="${m.data}" alt="리뷰 사진" onclick="openLightbox('${revId}',${i})">`
+        : `<video src="${m.data}" controls playsinline preload="metadata"></video>`
+    ).join('');
+  } catch (e) {
+    el.innerHTML = `<span style="font-size:11px;color:rgba(35,39,45,.4)">첨부를 불러오지 못했어요</span>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// 현장 위치 인증 (선택 사항)
+// ─ 폰 GPS로 현재 위치를 받아 선택한 장소와의 거리를 계산
+// ─ 500m 이내면 리뷰에 "📍 현장 인증" 배지가 붙음
+// ─ 실패해도 리뷰 작성은 가능 (투숙 인증이 기본 관문)
+// ═══════════════════════════════════════════════════
+let onsiteVerified = false;
+const ONSITE_RADIUS_M = 500;   // 인증 반경(미터)
+
+// 하버사인 공식: 지구 위 두 좌표 사이의 거리(m)
+// 쉽게 말해 "둥근 지구 표면을 따라 잰 직선거리"
+function distanceM(lat1, lng1, lat2, lng2) {
+  const R = 6371000;                       // 지구 반지름(m)
+  const toRad = d => d * Math.PI / 180;    // 도(°) → 라디안
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat/2)**2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function requestOnsite() {
+  const msg = document.getElementById('onsiteMsg');
+  if (!navigator.geolocation) {
+    msg.textContent = "이 기기에서는 위치 확인을 지원하지 않아요."; return;
+  }
+  msg.textContent = "위치 확인 중…";
+  const poi = POI.find(p => p.id === document.getElementById('fPlace').value);
+  if (!poi) { msg.textContent = "먼저 위에서 장소를 검색해 선택해 주세요."; return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    const d = Math.round(distanceM(
+      pos.coords.latitude, pos.coords.longitude, poi.lat, poi.lng));
+    if (d <= ONSITE_RADIUS_M) {
+      onsiteVerified = true;
+      document.getElementById('onsiteBtn').textContent =
+        `✅ 현장 인증 완료 (${poi.name}에서 ${d}m)`;
+      msg.textContent = "";
+    } else {
+      onsiteVerified = false;
+      msg.textContent =
+        `현재 위치가 ${poi.name}에서 ${d >= 1000 ? (d/1000).toFixed(1)+"km" : d+"m"} 떨어져 있어요. ` +
+        "현장 배지 없이도 리뷰는 올릴 수 있습니다.";
+    }
+  }, err => {
+    msg.textContent = "위치 권한이 거부됐거나 확인에 실패했어요. 현장 배지 없이 진행됩니다.";
+  }, { enableHighAccuracy: true, timeout: 8000 });
+}
+
+// ── 5-2. 리뷰 작성 시트 ──
+let formStars = 0;
+let checkedIn = false;
+let checkinToken = null;
+
+// ═══════════════════════════════════════════════════
+// 투숙인증 QR 토큰 — 한 번 인증하면 계속 유지 (영구)
+// ─ QR에는 [앱 주소 + 인증 토큰]이 함께 담김 (예: ?checkin=JB-2607)
+// ─ 최초 스캔 시 토큰을 이 기기의 개인 저장소에 저장
+// ─ 한 번이라도 투숙 인증한 게스트는 퇴실 후에도,
+//   공항에서도, 다음 여행에서도 계속 리뷰를 올릴 수 있음
+// ═══════════════════════════════════════════════════
+const CHECKIN_KEY = "jb-checkin";               // 개인 저장소 키
+
+function readUrlToken() {
+  // 주소의 ?checkin=... 또는 #checkin=... 양쪽 모두 지원
+  const fromQuery = new URLSearchParams(location.search).get('checkin');
+  const fromHash  = (location.hash.match(/checkin=([\w-]+)/) || [])[1];
+  const token = fromQuery || fromHash;
+  return (token && /^JB-/.test(token)) ? token : null;  // JB- 형식만 유효
+}
+
+// 인증 토큰을 기기에 저장 (shared=false: 나에게만 보이는 개인 데이터)
+async function saveCheckin(token) {
+  checkinToken = token;
+  checkedIn = true;
+  try {
+    await kvSet(CHECKIN_KEY,
+      JSON.stringify({ token, ts: Date.now() }), false);
+  } catch (e) { /* 저장 불가 환경이면 이번 세션만 유지 */ }
+}
+
+// 저장된 인증 불러오기 — 만료 없이 항상 복원
+async function loadCheckin() {
+  try {
+    const raw = await kvGet(CHECKIN_KEY, false);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    checkinToken = saved.token;
+    checkedIn = true;
+  } catch (e) { /* 저장된 인증 없음 */ }
+}
+
+function renderCheckinState() {
+  const el = document.getElementById('fCheckin');
+  const label = document.getElementById('checkinLabel');
+  if (checkedIn) {
+    el.classList.add('done');
+    label.textContent = `✓ 인증된 게스트 (코드 ${checkinToken || "JB-DEMO"})`;
+  } else {
+    el.classList.remove('done');
+    label.textContent = "게스트하우스 QR 체크인 스캔";
+  }
+}
+
+function openWriteSheet() {
+  closeSheets();
+  formStars = 0;
+  document.getElementById('fText').value = "";
+  // 장소 검색 초기화
+  document.getElementById('fPlaceSearch').value = "";
+  document.getElementById('fPlace').value = "";
+  document.getElementById('placeSuggest').innerHTML = "";
+  document.getElementById('placePicked').style.display = "none";
+  formMedia = [];              // 첨부 초기화
+  mediaMsg("");
+  renderThumbs();
+  onsiteVerified = false;      // 현장 인증 초기화
+  document.getElementById('onsiteBtn').textContent = "📍 현장 인증 받기 (선택 · GPS로 위치 확인)";
+  document.getElementById('onsiteMsg').textContent = "";
+  drawStars();
+  renderCheckinState();
+  document.getElementById('writeSheet').classList.add('open');
+}
+
+// QR 체크인 시뮬레이션 (실서비스에서는 카메라 스캔 → 서버 검증)
+// 인증되면 저장되어 30일간 유지됨
+async function toggleCheckin() {
+  if (checkedIn) return;                 // 이미 인증됨 → 변화 없음
+  await saveCheckin("JB-DEMO");          // 데모용 토큰으로 저장
+  renderCheckinState();
+}
+
+function drawStars() {
+  const row = document.getElementById('fStars');
+  row.innerHTML = "";
+  for (let i = 1; i <= 5; i++) {
+    const b = document.createElement('button');
+    b.className = 'star-btn' + (i <= formStars ? ' on' : '');
+    b.textContent = '★';
+    b.onclick = () => { formStars = i; drawStars(); };
+    row.appendChild(b);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// 6) 검수 에이전트 A — 리뷰가 DB에 들어가기 전 3단계 검증
+//    실서비스에서는 서버 사이드에서 실행될 로직입니다.
+// ═══════════════════════════════════════════════════
+async function submitReview() {
+  const poiId = document.getElementById('fPlace').value;
+  const nick  = document.getElementById('fNick').value.trim();
+  const flag  = document.getElementById('fFlag').value;
+  const text  = document.getElementById('fText').value.trim();
+
+  // 검수 시트 열고 단계별 진행 표시
+  closeSheets();
+  const stepsEl = document.getElementById('auditSteps');
+  const resultEl = document.getElementById('auditResult');
+  resultEl.innerHTML = "";
+
+  // 3단계 검수 규칙 정의: [이름, 통과조건 함수, 실패 사유]
+  const checks = [
+    ["실방문 인증 확인 (QR 체크인)",
+      () => checkedIn,
+      "투숙 인증이 없어 반려됐어요. QR 체크인 후 다시 시도해 주세요."],
+    ["스팸·광고 필터 (금칙어, 최소 길이)",
+      () => text.length >= 10 && !/(광고|홍보|dm주세요|http|www\.|팔로우)/i.test(text) && nick.length >= 1 && formStars >= 1,
+      "내용이 너무 짧거나 광고성 문구가 감지됐어요. (닉네임·별점·10자 이상 필수)"],
+    ["공식 POI 대조 (장소 실존 여부)",
+      () => POI.some(p => p.id === poiId),
+      "공식 장소 목록에서 확인되지 않는 장소예요."],
+  ];
+
+  stepsEl.innerHTML = checks.map((c, i) =>
+    `<div class="audit-step wait" id="step${i}">
+       <span class="st-icon"><span class="spin">◌</span></span><span>${c[0]}</span>
+     </div>`).join('');
+  document.getElementById('auditSheet').classList.add('open');
+
+  // 한 단계씩 순서대로 검사 (시각적으로 파이프라인이 보이도록 약간의 지연)
+  for (let i = 0; i < checks.length; i++) {
+    await new Promise(r => setTimeout(r, 650));
+    const el = document.getElementById('step' + i);
+    const pass = checks[i][1]();
+    el.className = 'audit-step ' + (pass ? 'pass' : 'fail');
+    el.querySelector('.st-icon').innerHTML = pass ? '✓' : '✕';
+    if (!pass) {
+      resultEl.innerHTML = `<div class="audit-result no">검수 반려<br><span style="font-weight:500">${checks[i][2]}</span></div>`;
+      return;  // 반려된 리뷰는 DB에 저장되지 않음
+    }
+  }
+
+  // ── 3단계 모두 통과 → 리뷰 DB에 저장 → 지도 갱신 ──
+  const revId = "r" + Date.now() + Math.floor(Math.random() * 900 + 100);
+  reviews.push({
+    id: revId, poiId, nick, flag, text,
+    stars: formStars,
+    mediaCount: formMedia.length,   // 첨부 개수 (본문과 분리 저장)
+    onsite: onsiteVerified,         // 현장 GPS 인증 여부
+    ts: Date.now(),
+  });
+  await saveReviews();
+  // 미디어는 리뷰별 전용 키에 저장 → 개별 5MB 한도 확보 + 필요할 때만 로드
+  if (formMedia.length > 0) {
+    try {
+      await kvSet('jb-media:' + revId, JSON.stringify(formMedia), true);
+      mediaCache[revId] = formMedia;
+    } catch (e) { console.error("미디어 저장 실패:", e); }
+  }
+  renderMap();
+
+  const poiName = POI.find(p => p.id === poiId).name;
+  resultEl.innerHTML =
+    `<div class="audit-result ok">검수 통과 · 지도에 등록 완료 🍊<br>
+     <span style="font-weight:500">${poiName}에 감귤 마커가 생겼어요!</span></div>`;
+  setTimeout(() => {
+    closeSheets();
+    const poi = POI.find(p => p.id === poiId);
+    openViewSheet(poi);
+  }, 1600);
+}
+
+// ═══════════════════════════════════════════════════
+// 7) 유틸리티 함수
+// ═══════════════════════════════════════════════════
+// XSS 방지: 사용자 입력을 화면에 넣기 전 특수문자 치환
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, ch =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+// "n분 전" 형태의 상대 시간 표시
+function timeAgo(ts) {
+  const m = Math.floor((Date.now() - ts) / 60000);
+  if (m < 1)  return "방금 전";
+  if (m < 60) return m + "분 전";
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + "시간 전";
+  return Math.floor(h / 24) + "일 전";
+}
+
+// ═══════════════════════════════════════════════════
+// 8) 초기화: 폼 옵션 채우기 → 저장소에서 리뷰 로드 → 지도 렌더
+// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// 장소 검색: 업체명을 입력하면 공식 카탈로그에서 실시간 필터링
+// ─ 초성/부분 일치 검색, 선택하면 확정 표시
+// ─ 실서비스에서는 이 자리에 구글 플레이스 검색 API가 연결되어
+//   카탈로그에 없는 업체도 즉시 검증·추가됩니다
+// ═══════════════════════════════════════════════════
+const searchInput = document.getElementById('fPlaceSearch');
+const suggestBox  = document.getElementById('placeSuggest');
+
+function pickPlace(id) {
+  const poi = POI.find(p => p.id === id);
+  document.getElementById('fPlace').value = id;          // 확정된 장소 ID
+  searchInput.value = poi.name;
+  suggestBox.innerHTML = "";
+  const picked = document.getElementById('placePicked');
+  picked.style.display = "block";
+  picked.textContent = `✓ ${poi.name} — ${poi.src}`;
+}
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+  document.getElementById('fPlace').value = "";          // 다시 입력하면 선택 해제
+  document.getElementById('placePicked').style.display = "none";
+  if (!q) { suggestBox.innerHTML = ""; return; }
+
+  const norm = s => s.toLowerCase().replace(/\s+/g, "");   // 띄어쓰기 무시
+  const nq = norm(q);
+  const hits = POI.filter(p =>
+    norm(p.name).includes(nq) ||
+    (p.alias || []).some(a => norm(a).includes(nq) || nq.includes(norm(a)))
+  ).slice(0, 6);
+  suggestBox.innerHTML = hits.length
+    ? hits.map(p =>
+        `<button class="sg-item" onclick="pickPlace('${p.id}')">${p.name}<small>${p.src}</small></button>`
+      ).join('')
+    : `<div class="sg-none">검색 결과가 없어요. 실서비스에서는 구글 플레이스 연동으로 모든 업체 검색이 가능해집니다.</div>`;
+});
+
+document.getElementById('fFlag').innerHTML =
+  FLAGS.map(f => `<option value="${f}">${f}</option>`).join('');
+drawStars();
+
+// ── 하단 탭바 전환 ──
+function switchTab(tab) {
+  document.getElementById('tabMap').classList.toggle('active', tab === 'map');
+  document.getElementById('tabBus').classList.toggle('active', tab === 'bus');
+  if (tab === 'map')   { closeSheets(); }
+  if (tab === 'write') { openWriteSheet(); }
+  if (tab === 'bus')   { openBusSheet(); }
+}
+
+// ── 시트 스와이프 다운으로 닫기 (모바일 제스처) ──
+// 핸들/헤더 영역에서 아래로 60px 이상 끌면 시트가 닫힘
+sheets.forEach(id => {
+  const sheet = document.getElementById(id);
+  let startY = null, delta = 0;
+  const grabArea = [sheet.querySelector('.sheet-handle'), sheet.querySelector('.sheet-head')];
+
+  grabArea.forEach(area => {
+    if (!area) return;
+    area.addEventListener('touchstart', e => {
+      startY = e.touches[0].clientY; delta = 0;
+      sheet.style.transition = 'none';        // 드래그 중엔 즉시 따라오게
+    }, { passive: true });
+
+    area.addEventListener('touchmove', e => {
+      if (startY === null) return;
+      delta = Math.max(0, e.touches[0].clientY - startY);   // 아래 방향만
+      sheet.style.transform = `translateY(${delta}px)`;
+    }, { passive: true });
+
+    area.addEventListener('touchend', () => {
+      sheet.style.transition = '';            // 애니메이션 복원
+      sheet.style.transform = '';
+      if (delta > 60) closeSheets();          // 충분히 끌었으면 닫기
+      startY = null;
+    });
+  });
+});
+
+(async () => {
+  // ⓪ 사용 가능한 저장소 자동 감지 (cloud → local → memory)
+  await initStore();
+  // ① 저장된 인증이 있으면 복원
+  await loadCheckin();
+  // ② QR로 들어와 URL에 새 토큰이 있으면 저장(갱신)
+  const urlToken = readUrlToken();
+  if (urlToken) await saveCheckin(urlToken);
+  // ③ 리뷰 로드 → 지도 렌더
+  await loadReviews();
+  renderMap();
+})();
+</script>
+</body>
+</html>
