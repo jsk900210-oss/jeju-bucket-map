@@ -1580,13 +1580,16 @@ function finishIntro() {
   const urlToken = new URLSearchParams(location.search).get('checkin')
                 || (location.hash.match(/checkin=([\w-]+)/) || [])[1];
 
-  // ① QR 토큰이 URL에 있으면 → 인트로 완전 스킵 + 자동 인증
+  // ① QR 토큰이 URL에 있으면 → 즉시 인증 + 인트로 완전 스킵
   if (urlToken && /^JB-/.test(urlToken)) {
     introFlag = prev || '🇰🇷';
-    saveCheckin(urlToken).then(() => {
-      renderCheckinState();
-      document.getElementById('intro').style.display = 'none';
-    });
+    // 즉시 인증 상태로 설정 (비동기 저장 기다리지 않음)
+    checkedIn = true;
+    checkinToken = urlToken;
+    try { localStorage.setItem('jb-checkin', JSON.stringify({ token: urlToken, ts: Date.now() })); } catch(e) {}
+    saveCheckin(urlToken).catch(() => {});
+    document.getElementById('intro').style.display = 'none';
+    renderCheckinState();
     return;
   }
 
