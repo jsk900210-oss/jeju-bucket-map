@@ -374,6 +374,7 @@
     .live-dot, .spin { animation: none; }
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 </head>
 <body>
 <div id="intro">
@@ -1514,30 +1515,36 @@ async function goIntroStep2() {
 }
 
 function startQrScan(videoEl) {
-  if (!('BarcodeDetector' in window)) {
-    document.getElementById('introQrStatus').innerHTML =
-      'QR 자동 감지 미지원 브라우저예요.<br><span style="font-size:11px;color:#bbb">Try Chrome(Android) or Safari 17+(iOS).</span>';
-    return;
-  }
-  const detector = new BarcodeDetector({ formats: ['qr_code'] });
+  // jsQR 라이브러리로 QR 스캔 (모든 브라우저 지원)
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
   let scanning = true;
-  async function scan() {
+
+  function scan() {
     if (!scanning || !videoEl.srcObject) return;
-    try {
-      const codes = await detector.detect(videoEl);
-      if (codes.length > 0) {
-        const raw = codes[0].rawValue;
+    if (videoEl.readyState === videoEl.HAVE_ENOUGH_DATA) {
+      canvas.width  = videoEl.videoWidth;
+      canvas.height = videoEl.videoHeight;
+      ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imgData.data, imgData.width, imgData.height, {
+        inversionAttempts: 'dontInvert'
+      });
+      if (code) {
+        const raw = code.data;
         const token = raw.match(/checkin=(JB-[\w-]+)/)?.[1]
                    || (/^JB-/.test(raw) ? raw.trim() : null);
         if (token) {
           scanning = false; stopCam();
-          await saveCheckin(token);
-          showQrVerified(token); return;
+          saveCheckin(token).then(() => showQrVerified(token));
+          return;
         }
       }
-    } catch(e) {}
+    }
     requestAnimationFrame(scan);
   }
+  // 비디오 재생 시작 후 스캔
+  videoEl.addEventListener('playing', () => { scanning = true; scan(); }, { once: false });
   scan();
 }
 
