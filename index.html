@@ -661,7 +661,7 @@ async function loadReviews() {
     if (storageMode === "supabase") {
       const { data, error } = await sbClient
         .from("reviews")
-        .select("id,poi_id,nickname,flag,body,stars,onsite_verified,created_at")
+        .select("id,poi_id,nickname,flag,body,stars,onsite_verified,created_at,review_media(id,object_path,mime_type)")
         .order("created_at", { ascending: true });
       if (error) throw error;
       reviews = (data || []).map(r => ({
@@ -671,10 +671,17 @@ async function loadReviews() {
         flag: r.flag,
         text: r.body,
         stars: r.stars,
-        mediaCount: 0,
+        mediaCount: (r.review_media || []).length,
         onsite: r.onsite_verified,
         ts: new Date(r.created_at).getTime(),
       }));
+      (data || []).forEach(r => {
+        if (!r.review_media?.length) return;
+        mediaCache[r.id] = r.review_media.map(m => ({
+          kind: m.mime_type.startsWith("image/") ? "img" : "vid",
+          data: sbClient.storage.from("review-media").getPublicUrl(m.object_path).data.publicUrl,
+        }));
+      });
       return;
     }
     const raw = await kvGet(STORAGE_KEY, true);
@@ -695,6 +702,12 @@ function subscribeReviews() {
     .channel("public-reviews")
     .on("postgres_changes", {
       event: "*", schema: "public", table: "reviews"
+    }, async () => {
+      await loadReviews();
+      renderMap();
+    })
+    .on("postgres_changes", {
+      event: "*", schema: "public", table: "review_media"
     }, async () => {
       await loadReviews();
       renderMap();
@@ -1186,6 +1199,39 @@ function fileToDataURL(file) {
   });
 }
 
+function dataUrlToBlob(dataUrl) {
+  const [header, payload] = dataUrl.split(",");
+  const mime = header.match(/data:([^;]+)/)?.[1] || "application/octet-stream";
+  const bytes = atob(payload);
+  const out = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) out[i] = bytes.charCodeAt(i);
+  return new Blob([out], { type: mime });
+}
+
+async function uploadSupabaseMedia(reviewId) {
+  const { data: userData, error: userError } = await sbClient.auth.getUser();
+  if (userError || !userData.user) throw userError || new Error("authentication required");
+  for (const [index, media] of formMedia.entries()) {
+    if (media.kind !== "img") throw new Error("video upload is not supported yet");
+    const blob = dataUrlToBlob(media.data);
+    const path = `${userData.user.id}/${reviewId}/${crypto.randomUUID()}-${index}.jpg`;
+    const { error: uploadError } = await sbClient.storage
+      .from("review-media")
+      .upload(path, blob, { contentType: blob.type, upsert: false });
+    if (uploadError) throw uploadError;
+    const { error: attachError } = await sbClient.rpc("attach_review_media", {
+      p_review_id: reviewId,
+      p_object_path: path,
+      p_mime_type: blob.type,
+      p_size_bytes: blob.size,
+    });
+    if (attachError) {
+      await sbClient.storage.from("review-media").remove([path]);
+      throw attachError;
+    }
+  }
+}
+
 // 파일 선택 시 검증 → 통과분만 첨부 목록에 추가
 document.getElementById('fMedia').addEventListener('change', async (e) => {
   mediaMsg("");
@@ -1250,6 +1296,7 @@ async function loadReviewMedia(revId) {
   if (!el) return;
   try {
     if (!mediaCache[revId]) {
+      if (storageMode === "supabase") throw new Error("no media metadata");
       const raw = await kvGet('jb-media:' + revId, true);
       if (!raw) throw new Error("no media");
       mediaCache[revId] = JSON.parse(raw);
@@ -1456,9 +1503,9 @@ async function submitReview() {
   }
 
   // ── 3단계 모두 통과 → 리뷰 DB에 저장 → 지도 갱신 ──
-  if (storageMode === "supabase" && formMedia.length > 0) {
-    resultEl.innerHTML = `<div class="audit-result no">사진 공유는 다음 단계에서 지원해요.<br>
-      <span style="font-weight:500">사진을 제거한 뒤 텍스트 리뷰를 먼저 등록해 주세요.</span></div>`;
+  if (storageMode === "supabase" && formMedia.some(m => m.kind === "vid")) {
+    resultEl.innerHTML = `<div class="audit-result no">영상 공유는 아직 준비 중이에요.<br>
+      <span style="font-weight:500">영상을 제거한 뒤 사진과 텍스트 리뷰를 등록해 주세요.</span></div>`;
     return;
   }
 
@@ -1475,6 +1522,7 @@ async function submitReview() {
       if (error) throw error;
       const saved = Array.isArray(data) ? data[0] : data;
       revId = saved.id;
+      if (formMedia.length > 0) await uploadSupabaseMedia(revId);
       await loadReviews();
     } else {
       revId = "r" + Date.now() + Math.floor(Math.random() * 900 + 100);
