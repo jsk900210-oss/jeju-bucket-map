@@ -211,120 +211,42 @@
 
 
   /* ═══════════════════════════════════════
-     인트로 스플래시 화면
+     인트로 스플래시 — 2단계
   ═══════════════════════════════════════ */
-  #intro {
-    position: fixed; inset: 0; z-index: 9999;
-    background: linear-gradient(160deg, #fff7ed 0%, #fff3e0 60%, #ffe0b2 100%);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 32px 24px;
-    transition: opacity .5s ease, transform .5s ease;
-  }
-  #intro.hide {
-    opacity: 0; transform: scale(1.04) translateY(-12px);
-    pointer-events: none;
-  }
-
-  /* 귤 캐릭터 */
-  .intro-gamgyul {
-    font-size: 88px; line-height: 1;
-    animation: gamgyul-pop .65s cubic-bezier(.36,.07,.19,.97) both;
-    filter: drop-shadow(0 8px 24px rgba(244,132,31,.35));
-    margin-bottom: 8px;
-  }
-  @keyframes gamgyul-pop {
-    0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
-    55%  { transform: scale(1.22) rotate(8deg);  opacity: 1; }
-    75%  { transform: scale(.92) rotate(-4deg); }
-    90%  { transform: scale(1.06) rotate(2deg); }
-    100% { transform: scale(1)   rotate(0deg); }
-  }
-
-  /* 파티클 뿅! */
-  .intro-burst {
-    position: absolute; font-size: 22px;
-    animation: burst .7s ease-out both;
-    pointer-events: none;
-  }
-  @keyframes burst {
-    0%   { transform: translate(0,0) scale(0); opacity: 1; }
-    100% { transform: translate(var(--tx), var(--ty)) scale(1.2); opacity: 0; }
-  }
-
-  .intro-title {
-    font-size: 26px; font-weight: 900; color: var(--basalt);
-    letter-spacing: -0.5px; margin: 12px 0 4px;
-    animation: fade-up .5s .4s both;
-  }
-  .intro-sub {
-    font-size: 13px; color: #888; margin-bottom: 28px;
-    animation: fade-up .5s .5s both;
-  }
-  @keyframes fade-up {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* 국적 선택 */
-  .intro-flag-label {
-    font-size: 13px; font-weight: 700; color: var(--basalt);
-    margin-bottom: 10px; text-align: center;
-    animation: fade-up .5s .6s both;
-  }
-  .intro-flags {
-    display: flex; flex-wrap: wrap; gap: 8px;
-    justify-content: center; max-width: 320px;
-    margin-bottom: 24px;
-    animation: fade-up .5s .7s both;
-  }
-  .intro-flag-btn {
-    font-size: 28px; background: white;
-    border: 2.5px solid transparent; border-radius: 12px;
-    padding: 6px 8px; cursor: pointer;
-    transition: transform .15s, border-color .15s, box-shadow .15s;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
-  }
-  .intro-flag-btn:hover  { transform: scale(1.12); }
-  .intro-flag-btn.picked {
-    border-color: var(--gamgyul);
-    box-shadow: 0 0 0 3px rgba(244,132,31,.25);
-    transform: scale(1.15);
-  }
-
-  /* QR 체크인 박스 */
-  .intro-qr-box {
-    width: 100%; max-width: 320px;
-    border: 2px dashed #e0c097; border-radius: 16px;
-    padding: 16px 20px; text-align: center;
-    background: rgba(255,255,255,.7);
-    cursor: pointer; margin-bottom: 28px;
-    transition: border-color .2s, background .2s;
-    animation: fade-up .5s .8s both;
-  }
-  .intro-qr-box:hover   { border-color: var(--gamgyul); background: white; }
-  .intro-qr-box.verified {
-    border-color: var(--verified); border-style: solid;
-    background: rgba(46,158,91,.06);
-  }
-  .intro-qr-icon { font-size: 32px; margin-bottom: 4px; }
-  .intro-qr-title { font-size: 14px; font-weight: 800; color: var(--basalt); }
-  .intro-qr-sub   { font-size: 11px; color: #999; margin-top: 2px; }
-
-  /* 시작 버튼 */
-  .intro-start {
-    width: 100%; max-width: 320px;
-    padding: 16px; border-radius: 16px;
-    background: var(--gamgyul); color: white;
-    font-size: 17px; font-weight: 900;
-    border: none; cursor: pointer;
-    box-shadow: 0 6px 20px rgba(244,132,31,.4);
-    transition: transform .15s, box-shadow .15s;
-    animation: fade-up .5s .9s both;
-  }
-  .intro-start:hover  { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(244,132,31,.45); }
-  .intro-start:active { transform: translateY(0); }
-  .intro-start:disabled { background: #ddd; box-shadow: none; cursor: not-allowed; }
+  #intro { position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#fff7ed 0%,#fff3e0 60%,#ffe0b2 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px 40px;overflow-y:auto;transition:opacity .45s ease,transform .45s ease; }
+  #intro.hide { opacity:0;transform:scale(1.04) translateY(-14px);pointer-events:none; }
+  .intro-step { width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center; }
+  .intro-step.hidden { display:none; }
+  .intro-gamgyul { font-size:96px;line-height:1;margin-bottom:8px;animation:gam-pop .65s cubic-bezier(.36,.07,.19,.97) both;filter:drop-shadow(0 8px 28px rgba(244,132,31,.38)); }
+  @keyframes gam-pop { 0%{transform:scale(0) rotate(-20deg);opacity:0} 55%{transform:scale(1.25) rotate(8deg);opacity:1} 75%{transform:scale(.9) rotate(-4deg)} 90%{transform:scale(1.07) rotate(2deg)} 100%{transform:scale(1) rotate(0)} }
+  .intro-burst { position:absolute;font-size:22px;pointer-events:none;animation:burst .75s ease-out both; }
+  @keyframes burst { 0%{transform:translate(0,0) scale(0);opacity:1} 100%{transform:translate(var(--tx),var(--ty)) scale(1.2);opacity:0} }
+  .intro-title { font-size:28px;font-weight:900;color:var(--basalt);letter-spacing:-.5px;margin:10px 0 2px; }
+  .intro-sub { font-size:13px;color:#999;margin-bottom:28px; }
+  @keyframes fade-up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  .intro-flag-label { font-size:14px;font-weight:800;color:var(--basalt);margin-bottom:12px;text-align:center;animation:fade-up .45s .55s both; }
+  .intro-flags { display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:28px;animation:fade-up .45s .65s both; }
+  .intro-flag-btn { font-size:30px;background:white;border:2.5px solid transparent;border-radius:14px;padding:7px 9px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.09);transition:transform .15s,border-color .15s,box-shadow .15s; }
+  .intro-flag-btn:hover { transform:scale(1.12); }
+  .intro-flag-btn.picked { border-color:var(--gamgyul);box-shadow:0 0 0 3px rgba(244,132,31,.28);transform:scale(1.18); }
+  .intro-qr-wrap { width:100%;display:flex;flex-direction:column;align-items:center;animation:fade-up .4s .1s both; }
+  .intro-qr-cam { width:100%;max-width:300px;aspect-ratio:1/1;background:#111;border-radius:20px;overflow:hidden;position:relative;margin-bottom:16px;box-shadow:0 8px 32px rgba(0,0,0,.22); }
+  .intro-qr-cam video { width:100%;height:100%;object-fit:cover;display:block; }
+  .intro-qr-cam::after { content:'';position:absolute;left:12%;right:12%;height:2.5px;background:var(--gamgyul);box-shadow:0 0 8px var(--gamgyul);animation:scan-line 2s ease-in-out infinite; }
+  @keyframes scan-line { 0%,100%{top:15%} 50%{top:82%} }
+  .qr-corner { position:absolute;width:28px;height:28px;border-color:white;border-style:solid; }
+  .qr-corner.tl { top:12px;left:12px;border-width:3px 0 0 3px;border-radius:6px 0 0 0; }
+  .qr-corner.tr { top:12px;right:12px;border-width:3px 3px 0 0;border-radius:0 6px 0 0; }
+  .qr-corner.bl { bottom:12px;left:12px;border-width:0 0 3px 3px;border-radius:0 0 0 6px; }
+  .qr-corner.br { bottom:12px;right:12px;border-width:0 3px 3px 0;border-radius:0 0 6px 0; }
+  .intro-qr-verified { width:100%;max-width:300px;aspect-ratio:1/1;background:linear-gradient(135deg,#e8f8ef,#c6f0d8);border-radius:20px;display:none;align-items:center;justify-content:center;flex-direction:column;font-size:64px;margin-bottom:16px; }
+  .intro-qr-verified.show { display:flex; }
+  .qr-status { font-size:14px;color:#555;text-align:center;margin-bottom:20px;line-height:1.6; }
+  .intro-btn-main { width:100%;padding:16px;border-radius:16px;background:var(--gamgyul);color:white;font-size:17px;font-weight:900;border:none;cursor:pointer;box-shadow:0 6px 20px rgba(244,132,31,.4);transition:transform .15s,box-shadow .15s;margin-bottom:12px; }
+  .intro-btn-main:hover { transform:translateY(-2px);box-shadow:0 10px 28px rgba(244,132,31,.45); }
+  .intro-btn-main:active { transform:translateY(0); }
+  .intro-btn-main:disabled { background:#ddd;box-shadow:none;cursor:not-allowed;color:#aaa; }
+  .intro-btn-skip { background:none;border:none;color:#aaa;font-size:13px;cursor:pointer;padding:8px;text-decoration:underline; }
 
   /* ── 리뷰 미디어 (사진·영상) ── */
   .media-btn {
@@ -455,20 +377,18 @@
 </head>
 <body>
 <div id="intro">
-  <!-- 파티클 -->
-  <span class="intro-burst" style="top:38%;left:42%;--tx:-55px;--ty:-60px;animation-delay:.65s">✨</span>
-  <span class="intro-burst" style="top:38%;left:55%;--tx:50px;--ty:-65px;animation-delay:.7s">🎉</span>
-  <span class="intro-burst" style="top:40%;left:35%;--tx:-70px;--ty:10px;animation-delay:.68s">⭐</span>
-  <span class="intro-burst" style="top:40%;left:62%;--tx:65px;--ty:15px;animation-delay:.72s">🍊</span>
-  <span class="intro-burst" style="top:42%;left:50%;--tx:0px;--ty:70px;animation-delay:.66s">✦</span>
-
-  <div class="intro-gamgyul" id="introGamgyul">🍊</div>
-  <div class="intro-title">제주 리뷰맵</div>
-  <div class="intro-sub">Jeju Guest Review Map</div>
-
-  <div class="intro-flag-label">🌍 어느 나라에서 오셨나요? / Where are you from?</div>
-  <div class="intro-flags">
-    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇰🇷">🇰🇷</button>
+  <span class="intro-burst" style="top:36%;left:42%;--tx:-60px;--ty:-70px;animation-delay:.66s">✨</span>
+  <span class="intro-burst" style="top:36%;left:56%;--tx:55px;--ty:-72px;animation-delay:.7s">🎉</span>
+  <span class="intro-burst" style="top:38%;left:34%;--tx:-75px;--ty:12px;animation-delay:.68s">⭐</span>
+  <span class="intro-burst" style="top:38%;left:64%;--tx:68px;--ty:16px;animation-delay:.73s">🍊</span>
+  <span class="intro-burst" style="top:40%;left:50%;--tx:0;--ty:80px;animation-delay:.67s">✦</span>
+  <div class="intro-step" id="introStep1">
+    <div class="intro-gamgyul" id="introGamgyul">🍊</div>
+    <div class="intro-title">제주 리뷰맵</div>
+    <div class="intro-sub">Jeju Guest Review Map</div>
+    <div class="intro-flag-label">🌍 어느 나라에서 오셨나요?<br><span style="font-weight:400;color:#aaa;font-size:12px">Where are you from?</span></div>
+    <div class="intro-flags">
+      <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇰🇷">🇰🇷</button>
     <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇺🇸">🇺🇸</button>
     <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇯🇵">🇯🇵</button>
     <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇨🇳">🇨🇳</button>
@@ -488,18 +408,41 @@
     <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇮🇳">🇮🇳</button>
     <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇧🇷">🇧🇷</button>
     <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇲🇽">🇲🇽</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇮🇹">🇮🇹</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇷🇺">🇷🇺</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇳🇱">🇳🇱</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇸🇪">🇸🇪</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇨🇭">🇨🇭</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇳🇿">🇳🇿</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇭🇰">🇭🇰</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇲🇴">🇲🇴</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇲🇳">🇲🇳</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🌍">🌍</button>
+    </div>
+    <button class="intro-btn-main" id="introNextBtn" onclick="goIntroStep2()" disabled>국적을 선택해 주세요 / Select your country</button>
   </div>
-
-  <div class="intro-qr-box" id="introQrBox" onclick="introQrTap()">
-    <div class="intro-qr-icon" id="introQrIcon">📱</div>
-    <div class="intro-qr-title" id="introQrTitle">게스트하우스 투숙 인증 (선택)</div>
-    <div class="intro-qr-sub" id="introQrSub">QR 스캔으로 체크인하셨다면 자동 인증됩니다<br>Guest QR check-in verification (optional)</div>
+  <div class="intro-step hidden" id="introStep2">
+    <div style="margin-bottom:20px;text-align:center;animation:fade-up .4s both">
+      <div style="font-size:22px;font-weight:900;color:var(--basalt);margin-bottom:4px">게스트하우스 QR 인증</div>
+      <div style="font-size:13px;color:#999">체크인 QR을 카메라에 비춰주세요<br>Scan your check-in QR code</div>
+    </div>
+    <div class="intro-qr-wrap">
+      <div class="intro-qr-cam" id="introCamBox">
+        <video id="introCamVideo" autoplay playsinline muted></video>
+        <div class="qr-corner tl"></div><div class="qr-corner tr"></div>
+        <div class="qr-corner bl"></div><div class="qr-corner br"></div>
+      </div>
+      <div class="intro-qr-verified" id="introQrVerified">
+        ✅<div style="font-size:18px;font-weight:800;margin-top:8px;color:#2e9e5b">인증 완료!</div>
+        <div style="font-size:12px;color:#888;margin-top:4px">Verified Guest</div>
+      </div>
+      <div class="qr-status" id="introQrStatus">카메라를 QR 코드에 가까이 대주세요<br>Hold camera close to the QR code</div>
+      <button class="intro-btn-main" onclick="finishIntro()">🗺️ 지도 보러 가기 · Enter Map</button>
+      <button class="intro-btn-skip" onclick="finishIntro()">건너뛰기 · Skip</button>
+    </div>
   </div>
-
-  <button class="intro-start" id="introStartBtn" onclick="finishIntro()" disabled>
-    국적을 선택해 주세요 / Select your country
-  </button>
 </div>
+
 
 <div id="app">
   <div id="map"></div>
@@ -1528,6 +1471,109 @@ function requestOnsite() {
 let formStars = 0;
 let checkedIn = false;
 let checkinToken = null;
+
+// ═══════════════════════════════════════════════════
+// 인트로 스플래시 — 2단계 로직
+// ═══════════════════════════════════════════════════
+let introFlag = null;
+let introCamStream = null;
+
+function pickIntroFlag(btn) {
+  document.querySelectorAll('.intro-flag-btn').forEach(b => b.classList.remove('picked'));
+  btn.classList.add('picked');
+  introFlag = btn.dataset.flag;
+  const nb = document.getElementById('introNextBtn');
+  nb.disabled = false;
+  nb.textContent = introFlag + '  다음 · Next  →';
+  const g = document.getElementById('introGamgyul');
+  g.style.animation = 'none';
+  setTimeout(() => { g.style.animation = 'gam-pop .35s cubic-bezier(.36,.07,.19,.97) both'; }, 10);
+}
+
+async function goIntroStep2() {
+  if (!introFlag) return;
+  const sel = document.getElementById('fFlag');
+  if (sel) for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === introFlag) { sel.selectedIndex = i; break; }
+  }
+  document.getElementById('introStep1').classList.add('hidden');
+  document.getElementById('introStep2').classList.remove('hidden');
+  if (checkinToken) { showQrVerified(checkinToken); return; }
+  try {
+    introCamStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 640 }, height: { ideal: 640 } }
+    });
+    const vid = document.getElementById('introCamVideo');
+    vid.srcObject = introCamStream;
+    startQrScan(vid);
+  } catch(e) {
+    document.getElementById('introQrStatus').innerHTML =
+      '카메라 접근이 거부됐어요.<br><span style="font-size:11px;color:#bbb">Camera access denied — tap Skip.</span>';
+  }
+}
+
+function startQrScan(videoEl) {
+  if (!('BarcodeDetector' in window)) {
+    document.getElementById('introQrStatus').innerHTML =
+      'QR 자동 감지 미지원 브라우저예요.<br><span style="font-size:11px;color:#bbb">Try Chrome(Android) or Safari 17+(iOS).</span>';
+    return;
+  }
+  const detector = new BarcodeDetector({ formats: ['qr_code'] });
+  let scanning = true;
+  async function scan() {
+    if (!scanning || !videoEl.srcObject) return;
+    try {
+      const codes = await detector.detect(videoEl);
+      if (codes.length > 0) {
+        const raw = codes[0].rawValue;
+        const token = raw.match(/checkin=(JB-[\w-]+)/)?.[1]
+                   || (/^JB-/.test(raw) ? raw.trim() : null);
+        if (token) {
+          scanning = false; stopCam();
+          await saveCheckin(token);
+          showQrVerified(token); return;
+        }
+      }
+    } catch(e) {}
+    requestAnimationFrame(scan);
+  }
+  scan();
+}
+
+function showQrVerified(token) {
+  document.getElementById('introCamBox').style.display = 'none';
+  document.getElementById('introQrVerified').classList.add('show');
+  document.getElementById('introQrStatus').innerHTML =
+    `✓ 인증 완료 · Verified<br><span style="font-size:12px;color:#888">코드: ${token}</span>`;
+  renderCheckinState();
+}
+
+function stopCam() {
+  if (introCamStream) { introCamStream.getTracks().forEach(t => t.stop()); introCamStream = null; }
+}
+
+function finishIntro() {
+  stopCam();
+  try { if (introFlag) localStorage.setItem('jb-intro-flag', introFlag); } catch(e) {}
+  const intro = document.getElementById('intro');
+  intro.classList.add('hide');
+  setTimeout(() => { intro.style.display = 'none'; }, 480);
+}
+
+(function checkPrevVisit() {
+  const prev = localStorage.getItem('jb-intro-flag');
+  const hasQr = new URLSearchParams(location.search).get('checkin') || location.hash.includes('checkin=');
+  if (prev && !hasQr) {
+    introFlag = prev;
+    const sel = document.getElementById('fFlag');
+    if (sel) for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === prev) { sel.selectedIndex = i; break; }
+    }
+    document.getElementById('intro').style.display = 'none';
+  }
+})();
+
+
 
 // ═══════════════════════════════════════════════════
 // 투숙인증 QR 토큰 — 한 번 인증하면 계속 유지 (영구)
