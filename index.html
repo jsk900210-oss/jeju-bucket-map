@@ -439,9 +439,9 @@
         ✅<div style="font-size:18px;font-weight:800;margin-top:8px;color:#2e9e5b">인증 완료!</div>
         <div style="font-size:12px;color:#888;margin-top:4px">Verified Guest</div>
       </div>
-      <div class="qr-status" id="introQrStatus">카메라를 QR 코드에 가까이 대주세요<br>Hold camera close to the QR code</div>
-      <button class="intro-btn-main" onclick="finishIntro()">🗺️ 지도 보러 가기 · Enter Map</button>
-      <button class="intro-btn-skip" onclick="finishIntro()">건너뛰기 · Skip</button>
+      <div class="qr-status" id="introQrStatus">게스트하우스에서 받은 QR을 스캔해야 입장 가능해요<br>Scan the check-in QR to enter</div>
+      <button class="intro-btn-main" id="introEnterBtn" onclick="finishIntro()" disabled style="background:#ddd;box-shadow:none;color:#aaa">🔒 QR 인증 후 입장 가능</button>
+      
     </div>
   </div>
 </div>
@@ -1546,6 +1546,15 @@ function showQrVerified(token) {
   document.getElementById('introQrVerified').classList.add('show');
   document.getElementById('introQrStatus').innerHTML =
     `✓ 인증 완료 · Verified<br><span style="font-size:12px;color:#888">코드: ${token}</span>`;
+  // 입장 버튼 활성화
+  const btn = document.getElementById('introEnterBtn');
+  if (btn) {
+    btn.disabled = false;
+    btn.style.background = '';
+    btn.style.boxShadow = '';
+    btn.style.color = '';
+    btn.textContent = '🗺️ 버킷 지도 입장 · Enter Map';
+  }
   renderCheckinState();
 }
 
@@ -1554,6 +1563,8 @@ function stopCam() {
 }
 
 function finishIntro() {
+  // QR 인증 없이는 입장 불가
+  if (!checkedIn) return;
   stopCam();
   try { if (introFlag) localStorage.setItem('jb-intro-flag', introFlag); } catch(e) {}
   const intro = document.getElementById('intro');
@@ -1564,7 +1575,8 @@ function finishIntro() {
 (function checkPrevVisit() {
   const prev = localStorage.getItem('jb-intro-flag');
   const hasQr = new URLSearchParams(location.search).get('checkin') || location.hash.includes('checkin=');
-  if (prev && !hasQr) {
+  // 이전 방문 + 인증 기록 둘 다 있어야 스킵
+  if (prev && !hasQr && checkedIn) {
     introFlag = prev;
     const sel = document.getElementById('fFlag');
     if (sel) for (let i = 0; i < sel.options.length; i++) {
@@ -1633,36 +1645,7 @@ function renderCheckinState() {
 }
 
 function openWriteSheet() {
-  // ── 현장 방문 1회 이상 인증 필요 ──
-  if (!checkedIn) {
-    const msg = document.createElement('div');
-    msg.style.cssText = `
-      position:fixed;inset:0;z-index:9998;
-      background:rgba(35,39,45,.72);
-      display:flex;align-items:center;justify-content:center;
-      padding:24px;
-    `;
-    msg.innerHTML = \`
-      <div style="background:white;border-radius:24px;padding:28px 24px;max-width:300px;width:100%;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.22)">
-        <div style="font-size:52px;margin-bottom:12px">🪣</div>
-        <div style="font-size:18px;font-weight:900;color:#23272d;margin-bottom:8px">현장 방문 인증이 필요해요</div>
-        <div style="font-size:13px;color:#888;line-height:1.6;margin-bottom:20px">
-          버킷메이트는 실제 방문한 분만<br>리뷰를 남길 수 있어요.<br><br>
-          게스트하우스 체크인 시 받으신<br>QR을 스캔해 주세요 🍊
-        </div>
-        <div style="font-size:12px;color:#aaa;margin-bottom:20px">
-          Visit the guesthouse to get your QR code
-        </div>
-        <button onclick="this.closest('div[style]').remove()"
-          style="width:100%;padding:14px;border-radius:14px;background:#f4841f;color:white;font-size:16px;font-weight:900;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(244,132,31,.35)">
-          확인 · OK
-        </button>
-      </div>
-    \`;
-    msg.addEventListener('click', e => { if (e.target === msg) msg.remove(); });
-    document.body.appendChild(msg);
-    return;
-  }
+
   closeSheets();
   formStars = 0;
   document.getElementById('fText').value = "";
