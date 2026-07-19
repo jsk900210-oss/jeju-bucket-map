@@ -1615,6 +1615,12 @@ async function loadCheckin() {
 }
 
 function renderCheckinState() {
+  // 탭 아이콘 업데이트
+  const writeTab = document.querySelector('[onclick*="write"]');
+  if (writeTab) {
+    const icon = writeTab.querySelector('.tab-icon');
+    if (icon) icon.textContent = checkedIn ? '✏️' : '🔒';
+  }
   const el = document.getElementById('fCheckin');
   const label = document.getElementById('checkinLabel');
   if (checkedIn) {
@@ -1627,6 +1633,36 @@ function renderCheckinState() {
 }
 
 function openWriteSheet() {
+  // ── 현장 방문 1회 이상 인증 필요 ──
+  if (!checkedIn) {
+    const msg = document.createElement('div');
+    msg.style.cssText = `
+      position:fixed;inset:0;z-index:9998;
+      background:rgba(35,39,45,.72);
+      display:flex;align-items:center;justify-content:center;
+      padding:24px;
+    `;
+    msg.innerHTML = \`
+      <div style="background:white;border-radius:24px;padding:28px 24px;max-width:300px;width:100%;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.22)">
+        <div style="font-size:52px;margin-bottom:12px">🪣</div>
+        <div style="font-size:18px;font-weight:900;color:#23272d;margin-bottom:8px">현장 방문 인증이 필요해요</div>
+        <div style="font-size:13px;color:#888;line-height:1.6;margin-bottom:20px">
+          버킷메이트는 실제 방문한 분만<br>리뷰를 남길 수 있어요.<br><br>
+          게스트하우스 체크인 시 받으신<br>QR을 스캔해 주세요 🍊
+        </div>
+        <div style="font-size:12px;color:#aaa;margin-bottom:20px">
+          Visit the guesthouse to get your QR code
+        </div>
+        <button onclick="this.closest('div[style]').remove()"
+          style="width:100%;padding:14px;border-radius:14px;background:#f4841f;color:white;font-size:16px;font-weight:900;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(244,132,31,.35)">
+          확인 · OK
+        </button>
+      </div>
+    \`;
+    msg.addEventListener('click', e => { if (e.target === msg) msg.remove(); });
+    document.body.appendChild(msg);
+    return;
+  }
   closeSheets();
   formStars = 0;
   document.getElementById('fText').value = "";
@@ -1836,6 +1872,12 @@ function switchTab(tab) {
   document.getElementById('tabBus').classList.toggle('active', tab === 'bus');
   if (tab === 'map')   { closeSheets(); }
   if (tab === 'write') { openWriteSheet(); }
+    // 리뷰 탭 아이콘: 인증 여부에 따라 변경
+    const writeTab = document.querySelector('[onclick*="write"]');
+    if (writeTab) {
+      const icon = writeTab.querySelector('.tab-icon');
+      if (icon) icon.textContent = checkedIn ? '✏️' : '🔒';
+    }
   if (tab === 'bus')   { openBusSheet(); }
 }
 
