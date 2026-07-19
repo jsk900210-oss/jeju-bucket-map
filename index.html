@@ -209,6 +209,123 @@
     padding: 9px 14px; border-radius: 8px; margin-right: 10px; cursor: pointer;
   }
 
+
+  /* ═══════════════════════════════════════
+     인트로 스플래시 화면
+  ═══════════════════════════════════════ */
+  #intro {
+    position: fixed; inset: 0; z-index: 9999;
+    background: linear-gradient(160deg, #fff7ed 0%, #fff3e0 60%, #ffe0b2 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 32px 24px;
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  #intro.hide {
+    opacity: 0; transform: scale(1.04) translateY(-12px);
+    pointer-events: none;
+  }
+
+  /* 귤 캐릭터 */
+  .intro-gamgyul {
+    font-size: 88px; line-height: 1;
+    animation: gamgyul-pop .65s cubic-bezier(.36,.07,.19,.97) both;
+    filter: drop-shadow(0 8px 24px rgba(244,132,31,.35));
+    margin-bottom: 8px;
+  }
+  @keyframes gamgyul-pop {
+    0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+    55%  { transform: scale(1.22) rotate(8deg);  opacity: 1; }
+    75%  { transform: scale(.92) rotate(-4deg); }
+    90%  { transform: scale(1.06) rotate(2deg); }
+    100% { transform: scale(1)   rotate(0deg); }
+  }
+
+  /* 파티클 뿅! */
+  .intro-burst {
+    position: absolute; font-size: 22px;
+    animation: burst .7s ease-out both;
+    pointer-events: none;
+  }
+  @keyframes burst {
+    0%   { transform: translate(0,0) scale(0); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(1.2); opacity: 0; }
+  }
+
+  .intro-title {
+    font-size: 26px; font-weight: 900; color: var(--basalt);
+    letter-spacing: -0.5px; margin: 12px 0 4px;
+    animation: fade-up .5s .4s both;
+  }
+  .intro-sub {
+    font-size: 13px; color: #888; margin-bottom: 28px;
+    animation: fade-up .5s .5s both;
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 국적 선택 */
+  .intro-flag-label {
+    font-size: 13px; font-weight: 700; color: var(--basalt);
+    margin-bottom: 10px; text-align: center;
+    animation: fade-up .5s .6s both;
+  }
+  .intro-flags {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center; max-width: 320px;
+    margin-bottom: 24px;
+    animation: fade-up .5s .7s both;
+  }
+  .intro-flag-btn {
+    font-size: 28px; background: white;
+    border: 2.5px solid transparent; border-radius: 12px;
+    padding: 6px 8px; cursor: pointer;
+    transition: transform .15s, border-color .15s, box-shadow .15s;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  }
+  .intro-flag-btn:hover  { transform: scale(1.12); }
+  .intro-flag-btn.picked {
+    border-color: var(--gamgyul);
+    box-shadow: 0 0 0 3px rgba(244,132,31,.25);
+    transform: scale(1.15);
+  }
+
+  /* QR 체크인 박스 */
+  .intro-qr-box {
+    width: 100%; max-width: 320px;
+    border: 2px dashed #e0c097; border-radius: 16px;
+    padding: 16px 20px; text-align: center;
+    background: rgba(255,255,255,.7);
+    cursor: pointer; margin-bottom: 28px;
+    transition: border-color .2s, background .2s;
+    animation: fade-up .5s .8s both;
+  }
+  .intro-qr-box:hover   { border-color: var(--gamgyul); background: white; }
+  .intro-qr-box.verified {
+    border-color: var(--verified); border-style: solid;
+    background: rgba(46,158,91,.06);
+  }
+  .intro-qr-icon { font-size: 32px; margin-bottom: 4px; }
+  .intro-qr-title { font-size: 14px; font-weight: 800; color: var(--basalt); }
+  .intro-qr-sub   { font-size: 11px; color: #999; margin-top: 2px; }
+
+  /* 시작 버튼 */
+  .intro-start {
+    width: 100%; max-width: 320px;
+    padding: 16px; border-radius: 16px;
+    background: var(--gamgyul); color: white;
+    font-size: 17px; font-weight: 900;
+    border: none; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(244,132,31,.4);
+    transition: transform .15s, box-shadow .15s;
+    animation: fade-up .5s .9s both;
+  }
+  .intro-start:hover  { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(244,132,31,.45); }
+  .intro-start:active { transform: translateY(0); }
+  .intro-start:disabled { background: #ddd; box-shadow: none; cursor: not-allowed; }
+
   /* ── 리뷰 미디어 (사진·영상) ── */
   .media-btn {
     width: 100%; border: 1.5px dashed rgba(35,39,45,.25); background: none;
@@ -337,6 +454,53 @@
 </style>
 </head>
 <body>
+<div id="intro">
+  <!-- 파티클 -->
+  <span class="intro-burst" style="top:38%;left:42%;--tx:-55px;--ty:-60px;animation-delay:.65s">✨</span>
+  <span class="intro-burst" style="top:38%;left:55%;--tx:50px;--ty:-65px;animation-delay:.7s">🎉</span>
+  <span class="intro-burst" style="top:40%;left:35%;--tx:-70px;--ty:10px;animation-delay:.68s">⭐</span>
+  <span class="intro-burst" style="top:40%;left:62%;--tx:65px;--ty:15px;animation-delay:.72s">🍊</span>
+  <span class="intro-burst" style="top:42%;left:50%;--tx:0px;--ty:70px;animation-delay:.66s">✦</span>
+
+  <div class="intro-gamgyul" id="introGamgyul">🍊</div>
+  <div class="intro-title">제주 리뷰맵</div>
+  <div class="intro-sub">Jeju Guest Review Map</div>
+
+  <div class="intro-flag-label">🌍 어느 나라에서 오셨나요? / Where are you from?</div>
+  <div class="intro-flags">
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇰🇷">🇰🇷</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇺🇸">🇺🇸</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇯🇵">🇯🇵</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇨🇳">🇨🇳</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇹🇼">🇹🇼</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇫🇷">🇫🇷</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇩🇪">🇩🇪</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇬🇧">🇬🇧</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇪🇸">🇪🇸</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇨🇦">🇨🇦</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇦🇺">🇦🇺</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇻🇳">🇻🇳</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇹🇭">🇹🇭</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇮🇩">🇮🇩</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇲🇾">🇲🇾</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇸🇬">🇸🇬</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇵🇭">🇵🇭</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇮🇳">🇮🇳</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇧🇷">🇧🇷</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇲🇽">🇲🇽</button>
+  </div>
+
+  <div class="intro-qr-box" id="introQrBox" onclick="introQrTap()">
+    <div class="intro-qr-icon" id="introQrIcon">📱</div>
+    <div class="intro-qr-title" id="introQrTitle">게스트하우스 투숙 인증 (선택)</div>
+    <div class="intro-qr-sub" id="introQrSub">QR 스캔으로 체크인하셨다면 자동 인증됩니다<br>Guest QR check-in verification (optional)</div>
+  </div>
+
+  <button class="intro-start" id="introStartBtn" onclick="finishIntro()" disabled>
+    국적을 선택해 주세요 / Select your country
+  </button>
+</div>
+
 <div id="app">
   <div id="map"></div>
 
