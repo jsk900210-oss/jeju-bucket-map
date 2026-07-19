@@ -67,6 +67,13 @@ create table if not exists public.review_media (
   created_at timestamptz not null default now()
 );
 
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('review-media', 'review-media', true, 5242880, array['image/jpeg','image/png','image/webp'])
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
 alter table public.pois enable row level security;
 alter table public.reviews enable row level security;
 alter table public.review_media enable row level security;
@@ -91,6 +98,24 @@ create policy "owners can read their own reviews"
 
 revoke insert, update, delete on public.reviews from anon, authenticated;
 revoke all on public.review_media from anon, authenticated;
+
+drop policy if exists "users upload review media to own folder" on storage.objects;
+create policy "users upload review media to own folder"
+  on storage.objects for insert
+  to authenticated
+  with check (
+    bucket_id = 'review-media'
+    and (storage.foldername(name))[1] = (select auth.uid())::text
+  );
+
+drop policy if exists "users delete review media from own folder" on storage.objects;
+create policy "users delete review media from own folder"
+  on storage.objects for delete
+  to authenticated
+  using (
+    bucket_id = 'review-media'
+    and (storage.foldername(name))[1] = (select auth.uid())::text
+  );
 
 create or replace function public.submit_review(
   p_poi_id text,
@@ -152,6 +177,56 @@ $$;
 revoke all on function public.submit_review(text,text,text,text,integer) from public, anon;
 grant execute on function public.submit_review(text,text,text,text,integer) to authenticated;
 
+create or replace function public.attach_review_media(
+  p_review_id uuid,
+  p_object_path text,
+  p_mime_type text,
+  p_size_bytes bigint
+)
+returns public.review_media
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_media public.review_media;
+begin
+  if v_user_id is null then raise exception 'authentication required'; end if;
+  if not exists (
+    select 1 from public.reviews
+    where id = p_review_id and author_id = v_user_id
+  ) then raise exception 'review ownership required'; end if;
+  if p_object_path not like v_user_id::text || '/' || p_review_id::text || '/%' then
+    raise exception 'invalid object path';
+  end if;
+  if p_mime_type not in ('image/jpeg','image/png','image/webp') then
+    raise exception 'invalid media type';
+  end if;
+  if p_size_bytes < 1 or p_size_bytes > 5242880 then raise exception 'invalid media size'; end if;
+  if (select count(*) from public.review_media where review_id = p_review_id) >= 10 then
+    raise exception 'media limit exceeded';
+  end if;
+
+  insert into public.review_media (review_id, owner_id, object_path, mime_type, size_bytes)
+  values (p_review_id, v_user_id, p_object_path, p_mime_type, p_size_bytes)
+  returning * into v_media;
+  return v_media;
+end;
+$$;
+
+revoke all on function public.attach_review_media(uuid,text,text,bigint) from public, anon;
+grant execute on function public.attach_review_media(uuid,text,text,bigint) to authenticated;
+
+drop policy if exists "approved review media are publicly readable" on public.review_media;
+create policy "approved review media are publicly readable"
+  on public.review_media for select
+  to anon, authenticated
+  using (exists (
+    select 1 from public.reviews
+    where reviews.id = review_media.review_id and reviews.status = 'approved'
+  ));
+
 do $$
 begin
   if not exists (
@@ -162,5 +237,14 @@ begin
       and tablename = 'reviews'
   ) then
     alter publication supabase_realtime add table public.reviews;
+  end if;
+  if not exists (
+    select 1
+    from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'review_media'
+  ) then
+    alter publication supabase_realtime add table public.review_media;
   end if;
 end $$;
