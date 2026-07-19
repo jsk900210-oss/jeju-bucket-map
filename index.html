@@ -217,7 +217,7 @@
   #intro.hide { opacity:0;transform:scale(1.04) translateY(-14px);pointer-events:none; }
   .intro-step { width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center; }
   .intro-step.hidden { display:none; }
-  .intro-gamgyul { font-size:96px;line-height:1;margin-bottom:8px;animation:gam-pop .65s cubic-bezier(.36,.07,.19,.97) both;filter:drop-shadow(0 8px 28px rgba(244,132,31,.38)); }
+  .intro-gamgyul { width:160px;height:160px;margin-bottom:8px; } /* 버킷메이트 GIF */
   @keyframes gam-pop { 0%{transform:scale(0) rotate(-20deg);opacity:0} 55%{transform:scale(1.25) rotate(8deg);opacity:1} 75%{transform:scale(.9) rotate(-4deg)} 90%{transform:scale(1.07) rotate(2deg)} 100%{transform:scale(1) rotate(0)} }
   .intro-burst { position:absolute;font-size:22px;pointer-events:none;animation:burst .75s ease-out both; }
   @keyframes burst { 0%{transform:translate(0,0) scale(0);opacity:1} 100%{transform:translate(var(--tx),var(--ty)) scale(1.2);opacity:0} }
@@ -383,9 +383,11 @@
   <span class="intro-burst" style="top:38%;left:64%;--tx:68px;--ty:16px;animation-delay:.73s">🍊</span>
   <span class="intro-burst" style="top:40%;left:50%;--tx:0;--ty:80px;animation-delay:.67s">✦</span>
   <div class="intro-step" id="introStep1">
-    <div class="intro-gamgyul" id="introGamgyul">🍊</div>
-    <div class="intro-title">제주 리뷰맵</div>
-    <div class="intro-sub">Jeju Guest Review Map</div>
+    <div id="introGamgyul" style="width:160px;height:160px;margin-bottom:4px">
+      <img src="assets/bucketmate_loading.gif" alt="버킷메이트 로딩" style="width:100%;height:100%;object-fit:contain">
+    </div>
+    <div class="intro-title">버킷메이트</div>
+    <div class="intro-sub">BucketMate · 여행 기록이 담기는 버킷</div>
     <div class="intro-flag-label">🌍 어느 나라에서 오셨나요?<br><span style="font-weight:400;color:#aaa;font-size:12px">Where are you from?</span></div>
     <div class="intro-flags">
       <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇰🇷">🇰🇷</button>
@@ -455,8 +457,8 @@
 
   <header>
     <div class="brand">
-      <h1>제주 리뷰맵<span class="dot">.</span></h1>
-      <span>게스트가 직접 만드는 실시간 지도 · Guest-made Live Map</span>
+      <h1>버킷메이트<span class="dot">.</span></h1>
+      <span>여행 기록이 담기는 버킷 · Travel memories in a bucket</span>
     </div>
     <div class="stat-line" id="statLine">리뷰 불러오는 중…</div>
   </header>
@@ -464,7 +466,7 @@
   <!-- 리뷰가 하나도 없을 때 보이는 빈 상태 카드 -->
   <div class="empty-card" id="emptyCard" style="display:none">
     <div class="icon">🍊</div>
-    <h3>아직 지도가 비어 있어요</h3>
+    <h3>아직 버킷이 비어 있어요 🪣</h3>
     <p>이 지도는 <b>게스트가 직접 남긴 리뷰</b>로만 채워집니다.<br>
     첫 번째 리뷰를 남기면 그 장소에<br>감귤 마커가 생겨요!</p>
   </div>
@@ -938,8 +940,8 @@ function renderMap() {
     " · <span style='color:var(--reject)'>임시 모드 — 화면을 닫으면 사라져요</span>";
   document.getElementById('statLine').innerHTML =
     reviews.length === 0
-      ? `리뷰 <b>0건</b> · 장소 ${POI.length}곳 준비됨 — 첫 리뷰를 기다리는 중${modeLabel}`
-      : `누적 리뷰 <b>${reviews.length}건</b> · 리뷰 장소 <b>${reviewedPlaces}곳</b>/${POI.length}${modeLabel}`;
+      ? `버킷이 비어있어요 🪣 · 첫 기록을 담아주세요!${modeLabel}`
+      : `🪣 버킷에 <b>${reviews.length}개</b>의 기록이 담겼어요 · <b>${reviewedPlaces}곳</b> 방문${modeLabel}`;
   document.getElementById('emptyCard').style.display =
     reviews.length === 0 ? "block" : "none";
 }
@@ -1491,9 +1493,7 @@ function pickIntroFlag(btn) {
   const nb = document.getElementById('introNextBtn');
   nb.disabled = false;
   nb.textContent = introFlag + '  다음 · Next  →';
-  const g = document.getElementById('introGamgyul');
-  g.style.animation = 'none';
-  setTimeout(() => { g.style.animation = 'gam-pop .35s cubic-bezier(.36,.07,.19,.97) both'; }, 10);
+  // GIF 애니메이션은 자동 재생
 }
 
 async function goIntroStep2() {
