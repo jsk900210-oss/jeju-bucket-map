@@ -424,25 +424,31 @@
     </div>
     <button class="intro-btn-main" id="introNextBtn" onclick="goIntroStep2()" disabled>국적을 선택해 주세요 / Select your country</button>
   </div>
+  <di  <!-- 2단계: QR 인증 안내 -->
   <div class="intro-step hidden" id="introStep2">
-    <div style="margin-bottom:16px;text-align:center;animation:fade-up .4s both">
-      <div style="font-size:22px;font-weight:900;color:var(--basalt);margin-bottom:4px">게스트하우스 QR 인증</div>
-      <div style="font-size:13px;color:#999">게스트하우스 체크인 QR을 카메라로 찍어주세요<br>Scan the check-in QR at the guesthouse</div>
+    <div style="margin-bottom:20px;text-align:center;animation:fade-up .4s both">
+      <div style="font-size:22px;font-weight:900;color:var(--basalt);margin-bottom:4px">투숙 인증</div>
+      <div style="font-size:13px;color:#999">게스트하우스 QR을 스캔하면 자동 인증돼요<br>Scan the check-in QR to verify</div>
     </div>
-
     <div class="intro-qr-wrap">
-      <div class="intro-qr-cam" id="introCamBox">
-        <video id="introCamVideo" autoplay playsinline muted></video>
-        <div class="qr-corner tl"></div><div class="qr-corner tr"></div>
-        <div class="qr-corner bl"></div><div class="qr-corner br"></div>
+      <div id="introCamBox" style="width:100%;max-width:300px;background:linear-gradient(135deg,#fff7ed,#ffe0b2);border-radius:20px;padding:32px 24px;text-align:center;margin-bottom:16px;box-shadow:0 8px 32px rgba(244,132,31,.15);animation:fade-up .4s .1s both">
+        <div style="font-size:72px;margin-bottom:16px">📱</div>
+        <div style="font-size:16px;font-weight:900;color:var(--basalt);margin-bottom:10px">스마트폰 기본 카메라로</div>
+        <div style="font-size:13px;color:#666;line-height:1.8">
+          게스트하우스 벽의<br>
+          <b style="color:#f4841f">감귤색 QR 코드</b>를<br>
+          기본 카메라 앱으로 찍으면<br>
+          자동으로 인증 완료! 🍊<br>
+          <span style="font-size:11px;color:#aaa;margin-top:8px;display:block">Scan the orange QR at the guesthouse<br>with your phone's camera app</span>
+        </div>
       </div>
       <div class="intro-qr-verified" id="introQrVerified">
-        ✅<div style="font-size:18px;font-weight:800;margin-top:8px;color:#2e9e5b">인증 완료!</div>
-        <div style="font-size:12px;color:#888;margin-top:4px">Verified Guest</div>
+        ✅
+        <div style="font-size:18px;font-weight:800;margin-top:8px;color:#2e9e5b">인증 완료!</div>
+        <div style="font-size:12px;color:#888;margin-top:4px">Verified Guest 🍊</div>
       </div>
-      <div class="qr-status" id="introQrStatus">게스트하우스에서 받은 QR을 스캔해야 입장 가능해요<br>Scan the check-in QR to enter</div>
+      <div class="qr-status" id="introQrStatus">게스트하우스 QR을 스캔해 주세요</div>
       <button class="intro-btn-main" id="introEnterBtn" onclick="finishIntro()" disabled style="background:#ddd;box-shadow:none;color:#aaa">🔒 QR 인증 후 입장 가능</button>
-      
     </div>
   </div>
 </div>
@@ -1501,17 +1507,7 @@ async function goIntroStep2() {
   document.getElementById('introStep1').classList.add('hidden');
   document.getElementById('introStep2').classList.remove('hidden');
   if (checkinToken) { showQrVerified(checkinToken); return; }
-  try {
-    introCamStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' }, width: { ideal: 640 }, height: { ideal: 640 } }
-    });
-    const vid = document.getElementById('introCamVideo');
-    vid.srcObject = introCamStream;
-    startQrScan(vid);
-  } catch(e) {
-    document.getElementById('introQrStatus').innerHTML =
-      '카메라 접근이 거부됐어요.<br><span style="font-size:11px;color:#bbb">Camera access denied — tap Skip.</span>';
-  }
+  // QR은 기본 카메라 앱으로 스캔 → URL 토큰으로 자동 인증
 }
 
 function startQrScan(videoEl) {
