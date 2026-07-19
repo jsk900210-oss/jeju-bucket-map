@@ -374,6 +374,7 @@
     .live-dot, .spin { animation: none; }
   }
 </style>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=3be57297d115dc48a31d134ae1db482e&libraries=services"></script>
 </head>
 <body>
 <div id="intro">
@@ -1827,23 +1828,61 @@ function pickPlace(id) {
 }
 
 searchInput.addEventListener('input', () => {
-  const q = searchInput.value.trim().toLowerCase();
-  document.getElementById('fPlace').value = "";          // 다시 입력하면 선택 해제
+  const q = searchInput.value.trim();
+  document.getElementById('fPlace').value = "";
   document.getElementById('placePicked').style.display = "none";
   if (!q) { suggestBox.innerHTML = ""; return; }
 
-  const norm = s => s.toLowerCase().replace(/\s+/g, "");   // 띄어쓰기 무시
+  const norm = s => s.toLowerCase().replace(/\s+/g, "");
   const nq = norm(q);
-  const hits = POI.filter(p =>
+
+  // ① 기존 POI 내부 검색
+  const poiHits = POI.filter(p =>
     norm(p.name).includes(nq) ||
     (p.alias || []).some(a => norm(a).includes(nq) || nq.includes(norm(a)))
-  ).slice(0, 6);
-  suggestBox.innerHTML = hits.length
-    ? hits.map(p =>
-        `<button class="sg-item" onclick="pickPlace('${p.id}')">${p.name}<small>${p.src}</small></button>`
-      ).join('')
-    : `<div class="sg-none">검색 결과가 없어요. 실서비스에서는 구글 플레이스 연동으로 모든 업체 검색이 가능해집니다.</div>`;
+  ).slice(0, 3);
+
+  // ② 카카오 로컬 API 검색 (제주도 반경)
+  const ps = new kakao.maps.services.Places();
+  ps.keywordSearch(q, (data, status) => {
+    let kakaoHits = [];
+    if (status === kakao.maps.services.Status.OK) {
+      // 제주도 좌표 범위 필터 (위도 33.1~33.6, 경도 126.1~126.9)
+      kakaoHits = data.filter(p => {
+        const lat = parseFloat(p.y), lng = parseFloat(p.x);
+        return lat >= 33.1 && lat <= 33.6 && lng >= 126.1 && lng <= 126.9;
+      }).slice(0, 4).map(p => ({
+        id: 'kakao_' + p.id,
+        name: p.place_name,
+        src: p.address_name || p.road_address_name || '제주도',
+        lat: parseFloat(p.y),
+        lng: parseFloat(p.x),
+        kakao: true
+      }));
+    }
+    // POI + 카카오 결과 합치기 (중복 제거)
+    const combined = [...poiHits, ...kakaoHits].slice(0, 6);
+    suggestBox.innerHTML = combined.length
+      ? combined.map(p => p.kakao
+          ? `<button class="sg-item" onclick="pickKakaoPlace('${p.id}','${p.name.replace(/'/g,"\'")}',${p.lat},${p.lng},'${p.src.replace(/'/g,"\'")}')">
+              ${p.name}<small>${p.src} 📍카카오맵</small></button>`
+          : `<button class="sg-item" onclick="pickPlace('${p.id}')">${p.name}<small>${p.src}</small></button>`
+        ).join('')
+      : '<div class="sg-empty">검색 결과가 없어요</div>';
+  }, { size: 8 });
 });
+
+// 카카오맵 검색 결과 장소 선택
+function pickKakaoPlace(id, name, lat, lng, address) {
+  document.getElementById('fPlace').value = id;
+  searchInput.value = name;
+  suggestBox.innerHTML = "";
+  const picked = document.getElementById('placePicked');
+  picked.style.display = "block";
+  picked.textContent = `✓ ${name} — ${address}`;
+  // 지도 이동
+  if (map) map.setCenter(new kakao.maps.LatLng(lat, lng));
+}
 
 document.getElementById('fFlag').innerHTML =
   FLAGS.map(f => `<option value="${f}">${f}</option>`).join('');
