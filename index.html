@@ -1577,9 +1577,21 @@ function finishIntro() {
 
 (function checkPrevVisit() {
   const prev = localStorage.getItem('jb-intro-flag');
-  const hasQr = new URLSearchParams(location.search).get('checkin') || location.hash.includes('checkin=');
-  // 이전 방문 + 인증 기록 둘 다 있어야 스킵
-  if (prev && !hasQr && checkedIn) {
+  const urlToken = new URLSearchParams(location.search).get('checkin')
+                || (location.hash.match(/checkin=([\w-]+)/) || [])[1];
+
+  // ① QR 토큰이 URL에 있으면 → 인트로 완전 스킵 + 자동 인증
+  if (urlToken && /^JB-/.test(urlToken)) {
+    introFlag = prev || '🇰🇷';
+    saveCheckin(urlToken).then(() => {
+      renderCheckinState();
+      document.getElementById('intro').style.display = 'none';
+    });
+    return;
+  }
+
+  // ② 이전 방문 + 인증 기록 둘 다 있어야 스킵
+  if (prev && checkedIn) {
     introFlag = prev;
     const sel = document.getElementById('fFlag');
     if (sel) for (let i = 0; i < sel.options.length; i++) {
