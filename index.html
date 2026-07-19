@@ -343,7 +343,7 @@
   <header>
     <div class="brand">
       <h1>제주 리뷰맵<span class="dot">.</span></h1>
-      <span>게스트가 직접 만드는 실시간 지도</span>
+      <span>게스트가 직접 만드는 실시간 지도 · Guest-made Live Map</span>
     </div>
     <div class="stat-line" id="statLine">리뷰 불러오는 중…</div>
   </header>
@@ -396,12 +396,12 @@
         <h2>리뷰 남기기</h2>
         <button class="close-btn" onclick="closeSheets()">✕</button>
       </div>
-      <div class="meta">개인정보 없이 · 닉네임만으로 참여</div>
+      <div class="meta">개인정보 없이 · 닉네임만으로 참여 · No personal info needed</div>
     </div>
     <div class="sheet-body" id="writeBody">
       <!-- 작성 폼 (JS에서 상태 관리) -->
       <div class="field">
-        <label>방문한 장소 — 업체명으로 검색</label>
+        <label>방문한 장소 / Place — 업체명으로 검색 / Search by name</label>
         <input type="text" id="fPlaceSearch" placeholder="예: 제주당, 우진해장국, 함덕…" autocomplete="off">
         <div id="placeSuggest"></div>
         <input type="hidden" id="fPlace" value="">
@@ -412,7 +412,7 @@
         <div class="media-msg" id="onsiteMsg" style="color:var(--basalt-soft)"></div>
       </div>
       <div class="field">
-        <label>닉네임 · 국적</label>
+        <label>닉네임 · 국적 / Nickname · Country</label>
         <div style="display:flex; gap:8px;">
           <input type="text" id="fNick" placeholder="닉네임" maxlength="12" style="flex:1">
           <select id="fFlag" style="width:96px"></select>
@@ -424,7 +424,7 @@
       </div>
       <div class="field">
         <label>리뷰 내용</label>
-        <textarea id="fText" placeholder="실제 방문 경험을 알려주세요 (10자 이상)" maxlength="300"></textarea>
+        <textarea id="fText" placeholder="실제 방문 경험을 알려주세요 (10자↑) · Share your experience (5+ chars)" maxlength="300"></textarea>
       </div>
       <div class="field">
         <label>사진 · 영상 (최대 10개, 영상은 30초 이하) <span id="mediaCount"></span></label>
@@ -579,7 +579,7 @@ const POI = [
   { id:"unjin",    cat:"fish", name:"운진항 방파제 (낚시)",    lat:33.2111, lng:126.2574, src:"구글 플레이스 확인 · 방파제 낚시 · 마라도 배편" },
 ];
 
-const FLAGS = ["🇰🇷","🇺🇸","🇯🇵","🇨🇳","🇹🇼","🇫🇷","🇩🇪","🇬🇧","🇪🇸","🇨🇦","🇦🇺","🇻🇳","🇹🇭","🇮🇩"];
+const FLAGS = ["🇰🇷","🇺🇸","🇯🇵","🇨🇳","🇹🇼","🇫🇷","🇩🇪","🇬🇧","🇪🇸","🇨🇦","🇦🇺","🇻🇳","🇹🇭","🇮🇩","🇲🇾","🇸🇬","🇵🇭","🇮🇳","🇧🇷","🇲🇽","🇮🇹","🇷🇺","🇳🇱","🇸🇪","🇨🇭","🇳🇿","🇭🇰","🇲🇴","🇲🇳","🌍"];
 const STORAGE_KEY = "jeju-reviews-v1";   // 모든 리뷰를 이 키 하나에 모아 저장
 const SUPABASE_URL = "https://qgkldtfmewnwjkooeygp.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_rXjjNDnelY9CQSiEmtq12A_CraIHE7Q";
@@ -1212,12 +1212,13 @@ async function uploadSupabaseMedia(reviewId) {
   const { data: userData, error: userError } = await sbClient.auth.getUser();
   if (userError || !userData.user) throw userError || new Error("authentication required");
   for (const [index, media] of formMedia.entries()) {
-    if (media.kind !== "img") throw new Error("video upload is not supported yet");
+    // 사진·영상 모두 업로드 지원
     const blob = dataUrlToBlob(media.data);
-    const path = `${userData.user.id}/${reviewId}/${crypto.randomUUID()}-${index}.jpg`;
+    const ext = media.kind === "vid" ? "mp4" : "jpg";
+      const path = `${userData.user.id}/${reviewId}/${crypto.randomUUID()}-${index}.${ext}`;
     const { error: uploadError } = await sbClient.storage
       .from("review-media")
-      .upload(path, blob, { contentType: blob.type, upsert: false });
+      .upload(path, media.kind === "vid" ? await (await fetch(media.data)).blob() : blob, { contentType: media.kind === "vid" ? "video/mp4" : blob.type, upsert: false });
     if (uploadError) throw uploadError;
     const { error: attachError } = await sbClient.rpc("attach_review_media", {
       p_review_id: reviewId,
@@ -1476,7 +1477,7 @@ async function submitReview() {
       () => checkedIn,
       "투숙 인증이 없어 반려됐어요. QR 체크인 후 다시 시도해 주세요."],
     ["스팸·광고 필터 (금칙어, 최소 길이)",
-      () => text.length >= 10 && !/(광고|홍보|dm주세요|http|www\.|팔로우)/i.test(text) && nick.length >= 1 && formStars >= 1,
+      () => text.length >= 5 && !/(광고|홍보|dm주세요|팔로우)/i.test(text) && nick.length >= 1 && formStars >= 1,
       "내용이 너무 짧거나 광고성 문구가 감지됐어요. (닉네임·별점·10자 이상 필수)"],
     ["공식 POI 대조 (장소 실존 여부)",
       () => POI.some(p => p.id === poiId),
@@ -1503,11 +1504,7 @@ async function submitReview() {
   }
 
   // ── 3단계 모두 통과 → 리뷰 DB에 저장 → 지도 갱신 ──
-  if (storageMode === "supabase" && formMedia.some(m => m.kind === "vid")) {
-    resultEl.innerHTML = `<div class="audit-result no">영상 공유는 아직 준비 중이에요.<br>
-      <span style="font-weight:500">영상을 제거한 뒤 사진과 텍스트 리뷰를 등록해 주세요.</span></div>`;
-    return;
-  }
+  // 영상 업로드 Supabase Storage 지원
 
   let revId;
   try {
