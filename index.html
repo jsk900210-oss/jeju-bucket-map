@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>제주 리뷰맵 — 게스트 여행정보 플랫폼</title>
+<title>버킷메이트 · BucketMate</title>
 <!-- Leaflet 지도 라이브러리 (오픈소스 지도 엔진) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -209,6 +209,45 @@
     padding: 9px 14px; border-radius: 8px; margin-right: 10px; cursor: pointer;
   }
 
+
+  /* ═══════════════════════════════════════
+     인트로 스플래시 — 2단계
+  ═══════════════════════════════════════ */
+  #intro { position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#fff7ed 0%,#fff3e0 60%,#ffe0b2 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px 40px;overflow-y:auto;transition:opacity .45s ease,transform .45s ease; }
+  #intro.hide { opacity:0;transform:scale(1.04) translateY(-14px);pointer-events:none; }
+  .intro-step { width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center; }
+  .intro-step.hidden { display:none; }
+  .intro-gamgyul { width:160px;height:160px;margin-bottom:8px; } /* 버킷메이트 GIF */
+  @keyframes gam-pop { 0%{transform:scale(0) rotate(-20deg);opacity:0} 55%{transform:scale(1.25) rotate(8deg);opacity:1} 75%{transform:scale(.9) rotate(-4deg)} 90%{transform:scale(1.07) rotate(2deg)} 100%{transform:scale(1) rotate(0)} }
+  .intro-burst { position:absolute;font-size:22px;pointer-events:none;animation:burst .75s ease-out both; }
+  @keyframes burst { 0%{transform:translate(0,0) scale(0);opacity:1} 100%{transform:translate(var(--tx),var(--ty)) scale(1.2);opacity:0} }
+  .intro-title { font-size:28px;font-weight:900;color:var(--basalt);letter-spacing:-.5px;margin:10px 0 2px; }
+  .intro-sub { font-size:13px;color:#999;margin-bottom:28px; }
+  @keyframes fade-up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  .intro-flag-label { font-size:14px;font-weight:800;color:var(--basalt);margin-bottom:12px;text-align:center;animation:fade-up .45s .55s both; }
+  .intro-flags { display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:28px;animation:fade-up .45s .65s both; }
+  .intro-flag-btn { font-size:30px;background:white;border:2.5px solid transparent;border-radius:14px;padding:7px 9px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.09);transition:transform .15s,border-color .15s,box-shadow .15s; }
+  .intro-flag-btn:hover { transform:scale(1.12); }
+  .intro-flag-btn.picked { border-color:var(--gamgyul);box-shadow:0 0 0 3px rgba(244,132,31,.28);transform:scale(1.18); }
+  .intro-qr-wrap { width:100%;display:flex;flex-direction:column;align-items:center;animation:fade-up .4s .1s both; }
+  .intro-qr-cam { width:100%;max-width:300px;aspect-ratio:1/1;background:#111;border-radius:20px;overflow:hidden;position:relative;margin-bottom:16px;box-shadow:0 8px 32px rgba(0,0,0,.22); }
+  .intro-qr-cam video { width:100%;height:100%;object-fit:cover;display:block; }
+  .intro-qr-cam::after { content:'';position:absolute;left:12%;right:12%;height:2.5px;background:var(--gamgyul);box-shadow:0 0 8px var(--gamgyul);animation:scan-line 2s ease-in-out infinite; }
+  @keyframes scan-line { 0%,100%{top:15%} 50%{top:82%} }
+  .qr-corner { position:absolute;width:28px;height:28px;border-color:white;border-style:solid; }
+  .qr-corner.tl { top:12px;left:12px;border-width:3px 0 0 3px;border-radius:6px 0 0 0; }
+  .qr-corner.tr { top:12px;right:12px;border-width:3px 3px 0 0;border-radius:0 6px 0 0; }
+  .qr-corner.bl { bottom:12px;left:12px;border-width:0 0 3px 3px;border-radius:0 0 0 6px; }
+  .qr-corner.br { bottom:12px;right:12px;border-width:0 3px 3px 0;border-radius:0 0 6px 0; }
+  .intro-qr-verified { width:100%;max-width:300px;aspect-ratio:1/1;background:linear-gradient(135deg,#e8f8ef,#c6f0d8);border-radius:20px;display:none;align-items:center;justify-content:center;flex-direction:column;font-size:64px;margin-bottom:16px; }
+  .intro-qr-verified.show { display:flex; }
+  .qr-status { font-size:14px;color:#555;text-align:center;margin-bottom:20px;line-height:1.6; }
+  .intro-btn-main { width:100%;padding:16px;border-radius:16px;background:var(--gamgyul);color:white;font-size:17px;font-weight:900;border:none;cursor:pointer;box-shadow:0 6px 20px rgba(244,132,31,.4);transition:transform .15s,box-shadow .15s;margin-bottom:12px; }
+  .intro-btn-main:hover { transform:translateY(-2px);box-shadow:0 10px 28px rgba(244,132,31,.45); }
+  .intro-btn-main:active { transform:translateY(0); }
+  .intro-btn-main:disabled { background:#ddd;box-shadow:none;cursor:not-allowed;color:#aaa; }
+  .intro-btn-skip { background:none;border:none;color:#aaa;font-size:13px;cursor:pointer;padding:8px;text-decoration:underline; }
+
   /* ── 리뷰 미디어 (사진·영상) ── */
   .media-btn {
     width: 100%; border: 1.5px dashed rgba(35,39,45,.25); background: none;
@@ -335,15 +374,93 @@
     .live-dot, .spin { animation: none; }
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 </head>
 <body>
+<div id="intro">
+  <span class="intro-burst" style="top:36%;left:42%;--tx:-60px;--ty:-70px;animation-delay:.66s">✨</span>
+  <span class="intro-burst" style="top:36%;left:56%;--tx:55px;--ty:-72px;animation-delay:.7s">🎉</span>
+  <span class="intro-burst" style="top:38%;left:34%;--tx:-75px;--ty:12px;animation-delay:.68s">⭐</span>
+  <span class="intro-burst" style="top:38%;left:64%;--tx:68px;--ty:16px;animation-delay:.73s">🍊</span>
+  <span class="intro-burst" style="top:40%;left:50%;--tx:0;--ty:80px;animation-delay:.67s">✦</span>
+  <div class="intro-step" id="introStep1">
+    <div id="introGamgyul" style="width:160px;height:160px;margin-bottom:4px">
+      <img src="assets/bucketmate_loading.gif" alt="버킷메이트 로딩" style="width:100%;height:100%;object-fit:contain">
+    </div>
+    <div class="intro-title">버킷메이트</div>
+    <div class="intro-sub">BucketMate · 여행 기록이 담기는 버킷</div>
+    <div class="intro-flag-label">🌍 어느 나라에서 오셨나요?<br><span style="font-weight:400;color:#aaa;font-size:12px">Where are you from?</span></div>
+    <div class="intro-flags">
+      <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇰🇷">🇰🇷</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇺🇸">🇺🇸</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇯🇵">🇯🇵</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇨🇳">🇨🇳</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇹🇼">🇹🇼</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇫🇷">🇫🇷</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇩🇪">🇩🇪</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇬🇧">🇬🇧</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇪🇸">🇪🇸</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇨🇦">🇨🇦</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇦🇺">🇦🇺</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇻🇳">🇻🇳</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇹🇭">🇹🇭</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇮🇩">🇮🇩</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇲🇾">🇲🇾</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇸🇬">🇸🇬</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇵🇭">🇵🇭</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇮🇳">🇮🇳</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇧🇷">🇧🇷</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇲🇽">🇲🇽</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇮🇹">🇮🇹</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇷🇺">🇷🇺</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇳🇱">🇳🇱</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇸🇪">🇸🇪</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇨🇭">🇨🇭</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇳🇿">🇳🇿</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇭🇰">🇭🇰</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇲🇴">🇲🇴</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🇲🇳">🇲🇳</button>
+    <button class="intro-flag-btn" onclick="pickIntroFlag(this)" data-flag="🌍">🌍</button>
+    </div>
+    <button class="intro-btn-main" id="introNextBtn" onclick="goIntroStep2()" disabled>국적을 선택해 주세요 / Select your country</button>
+  </div>
+  <di  <!-- 2단계: QR 인증 안내 -->
+  <div class="intro-step hidden" id="introStep2">
+    <div style="margin-bottom:20px;text-align:center;animation:fade-up .4s both">
+      <div style="font-size:22px;font-weight:900;color:var(--basalt);margin-bottom:4px">투숙 인증</div>
+      <div style="font-size:13px;color:#999">게스트하우스 QR을 스캔하면 자동 인증돼요<br>Scan the check-in QR to verify</div>
+    </div>
+    <div class="intro-qr-wrap">
+      <div id="introCamBox" style="width:100%;max-width:300px;background:linear-gradient(135deg,#fff7ed,#ffe0b2);border-radius:20px;padding:32px 24px;text-align:center;margin-bottom:16px;box-shadow:0 8px 32px rgba(244,132,31,.15);animation:fade-up .4s .1s both">
+        <div style="font-size:72px;margin-bottom:16px">📱</div>
+        <div style="font-size:16px;font-weight:900;color:var(--basalt);margin-bottom:10px">스마트폰 기본 카메라로</div>
+        <div style="font-size:13px;color:#666;line-height:1.8">
+          게스트하우스 벽의<br>
+          <b style="color:#f4841f">감귤색 QR 코드</b>를<br>
+          기본 카메라 앱으로 찍으면<br>
+          자동으로 인증 완료! 🍊<br>
+          <span style="font-size:11px;color:#aaa;margin-top:8px;display:block">Scan the orange QR at the guesthouse<br>with your phone's camera app</span>
+        </div>
+      </div>
+      <div class="intro-qr-verified" id="introQrVerified">
+        ✅
+        <div style="font-size:18px;font-weight:800;margin-top:8px;color:#2e9e5b">인증 완료!</div>
+        <div style="font-size:12px;color:#888;margin-top:4px">Verified Guest 🍊</div>
+      </div>
+      <div class="qr-status" id="introQrStatus">게스트하우스 QR을 스캔해 주세요</div>
+      <button class="intro-btn-main" id="introEnterBtn" onclick="finishIntro()" disabled style="background:#ddd;box-shadow:none;color:#aaa">🔒 QR 인증 후 입장 가능</button>
+    </div>
+  </div>
+</div>
+
+
 <div id="app">
   <div id="map"></div>
 
   <header>
     <div class="brand">
-      <h1>제주 리뷰맵<span class="dot">.</span></h1>
-      <span>게스트가 직접 만드는 실시간 지도</span>
+      <h1>버킷메이트<span class="dot">.</span></h1>
+      <span>여행 기록이 담기는 버킷 · Travel memories in a bucket</span>
     </div>
     <div class="stat-line" id="statLine">리뷰 불러오는 중…</div>
   </header>
@@ -351,7 +468,7 @@
   <!-- 리뷰가 하나도 없을 때 보이는 빈 상태 카드 -->
   <div class="empty-card" id="emptyCard" style="display:none">
     <div class="icon">🍊</div>
-    <h3>아직 지도가 비어 있어요</h3>
+    <h3>아직 버킷이 비어 있어요 🪣</h3>
     <p>이 지도는 <b>게스트가 직접 남긴 리뷰</b>로만 채워집니다.<br>
     첫 번째 리뷰를 남기면 그 장소에<br>감귤 마커가 생겨요!</p>
   </div>
@@ -396,12 +513,12 @@
         <h2>리뷰 남기기</h2>
         <button class="close-btn" onclick="closeSheets()">✕</button>
       </div>
-      <div class="meta">개인정보 없이 · 닉네임만으로 참여</div>
+      <div class="meta">개인정보 없이 · 닉네임만으로 참여 · No personal info needed</div>
     </div>
     <div class="sheet-body" id="writeBody">
       <!-- 작성 폼 (JS에서 상태 관리) -->
       <div class="field">
-        <label>방문한 장소 — 업체명으로 검색</label>
+        <label>방문한 장소 / Place — 업체명으로 검색 / Search by name</label>
         <input type="text" id="fPlaceSearch" placeholder="예: 제주당, 우진해장국, 함덕…" autocomplete="off">
         <div id="placeSuggest"></div>
         <input type="hidden" id="fPlace" value="">
@@ -412,7 +529,7 @@
         <div class="media-msg" id="onsiteMsg" style="color:var(--basalt-soft)"></div>
       </div>
       <div class="field">
-        <label>닉네임 · 국적</label>
+        <label>닉네임 · 국적 / Nickname · Country</label>
         <div style="display:flex; gap:8px;">
           <input type="text" id="fNick" placeholder="닉네임" maxlength="12" style="flex:1">
           <select id="fFlag" style="width:96px"></select>
@@ -424,7 +541,7 @@
       </div>
       <div class="field">
         <label>리뷰 내용</label>
-        <textarea id="fText" placeholder="실제 방문 경험을 알려주세요 (10자 이상)" maxlength="300"></textarea>
+        <textarea id="fText" placeholder="실제 방문 경험을 알려주세요 (10자↑) · Share your experience (5+ chars)" maxlength="300"></textarea>
       </div>
       <div class="field">
         <label>사진 · 영상 (최대 10개, 영상은 30초 이하) <span id="mediaCount"></span></label>
@@ -579,7 +696,7 @@ const POI = [
   { id:"unjin",    cat:"fish", name:"운진항 방파제 (낚시)",    lat:33.2111, lng:126.2574, src:"구글 플레이스 확인 · 방파제 낚시 · 마라도 배편" },
 ];
 
-const FLAGS = ["🇰🇷","🇺🇸","🇯🇵","🇨🇳","🇹🇼","🇫🇷","🇩🇪","🇬🇧","🇪🇸","🇨🇦","🇦🇺","🇻🇳","🇹🇭","🇮🇩"];
+const FLAGS = ["🇰🇷","🇺🇸","🇯🇵","🇨🇳","🇹🇼","🇫🇷","🇩🇪","🇬🇧","🇪🇸","🇨🇦","🇦🇺","🇻🇳","🇹🇭","🇮🇩","🇲🇾","🇸🇬","🇵🇭","🇮🇳","🇧🇷","🇲🇽","🇮🇹","🇷🇺","🇳🇱","🇸🇪","🇨🇭","🇳🇿","🇭🇰","🇲🇴","🇲🇳","🌍"];
 const STORAGE_KEY = "jeju-reviews-v1";   // 모든 리뷰를 이 키 하나에 모아 저장
 const SUPABASE_URL = "https://qgkldtfmewnwjkooeygp.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_rXjjNDnelY9CQSiEmtq12A_CraIHE7Q";
@@ -595,7 +712,7 @@ const sbClient = window.supabase
 //    시작할 때 실제로 써보고(프로브) 되는 단계를 자동 선택합니다.
 // ═══════════════════════════════════════════════════
 let reviews = [];              // 현재 화면이 알고 있는 전체 리뷰
-let storageMode = "memory";    // 'supabase' | 'cloud' | 'local' | 'memory'
+let storageMode = "supabase";  // Supabase 활성화    // 'supabase' | 'cloud' | 'local' | 'memory'
 let memStore = {};             // 메모리 모드용 임시 보관함
 let reviewsChannel = null;
 
@@ -825,8 +942,8 @@ function renderMap() {
     " · <span style='color:var(--reject)'>임시 모드 — 화면을 닫으면 사라져요</span>";
   document.getElementById('statLine').innerHTML =
     reviews.length === 0
-      ? `리뷰 <b>0건</b> · 장소 ${POI.length}곳 준비됨 — 첫 리뷰를 기다리는 중${modeLabel}`
-      : `누적 리뷰 <b>${reviews.length}건</b> · 리뷰 장소 <b>${reviewedPlaces}곳</b>/${POI.length}${modeLabel}`;
+      ? `버킷이 비어있어요 🪣 · 첫 기록을 담아주세요!${modeLabel}`
+      : `🪣 버킷에 <b>${reviews.length}개</b>의 기록이 담겼어요 · <b>${reviewedPlaces}곳</b> 방문${modeLabel}`;
   document.getElementById('emptyCard').style.display =
     reviews.length === 0 ? "block" : "none";
 }
@@ -1212,12 +1329,13 @@ async function uploadSupabaseMedia(reviewId) {
   const { data: userData, error: userError } = await sbClient.auth.getUser();
   if (userError || !userData.user) throw userError || new Error("authentication required");
   for (const [index, media] of formMedia.entries()) {
-    if (media.kind !== "img") throw new Error("video upload is not supported yet");
+    // 사진·영상 모두 업로드 지원
     const blob = dataUrlToBlob(media.data);
-    const path = `${userData.user.id}/${reviewId}/${crypto.randomUUID()}-${index}.jpg`;
+    const ext = media.kind === "vid" ? "mp4" : "jpg";
+      const path = `${userData.user.id}/${reviewId}/${crypto.randomUUID()}-${index}.${ext}`;
     const { error: uploadError } = await sbClient.storage
       .from("review-media")
-      .upload(path, blob, { contentType: blob.type, upsert: false });
+      .upload(path, media.kind === "vid" ? await (await fetch(media.data)).blob() : blob, { contentType: media.kind === "vid" ? "video/mp4" : blob.type, upsert: false });
     if (uploadError) throw uploadError;
     const { error: attachError } = await sbClient.rpc("attach_review_media", {
       p_review_id: reviewId,
@@ -1365,6 +1483,142 @@ let checkedIn = false;
 let checkinToken = null;
 
 // ═══════════════════════════════════════════════════
+// 인트로 스플래시 — 2단계 로직
+// ═══════════════════════════════════════════════════
+let introFlag = null;
+let introCamStream = null;
+
+function pickIntroFlag(btn) {
+  document.querySelectorAll('.intro-flag-btn').forEach(b => b.classList.remove('picked'));
+  btn.classList.add('picked');
+  introFlag = btn.dataset.flag;
+  const nb = document.getElementById('introNextBtn');
+  nb.disabled = false;
+  nb.textContent = introFlag + '  지도 입장 · Enter Map  →';
+  // GIF 애니메이션은 자동 재생
+}
+
+async function goIntroStep2() {
+  if (!introFlag) return;
+  const sel = document.getElementById('fFlag');
+  if (sel) for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === introFlag) { sel.selectedIndex = i; break; }
+  }
+  // 지도 열람은 투숙 인증 없이 허용한다. QR 인증은 리뷰 작성 단계에서만 확인한다.
+  try { localStorage.setItem('jb-intro-flag', introFlag); } catch(e) {}
+  stopCam();
+  const intro = document.getElementById('intro');
+  intro.classList.add('hide');
+  setTimeout(() => { intro.style.display = 'none'; }, 480);
+}
+
+function startQrScan(videoEl) {
+  // jsQR 라이브러리로 QR 스캔 (모든 브라우저 지원)
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  let scanning = true;
+
+  function scan() {
+    if (!scanning || !videoEl.srcObject) return;
+    if (videoEl.readyState === videoEl.HAVE_ENOUGH_DATA) {
+      canvas.width  = videoEl.videoWidth;
+      canvas.height = videoEl.videoHeight;
+      ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imgData.data, imgData.width, imgData.height, {
+        inversionAttempts: 'dontInvert'
+      });
+      if (code) {
+        const raw = code.data;
+        const token = raw.match(/checkin=(JB-[\w-]+)/)?.[1]
+                   || (/^JB-/.test(raw) ? raw.trim() : null);
+        if (token) {
+          scanning = false; stopCam();
+          saveCheckin(token).then(() => showQrVerified(token));
+          return;
+        }
+      }
+    }
+    requestAnimationFrame(scan);
+  }
+  // 비디오 재생 시작 후 스캔
+  videoEl.addEventListener('playing', () => { scanning = true; scan(); }, { once: false });
+  scan();
+}
+
+function showQrVerified(token) {
+  document.getElementById('introCamBox').style.display = 'none';
+  document.getElementById('introQrVerified').classList.add('show');
+  document.getElementById('introQrStatus').innerHTML =
+    `✓ 인증 완료 · Verified<br><span style="font-size:12px;color:#888">코드: ${token}</span>`;
+  // 입장 버튼 활성화
+  const btn = document.getElementById('introEnterBtn');
+  if (btn) {
+    btn.disabled = false;
+    btn.style.background = '';
+    btn.style.boxShadow = '';
+    btn.style.color = '';
+    btn.textContent = '🗺️ 버킷 지도 입장 · Enter Map';
+  }
+  renderCheckinState();
+}
+
+function stopCam() {
+  if (introCamStream) { introCamStream.getTracks().forEach(t => t.stop()); introCamStream = null; }
+}
+
+function finishIntro() {
+  // QR 인증 없이는 입장 불가
+  if (!checkedIn) return;
+  stopCam();
+  try { if (introFlag) localStorage.setItem('jb-intro-flag', introFlag); } catch(e) {}
+  const intro = document.getElementById('intro');
+  intro.classList.add('hide');
+  setTimeout(() => { intro.style.display = 'none'; }, 480);
+}
+
+(function checkPrevVisit() {
+  const prev = localStorage.getItem('jb-intro-flag');
+
+  // URL에서 checkin 토큰 추출
+  const urlToken = new URLSearchParams(location.search).get('checkin')
+                || (location.hash.match(/checkin=([\w-]+)/) || [])[1];
+
+  // ① QR 토큰이 URL에 있으면 → 즉시 인증 완료 + 인트로 없이 바로 입장
+  if (urlToken && /^JB-/.test(urlToken)) {
+    checkedIn    = true;
+    checkinToken = urlToken;
+    introFlag    = prev || '🇰🇷';
+    // localStorage에 즉시 저장
+    try {
+      localStorage.setItem('jb-checkin', JSON.stringify({ token: urlToken, ts: Date.now() }));
+      localStorage.setItem('jb-intro-flag', introFlag);
+    } catch(e) {}
+    // Supabase 저장은 백그라운드
+    saveCheckin(urlToken).catch(() => {});
+    // 인트로 숨기기
+    const intro = document.getElementById('intro');
+    if (intro) intro.style.display = 'none';
+    // 인증 상태 UI 업데이트
+    setTimeout(renderCheckinState, 100);
+    return;
+  }
+
+  // ② 이전 방문 기록 + 인증 완료 → 인트로 스킵
+  if (prev && checkedIn) {
+    introFlag = prev;
+    const sel = document.getElementById('fFlag');
+    if (sel) for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === prev) { sel.selectedIndex = i; break; }
+    }
+    const intro = document.getElementById('intro');
+    if (intro) intro.style.display = 'none';
+  }
+})();
+
+
+
+// ═══════════════════════════════════════════════════
 // 투숙인증 QR 토큰 — 한 번 인증하면 계속 유지 (영구)
 // ─ QR에는 [앱 주소 + 인증 토큰]이 함께 담김 (예: ?checkin=JB-2607)
 // ─ 최초 스캔 시 토큰을 이 기기의 개인 저장소에 저장
@@ -1403,6 +1657,12 @@ async function loadCheckin() {
 }
 
 function renderCheckinState() {
+  // 탭 아이콘 업데이트
+  const writeTab = document.querySelector('[onclick*="write"]');
+  if (writeTab) {
+    const icon = writeTab.querySelector('.tab-icon');
+    if (icon) icon.textContent = checkedIn ? '✏️' : '🔒';
+  }
   const el = document.getElementById('fCheckin');
   const label = document.getElementById('checkinLabel');
   if (checkedIn) {
@@ -1415,6 +1675,7 @@ function renderCheckinState() {
 }
 
 function openWriteSheet() {
+
   closeSheets();
   formStars = 0;
   document.getElementById('fText').value = "";
@@ -1476,7 +1737,7 @@ async function submitReview() {
       () => checkedIn,
       "투숙 인증이 없어 반려됐어요. QR 체크인 후 다시 시도해 주세요."],
     ["스팸·광고 필터 (금칙어, 최소 길이)",
-      () => text.length >= 10 && !/(광고|홍보|dm주세요|http|www\.|팔로우)/i.test(text) && nick.length >= 1 && formStars >= 1,
+      () => text.length >= 5 && !/(광고|홍보|dm주세요|팔로우)/i.test(text) && nick.length >= 1 && formStars >= 1,
       "내용이 너무 짧거나 광고성 문구가 감지됐어요. (닉네임·별점·10자 이상 필수)"],
     ["공식 POI 대조 (장소 실존 여부)",
       () => POI.some(p => p.id === poiId),
@@ -1503,11 +1764,7 @@ async function submitReview() {
   }
 
   // ── 3단계 모두 통과 → 리뷰 DB에 저장 → 지도 갱신 ──
-  if (storageMode === "supabase" && formMedia.some(m => m.kind === "vid")) {
-    resultEl.innerHTML = `<div class="audit-result no">영상 공유는 아직 준비 중이에요.<br>
-      <span style="font-weight:500">영상을 제거한 뒤 사진과 텍스트 리뷰를 등록해 주세요.</span></div>`;
-    return;
-  }
+  // 영상 업로드 Supabase Storage 지원
 
   let revId;
   try {
@@ -1600,23 +1857,68 @@ function pickPlace(id) {
 }
 
 searchInput.addEventListener('input', () => {
-  const q = searchInput.value.trim().toLowerCase();
-  document.getElementById('fPlace').value = "";          // 다시 입력하면 선택 해제
+  const q = searchInput.value.trim();
+  document.getElementById('fPlace').value = "";
   document.getElementById('placePicked').style.display = "none";
   if (!q) { suggestBox.innerHTML = ""; return; }
 
-  const norm = s => s.toLowerCase().replace(/\s+/g, "");   // 띄어쓰기 무시
+  const norm = s => s.toLowerCase().replace(/\s+/g, "");
   const nq = norm(q);
-  const hits = POI.filter(p =>
+
+  // ① 기존 POI 내부 검색
+  const poiHits = POI.filter(p =>
     norm(p.name).includes(nq) ||
     (p.alias || []).some(a => norm(a).includes(nq) || nq.includes(norm(a)))
-  ).slice(0, 6);
-  suggestBox.innerHTML = hits.length
-    ? hits.map(p =>
-        `<button class="sg-item" onclick="pickPlace('${p.id}')">${p.name}<small>${p.src}</small></button>`
-      ).join('')
-    : `<div class="sg-none">검색 결과가 없어요. 실서비스에서는 구글 플레이스 연동으로 모든 업체 검색이 가능해집니다.</div>`;
+  ).slice(0, 3);
+
+  // ② 카카오 로컬 REST API로 제주도 가게 검색
+  const params = new URLSearchParams({
+    query: q,
+    x: '126.5312', y: '33.3617',  // 제주도 중심
+    radius: 40000,                   // 40km 반경
+    size: 5
+  });
+  fetch(`https://dapi.kakao.com/v2/local/search/keyword.json?${params}`, {
+    headers: { 'Authorization': 'KakaoAK 77cc6ad36ed0601b1aefce43b6145119' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    const kakaoHits = (data.documents || []).map(p => ({
+      id: 'kakao_' + p.id,
+      name: p.place_name,
+      src: p.address_name || '제주도',
+      lat: parseFloat(p.y),
+      lng: parseFloat(p.x),
+      kakao: true
+    }));
+    const combined = [...poiHits, ...kakaoHits].slice(0, 6);
+    suggestBox.innerHTML = combined.length
+      ? combined.map(p => p.kakao
+          ? `<button class="sg-item" onclick="pickKakaoPlace('${p.id}','${p.name.replace(/'/g, "\\'")}','${p.lat}','${p.lng}','${p.src.replace(/'/g, "\\'")}')">
+              ${p.name}<small>${p.src} 📍카카오맵</small></button>`
+          : `<button class="sg-item" onclick="pickPlace('${p.id}')">${p.name}<small>${p.src}</small></button>`
+        ).join('')
+      : '<div class="sg-empty">검색 결과가 없어요</div>';
+  })
+  .catch(() => {
+    // REST API 실패 시 POI만 표시
+    suggestBox.innerHTML = poiHits.length
+      ? poiHits.map(p => `<button class="sg-item" onclick="pickPlace('${p.id}')">${p.name}<small>${p.src}</small></button>`).join('')
+      : '<div class="sg-empty">검색 결과가 없어요</div>';
+  });
 });
+
+// 카카오맵 검색 결과 장소 선택
+function pickKakaoPlace(id, name, lat, lng, address) {
+  document.getElementById('fPlace').value = id;
+  searchInput.value = name;
+  suggestBox.innerHTML = "";
+  const picked = document.getElementById('placePicked');
+  picked.style.display = "block";
+  picked.textContent = `✓ ${name} — ${address}`;
+  if (map) map.setCenter(new L.LatLng(parseFloat(lat), parseFloat(lng)));
+}
+
 
 document.getElementById('fFlag').innerHTML =
   FLAGS.map(f => `<option value="${f}">${f}</option>`).join('');
@@ -1628,6 +1930,12 @@ function switchTab(tab) {
   document.getElementById('tabBus').classList.toggle('active', tab === 'bus');
   if (tab === 'map')   { closeSheets(); }
   if (tab === 'write') { openWriteSheet(); }
+    // 리뷰 탭 아이콘: 인증 여부에 따라 변경
+    const writeTab = document.querySelector('[onclick*="write"]');
+    if (writeTab) {
+      const icon = writeTab.querySelector('.tab-icon');
+      if (icon) icon.textContent = checkedIn ? '✏️' : '🔒';
+    }
   if (tab === 'bus')   { openBusSheet(); }
 }
 
