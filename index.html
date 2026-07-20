@@ -1494,7 +1494,7 @@ function pickIntroFlag(btn) {
   introFlag = btn.dataset.flag;
   const nb = document.getElementById('introNextBtn');
   nb.disabled = false;
-  nb.textContent = introFlag + '  다음 · Next  →';
+  nb.textContent = introFlag + '  지도 입장 · Enter Map  →';
   // GIF 애니메이션은 자동 재생
 }
 
@@ -1504,10 +1504,12 @@ async function goIntroStep2() {
   if (sel) for (let i = 0; i < sel.options.length; i++) {
     if (sel.options[i].value === introFlag) { sel.selectedIndex = i; break; }
   }
-  document.getElementById('introStep1').classList.add('hidden');
-  document.getElementById('introStep2').classList.remove('hidden');
-  if (checkinToken) { showQrVerified(checkinToken); return; }
-  // QR은 기본 카메라 앱으로 스캔 → URL 토큰으로 자동 인증
+  // 지도 열람은 투숙 인증 없이 허용한다. QR 인증은 리뷰 작성 단계에서만 확인한다.
+  try { localStorage.setItem('jb-intro-flag', introFlag); } catch(e) {}
+  stopCam();
+  const intro = document.getElementById('intro');
+  intro.classList.add('hide');
+  setTimeout(() => { intro.style.display = 'none'; }, 480);
 }
 
 function startQrScan(videoEl) {
