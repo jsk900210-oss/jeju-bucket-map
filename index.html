@@ -1972,13 +1972,6 @@ sheets.forEach(id => {
   // ① 저장된 인증이 있으면 복원
   await loadCheckin();
   // ② QR로 들어와 URL에 새 토큰이 있으면 저장(갱신)
-  // ── 인증 기록 초기화 (테스트용 일회성 실행) ──
-  try {
-    localStorage.removeItem('jb-checkin');
-    localStorage.removeItem('jb-intro-flag');
-  } catch(e) {}
-  await kvSet('jb-checkin', null, false).catch(() => {});
-
   const urlToken = readUrlToken();
   if (urlToken) await saveCheckin(urlToken);
   // ③ 리뷰 로드 → 지도 렌더
