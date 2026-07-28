@@ -467,14 +467,14 @@
   <!-- 리뷰가 하나도 없을 때 보이는 빈 상태 카드 -->
   <div class="empty-card" id="emptyCard" style="display:none">
     <div class="icon">🍊</div>
-    <h3>아직 버킷이 비어 있어요 🪣</h3>
-    <p>이 지도는 <b>게스트가 직접 남긴 리뷰</b>로만 채워집니다.<br>
+    <h3 id="emptyTitle">아직 버킷이 비어 있어요 🪣</h3>
+    <p id="emptyDesc">이 지도는 <b>게스트가 직접 남긴 리뷰</b>로만 채워집니다.<br>
     첫 번째 리뷰를 남기면 그 장소에<br>감귤 마커가 생겨요!</p>
   </div>
 
   <div class="pipeline-note">
     <span class="shield">🛡</span>
-    <span>검수 에이전트를 통과한<br><b>실방문 인증 리뷰</b>만 표시</span>
+    <span id="pipelineNote">검수 에이전트를 통과한<br><b>실방문 인증 리뷰</b>만 표시</span>
   </div>
 
   <!-- 하단 탭바: 지도 / 리뷰 남기기(강조) / 공항버스 -->
@@ -1517,6 +1517,9 @@ const I18N = {
     deviceOnly: "이 기기에 저장됨",
     daysAgo: (n) => n === 0 ? "방금" : `${n}일 전`,
     agentNote: "검수 에이전트를 통과한 실방문 인증 리뷰만 표시",
+    emptyTitle: "아직 버킷이 비어 있어요 🪣",
+    emptyDesc: "이 지도는 <b>게스트가 직접 남긴 리뷰</b>로만 채워집니다.<br>첫 번째 리뷰를 남기면 그 장소에<br>감귤 마커가 생겨요!",
+    pipelineNote: "검수 에이전트를 통과한<br><b>실방문 인증 리뷰</b>만 표시",
     nearBus: (name, dist) => `🚌 급행151 <b>${name}</b> 정류장에서 ${dist}`,
     nearBusFar: (name, dist) => `🚌 151 노선 <b>${name}</b>에서 ${dist} — 다른 노선 환승 필요`,
   },
@@ -1535,6 +1538,9 @@ const I18N = {
     deviceOnly: "Saved on this device",
     daysAgo: (n) => n === 0 ? "just now" : `${n} day${n!==1?'s':''} ago`,
     agentNote: "Only verified visit reviews are shown",
+    emptyTitle: "The bucket is empty 🪣",
+    emptyDesc: "This map is filled only with <b>reviews left by guests</b>.<br>Leave the first review to add a location marker!",
+    pipelineNote: "Only <b>verified visit reviews</b><br>are shown on this map",
     nearBus: (name, dist) => `🚌 Express 151 · <b>${name}</b> stop · ${dist} walk`,
     nearBusFar: (name, dist) => `🚌 Route 151 · <b>${name}</b> · ${dist} away — transfer needed`,
   },
@@ -1553,6 +1559,9 @@ const I18N = {
     deviceOnly: "このデバイスに保存",
     daysAgo: (n) => n === 0 ? "たった今" : `${n}日前`,
     agentNote: "審査済みの実訪問レビューのみ表示",
+    emptyTitle: "バケットはまだ空です 🪣",
+    emptyDesc: "この地図は<b>ゲストが書いたレビュー</b>だけで埋まります。<br>最初のレビューを書いて場所マーカーを作りましょう！",
+    pipelineNote: "審査済みの<b>実訪問レビュー</b><br>のみ表示",
     nearBus: (name, dist) => `🚌 急行151 <b>${name}</b>バス停から${dist}`,
     nearBusFar: (name, dist) => `🚌 151路線 <b>${name}</b>から${dist} — 乗り換え必要`,
   },
@@ -1571,6 +1580,9 @@ const I18N = {
     deviceOnly: "已保存到此设备",
     daysAgo: (n) => n === 0 ? "刚刚" : `${n}天前`,
     agentNote: "仅显示经过审核的实地访问评论",
+    emptyTitle: "桶还是空的 🪣",
+    emptyDesc: "此地图仅由<b>客人留下的评论</b>填充。<br>留下第一条评论，地图上就会出现位置标记！",
+    pipelineNote: "仅显示经过审核的<br><b>实地访问评论</b>",
     nearBus: (name, dist) => `🚌 快线151 <b>${name}</b>站 · 步行${dist}`,
     nearBusFar: (name, dist) => `🚌 151路 <b>${name}</b>站 · ${dist} — 需要换乘`,
   },
@@ -1648,6 +1660,14 @@ function applyLang(flag) {
   // 통계줄 빈 상태
   const emptyCard = document.querySelector('.empty-card h3');
   if (emptyCard) emptyCard.textContent = LANG.emptyBucket || emptyCard.textContent;
+
+  // 빈 버킷 카드
+  const emptyTitle = document.getElementById('emptyTitle');
+  if (emptyTitle && LANG.emptyTitle) emptyTitle.innerHTML = LANG.emptyTitle;
+  const emptyDesc = document.getElementById('emptyDesc');
+  if (emptyDesc && LANG.emptyDesc) emptyDesc.innerHTML = LANG.emptyDesc;
+  const pipelineNote = document.getElementById('pipelineNote');
+  if (pipelineNote && LANG.pipelineNote) pipelineNote.innerHTML = LANG.pipelineNote;
 
   try { localStorage.setItem('jb-lang', flag); } catch(e) {}
 }
