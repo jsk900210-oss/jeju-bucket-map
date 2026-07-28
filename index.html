@@ -1753,51 +1753,16 @@ function finishIntro() {
 }
 
 (function checkPrevVisit() {
-  // 저장된 언어 먼저 적용
-  try {
-    const savedLang = localStorage.getItem('jb-lang');
-    if (savedLang) applyLang(savedLang);
-  } catch(e) {}
-  const prev = localStorage.getItem('jb-intro-flag');
-
-  // URL에서 checkin 토큰 추출
-  const urlToken = new URLSearchParams(location.search).get('checkin')
-                || (location.hash.match(/checkin=([\w-]+)/) || [])[1];
-
-  // ① QR 토큰이 URL에 있으면 → 즉시 인증 완료 + 인트로 없이 바로 입장
-  if (urlToken && /^JB-/.test(urlToken)) {
-    checkedIn    = true;
-    checkinToken = urlToken;
-    introFlag    = prev || '🇰🇷';
-    applyLang(introFlag);
-    // localStorage에 즉시 저장
-    try {
-      localStorage.setItem('jb-checkin', JSON.stringify({ token: urlToken, ts: Date.now() }));
-      localStorage.setItem('jb-intro-flag', introFlag);
-    } catch(e) {}
-    // Supabase 저장은 백그라운드
-    saveCheckin(urlToken).catch(() => {});
-    // 인트로 숨기기
-    const intro = document.getElementById('intro');
-    if (intro) intro.style.display = 'none';
-    // 인증 상태 UI 업데이트
-    setTimeout(renderCheckinState, 100);
-    return;
-  }
-
-  // ② 이전 방문 기록 + 인증 완료 → 인트로 스킵
-  if (prev && checkedIn) {
-    introFlag = prev;
-    applyLang(prev);
-    const sel = document.getElementById('fFlag');
-    if (sel) for (let i = 0; i < sel.options.length; i++) {
-      if (sel.options[i].value === prev) { sel.selectedIndex = i; break; }
-    }
-    const intro = document.getElementById('intro');
-    if (intro) intro.style.display = 'none';
+  // 모든 접속은 인트로에서 시작한다.
+  // 저장된 언어·투숙 인증·QR URL이 있어도 인트로를 자동으로 건너뛰지 않는다.
+  // 사용자가 국기를 다시 선택하면 goIntroStep2()에서 해당 언어를 적용한다.
+  introFlag = null;
+  const intro = document.getElementById('intro');
+  if (intro) {
+    intro.style.display = 'flex';
+    intro.classList.remove('hide');
   }
 })();
-
 
 
 // ═══════════════════════════════════════════════════
