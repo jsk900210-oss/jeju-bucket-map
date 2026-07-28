@@ -1482,6 +1482,130 @@ let formStars = 0;
 let checkedIn = false;
 let checkinToken = null;
 
+
+// ═══════════════════════════════════════════════════
+// 다국어 지원 (i18n)
+// ═══════════════════════════════════════════════════
+const I18N = {
+  "🇰🇷": {
+    appName: "버킷메이트", appSub: "여행 기록이 담기는 버킷",
+    tabMap: "지도", tabWrite: "리뷰 남기기", tabBus: "공항버스",
+    writeTitle: "리뷰 남기기", writeSub: "개인정보 없이 · 닉네임만으로 참여",
+    placeLabel: "방문한 장소 / Place — 업체명으로 검색", placePH: "업체명 검색...",
+    nickLabel: "닉네임", starLabel: "별점", textPH: "실제 방문 경험을 알려주세요 (5자↑)",
+    submitBtn: "리뷰 등록", noResult: "검색 결과가 없어요",
+    emptyBucket: "아직 버킷이 비어 있어요 🪣",
+    statFmt: (n, p) => `🪣 버킷에 <b>${n}개</b>의 기록이 담겼어요 · <b>${p}곳</b> 방문`,
+  },
+  "🇺🇸": {
+    appName: "BucketMate", appSub: "Travel memories in a bucket",
+    tabMap: "Map", tabWrite: "Write Review", tabBus: "Airport Bus",
+    writeTitle: "Write a Review", writeSub: "No personal info · Just a nickname",
+    placeLabel: "Place — Search by name", placePH: "Search place...",
+    nickLabel: "Nickname", starLabel: "Rating", textPH: "Share your experience (5+ chars)",
+    submitBtn: "Submit", noResult: "No results found",
+    emptyBucket: "The bucket is empty 🪣",
+    statFmt: (n, p) => `🪣 <b>${n}</b> reviews · <b>${p}</b> places visited`,
+  },
+  "🇯🇵": {
+    appName: "バケットメイト", appSub: "旅の記憶をバケットに",
+    tabMap: "地図", tabWrite: "レビュー", tabBus: "空港バス",
+    writeTitle: "レビューを書く", writeSub: "個人情報不要 · ニックネームのみ",
+    placeLabel: "訪問場所 — 店名で検索", placePH: "店名を検索...",
+    nickLabel: "ニックネーム", starLabel: "評価", textPH: "体験を教えてください (5文字以上)",
+    submitBtn: "投稿", noResult: "検索結果がありません",
+    emptyBucket: "バケットはまだ空です 🪣",
+    statFmt: (n, p) => `🪣 <b>${n}件</b>の記録 · <b>${p}か所</b>訪問`,
+  },
+  "🇨🇳": {
+    appName: "桶伴", appSub: "把旅行记忆装进桶里",
+    tabMap: "地图", tabWrite: "写评论", tabBus: "机场巴士",
+    writeTitle: "写评论", writeSub: "无需个人信息 · 只需昵称",
+    placeLabel: "访问地点 — 按名称搜索", placePH: "搜索地点...",
+    nickLabel: "昵称", starLabel: "评分", textPH: "分享您的体验 (5字以上)",
+    submitBtn: "提交", noResult: "未找到结果",
+    emptyBucket: "桶还是空的 🪣",
+    statFmt: (n, p) => `🪣 <b>${n}条</b>记录 · 访问<b>${p}处</b>`,
+  },
+  "🇹🇼": {
+    appName: "桶伴", appSub: "把旅行記憶裝進桶裡",
+    tabMap: "地圖", tabWrite: "寫評論", tabBus: "機場巴士",
+    writeTitle: "寫評論", writeSub: "無需個人資訊 · 只需暱稱",
+    placeLabel: "訪問地點 — 按名稱搜尋", placePH: "搜尋地點...",
+    nickLabel: "暱稱", starLabel: "評分", textPH: "分享您的體驗 (5字以上)",
+    submitBtn: "提交", noResult: "未找到結果",
+    emptyBucket: "桶還是空的 🪣",
+    statFmt: (n, p) => `🪣 <b>${n}條</b>記錄 · 訪問<b>${p}處</b>`,
+  },
+  "🇻🇳": {
+    appName: "BucketMate", appSub: "Lưu ký ức du lịch vào xô",
+    tabMap: "Bản đồ", tabWrite: "Viết đánh giá", tabBus: "Xe buýt sân bay",
+    writeTitle: "Viết đánh giá", writeSub: "Không cần thông tin cá nhân",
+    placeLabel: "Địa điểm — Tìm theo tên", placePH: "Tìm địa điểm...",
+    nickLabel: "Biệt danh", starLabel: "Đánh giá", textPH: "Chia sẻ trải nghiệm (5+ ký tự)",
+    submitBtn: "Gửi", noResult: "Không tìm thấy kết quả",
+    emptyBucket: "Xô còn trống 🪣",
+    statFmt: (n, p) => `🪣 <b>${n}</b> đánh giá · <b>${p}</b> địa điểm`,
+  },
+  "🇹🇭": {
+    appName: "BucketMate", appSub: "เก็บความทรงจำการเดินทาง",
+    tabMap: "แผนที่", tabWrite: "เขียนรีวิว", tabBus: "รถบัสสนามบิน",
+    writeTitle: "เขียนรีวิว", writeSub: "ไม่ต้องใช้ข้อมูลส่วนตัว",
+    placeLabel: "สถานที่ — ค้นหาชื่อ", placePH: "ค้นหาสถานที่...",
+    nickLabel: "ชื่อเล่น", starLabel: "คะแนน", textPH: "แบ่งปันประสบการณ์ (5+ ตัวอักษร)",
+    submitBtn: "ส่ง", noResult: "ไม่พบผลลัพธ์",
+    emptyBucket: "บัคเก็ตยังว่างอยู่ 🪣",
+    statFmt: (n, p) => `🪣 <b>${n}</b> รีวิว · <b>${p}</b> สถานที่`,
+  },
+};
+// 영어권 국기 모두 영어로
+["🇬🇧","🇦🇺","🇨🇦","🇳🇿","🇸🇬","🌍"].forEach(f => I18N[f] = I18N["🇺🇸"]);
+// 인도네시아/말레이/필리핀/인도/브라질/멕시코/이탈리아/러시아/네덜란드/스웨덴/스위스/홍콩/마카오/몽골
+["🇮🇩","🇲🇾","🇵🇭"].forEach(f => I18N[f] = {...I18N["🇺🇸"]});
+["🇫🇷","🇩🇪","🇪🇸","🇮🇳","🇧🇷","🇲🇽","🇮🇹","🇷🇺","🇳🇱","🇸🇪","🇨🇭"].forEach(f => I18N[f] = {...I18N["🇺🇸"]});
+["🇭🇰","🇲🇴"].forEach(f => I18N[f] = {...I18N["🇨🇳"]});
+I18N["🇲🇳"] = {...I18N["🇺🇸"]};
+
+let LANG = I18N["🇰🇷"]; // 기본값: 한국어
+
+function applyLang(flag) {
+  LANG = I18N[flag] || I18N["🇺🇸"];
+
+  // 앱 이름/부제목
+  const h1 = document.querySelector('h1');
+  if (h1) h1.innerHTML = LANG.appName + '<span class="dot">.</span>';
+  const sub = document.getElementById('statLine');
+  if (sub) sub.textContent = LANG.appSub;
+
+  // 하단 탭
+  const tabs = document.querySelectorAll('.tabbar button .tab-label');
+  if (tabs[0]) tabs[0].textContent = LANG.tabMap;
+  if (tabs[1]) tabs[1].textContent = LANG.tabWrite;
+  if (tabs[2]) tabs[2].textContent = LANG.tabBus;
+
+  // 리뷰 폼
+  const wTitle = document.querySelector('#writeSheet h2');
+  if (wTitle) wTitle.textContent = LANG.writeTitle;
+  const wSub = document.querySelector('#writeSheet .sheet-sub');
+  if (wSub) wSub.textContent = LANG.writeSub;
+  const placeL = document.querySelector('label[for="fPlaceSearch"]');
+  if (placeL) placeL.textContent = LANG.placeLabel;
+  const placeInput = document.getElementById('fPlaceSearch');
+  if (placeInput) placeInput.placeholder = LANG.placePH;
+  const nickL = document.querySelector('label[for="fNick"]');
+  if (nickL) nickL.textContent = LANG.nickLabel;
+  const starL = document.querySelector('label[for="fStar"]');
+  if (starL) starL.textContent = LANG.starLabel;
+  const textArea = document.getElementById('fText');
+  if (textArea) textArea.placeholder = LANG.textPH;
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) submitBtn.textContent = LANG.submitBtn;
+
+  // 저장
+  try { localStorage.setItem('jb-lang', flag); } catch(e) {}
+}
+
+
 // ═══════════════════════════════════════════════════
 // 인트로 스플래시 — 2단계 로직
 // ═══════════════════════════════════════════════════
@@ -1568,16 +1692,22 @@ function stopCam() {
 }
 
 function finishIntro() {
-  // QR 인증 없이는 입장 불가
   if (!checkedIn) return;
   stopCam();
   try { if (introFlag) localStorage.setItem('jb-intro-flag', introFlag); } catch(e) {}
+  // 선택한 국기 언어 적용
+  if (introFlag) applyLang(introFlag);
   const intro = document.getElementById('intro');
   intro.classList.add('hide');
   setTimeout(() => { intro.style.display = 'none'; }, 480);
 }
 
 (function checkPrevVisit() {
+  // 저장된 언어 먼저 적용
+  try {
+    const savedLang = localStorage.getItem('jb-lang');
+    if (savedLang) applyLang(savedLang);
+  } catch(e) {}
   const prev = localStorage.getItem('jb-intro-flag');
 
   // URL에서 checkin 토큰 추출
