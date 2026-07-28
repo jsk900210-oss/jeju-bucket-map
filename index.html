@@ -2097,12 +2097,20 @@ searchInput.addEventListener('input', () => {
   });
   fetch(`https://qgkldtfmewnwjkooeygp.supabase.co/functions/v1/kakao-search?${params}`, {
     headers: {
-      'Authorization': 'Bearer sb_publishable_rXjjNDnelY9CQSiEmtq12A_CraIHE7Q',
       'apikey': 'sb_publishable_rXjjNDnelY9CQSiEmtq12A_CraIHE7Q'
     }
   })
-  .then(r => r.json())
+  .then(async r => {
+    if (!r.ok) {
+      const errData = await r.json().catch(() => ({}));
+      suggestBox.innerHTML = `<div class="sg-empty" style="color:#e53e3e">⚠️ 검색 서버 연결 오류 (${r.status})</div>`;
+      console.error('kakao-search 오류:', r.status, errData);
+      return null;
+    }
+    return r.json();
+  })
   .then(data => {
+    if (!data) return;
     const kakaoHits = (data.documents || []).map(p => ({
       id: 'kakao_' + p.id,
       name: p.place_name,
@@ -2136,7 +2144,7 @@ function pickKakaoPlace(id, name, lat, lng, address) {
   const picked = document.getElementById('placePicked');
   picked.style.display = "block";
   picked.textContent = `✓ ${name} — ${address}`;
-  if (map) map.setCenter(new L.LatLng(parseFloat(lat), parseFloat(lng)));
+  if (map) map.setView([parseFloat(lat), parseFloat(lng)], 15);
 }
 
 
