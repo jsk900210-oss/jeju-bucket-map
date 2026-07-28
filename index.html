@@ -938,7 +938,7 @@ function renderMap() {
   // 상단 통계 + 빈 상태 카드 갱신
   const modeLabel =
     storageMode === "cloud"  ? "" :
-    storageMode === "local"  ? " · <span style='color:var(--sea)'>이 기기에 저장됨</span>" :
+    storageMode === "local"  ? ` · <span style='color:var(--sea)'>${LANG.deviceOnly||'이 기기에 저장됨</span>" :
     " · <span style='color:var(--reject)'>임시 모드 — 화면을 닫으면 사라져요</span>";
   document.getElementById('statLine').innerHTML =
     reviews.length === 0
@@ -1226,16 +1226,16 @@ function openViewSheet(poi) {
   const list = reviewsOf(poi.id);
   document.getElementById('placeName').textContent = poi.name;
   document.getElementById('placeMeta').innerHTML =
-    `<span class="live-dot"></span>실시간 리뷰 ${list.length}건 · 📍 현장 인증 리뷰 우선 노출`;
+    `<span class="live-dot"></span>${(LANG.reviewCount||((n)=>`실시간 리뷰 ${n}건`))(list.length)} · 📍 ${LANG.certifiedOnly||"현장 인증 리뷰 우선 노출"}`;
 
   // 가장 가까운 151번 정류장 계산 → 버스 접근성 안내
   const ns = nearestStop(poi.lat, poi.lng);
   const busLine2 =
-    ns.d <= 1000 ? `🚌 급행151 <b>${ns.name}</b> 정류장에서 도보 ${fmtDist(ns.d)}` :
+    ns.d <= 1000 ? (LANG.nearBus ? LANG.nearBus(ns.name, `도보 ${fmtDist(ns.d)}`) : `🚌 급행151 <b>${ns.name}</b> 정류장에서 도보 ${fmtDist(ns.d)}`) :
     ns.d <= 4000 ? `🚌 급행151 <b>${ns.name}</b> 정류장에서 ${fmtDist(ns.d)} (택시·자전거 권장)` :
     `🚌 151 노선 <b>${ns.name}</b>에서 ${fmtDist(ns.d)} — 다른 노선 환승 필요`;
   document.getElementById('placeOfficial').innerHTML =
-    `✓ 장소 정보: ${poi.src}<br>${busLine2}`;
+    `✓ ${LANG.placeInfo||"장소 정보"}: ${poi.src}<br>${busLine2}`;
   document.getElementById('reviewList').innerHTML = list.map(r => `
     <div class="review">
       <div class="top">
@@ -1507,11 +1507,19 @@ const I18N = {
     appName: "버킷메이트", appSub: "여행 기록이 담기는 버킷",
     tabMap: "지도", tabWrite: "리뷰 남기기", tabBus: "공항버스",
     writeTitle: "리뷰 남기기", writeSub: "개인정보 없이 · 닉네임만으로 참여",
-    placeLabel: "방문한 장소 / Place — 업체명으로 검색", placePH: "업체명 검색...",
+    placeLabel: "방문한 장소 — 업체명으로 검색", placePH: "업체명 검색...",
     nickLabel: "닉네임", starLabel: "별점", textPH: "실제 방문 경험을 알려주세요 (5자↑)",
     submitBtn: "리뷰 등록", noResult: "검색 결과가 없어요",
     emptyBucket: "아직 버킷이 비어 있어요 🪣",
     statFmt: (n, p) => `🪣 버킷에 <b>${n}개</b>의 기록이 담겼어요 · <b>${p}곳</b> 방문`,
+    reviewCount: (n) => `실시간 리뷰 ${n}건`,
+    certifiedOnly: "현장 인증 리뷰 우선 노출",
+    placeInfo: "장소 정보",
+    deviceOnly: "이 기기에 저장됨",
+    daysAgo: (n) => n === 0 ? "방금" : `${n}일 전`,
+    agentNote: "검수 에이전트를 통과한 실방문 인증 리뷰만 표시",
+    nearBus: (name, dist) => `🚌 급행151 <b>${name}</b> 정류장에서 ${dist}`,
+    nearBusFar: (name, dist) => `🚌 151 노선 <b>${name}</b>에서 ${dist} — 다른 노선 환승 필요`,
   },
   "🇺🇸": {
     appName: "BucketMate", appSub: "Travel memories in a bucket",
@@ -1522,6 +1530,14 @@ const I18N = {
     submitBtn: "Submit", noResult: "No results found",
     emptyBucket: "The bucket is empty 🪣",
     statFmt: (n, p) => `🪣 <b>${n}</b> reviews · <b>${p}</b> places visited`,
+    reviewCount: (n) => `${n} real-time review${n!==1?'s':''}`,
+    certifiedOnly: "Verified visit reviews shown first",
+    placeInfo: "Place info",
+    deviceOnly: "Saved on this device",
+    daysAgo: (n) => n === 0 ? "just now" : `${n} day${n!==1?'s':''} ago`,
+    agentNote: "Only verified visit reviews are shown",
+    nearBus: (name, dist) => `🚌 Express 151 · <b>${name}</b> stop · ${dist} walk`,
+    nearBusFar: (name, dist) => `🚌 Route 151 · <b>${name}</b> · ${dist} away — transfer needed`,
   },
   "🇯🇵": {
     appName: "バケットメイト", appSub: "旅の記憶をバケットに",
@@ -1532,6 +1548,14 @@ const I18N = {
     submitBtn: "投稿", noResult: "検索結果がありません",
     emptyBucket: "バケットはまだ空です 🪣",
     statFmt: (n, p) => `🪣 <b>${n}件</b>の記録 · <b>${p}か所</b>訪問`,
+    reviewCount: (n) => `リアルタイムレビュー ${n}件`,
+    certifiedOnly: "現地認証レビュー優先表示",
+    placeInfo: "場所情報",
+    deviceOnly: "このデバイスに保存",
+    daysAgo: (n) => n === 0 ? "たった今" : `${n}日前`,
+    agentNote: "審査済みの実訪問レビューのみ表示",
+    nearBus: (name, dist) => `🚌 急行151 <b>${name}</b>バス停から${dist}`,
+    nearBusFar: (name, dist) => `🚌 151路線 <b>${name}</b>から${dist} — 乗り換え必要`,
   },
   "🇨🇳": {
     appName: "桶伴", appSub: "把旅行记忆装进桶里",
@@ -1542,6 +1566,14 @@ const I18N = {
     submitBtn: "提交", noResult: "未找到结果",
     emptyBucket: "桶还是空的 🪣",
     statFmt: (n, p) => `🪣 <b>${n}条</b>记录 · 访问<b>${p}处</b>`,
+    reviewCount: (n) => `实时评论 ${n}条`,
+    certifiedOnly: "优先显示现场认证评论",
+    placeInfo: "地点信息",
+    deviceOnly: "已保存到此设备",
+    daysAgo: (n) => n === 0 ? "刚刚" : `${n}天前`,
+    agentNote: "仅显示经过审核的实地访问评论",
+    nearBus: (name, dist) => `🚌 快线151 <b>${name}</b>站 · 步行${dist}`,
+    nearBusFar: (name, dist) => `🚌 151路 <b>${name}</b>站 · ${dist} — 需要换乘`,
   },
   "🇹🇼": {
     appName: "桶伴", appSub: "把旅行記憶裝進桶裡",
@@ -1609,6 +1641,14 @@ function applyLang(flag) {
   setQ('label[for="fStar"]',   LANG.starLabel);
   setPH('fText', LANG.textPH);
   set('submitBtn', LANG.submitBtn);
+
+  // 지도 체크박스 안내
+  const agentNote = document.querySelector('.filter-label');
+  if (agentNote) agentNote.textContent = LANG.agentNote || agentNote.textContent;
+
+  // 통계줄 빈 상태
+  const emptyCard = document.querySelector('.empty-card h3');
+  if (emptyCard) emptyCard.textContent = LANG.emptyBucket || emptyCard.textContent;
 
   try { localStorage.setItem('jb-lang', flag); } catch(e) {}
 }
