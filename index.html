@@ -459,7 +459,7 @@
 
   <header>
     <div class="brand">
-      <h1>버킷메이트<span class="dot">.</span></h1>
+      <h1 id="appTitle">버킷메이트<span class="dot">.</span></h1>
       <span>여행 기록이 담기는 버킷 · Travel memories in a bucket</span>
     </div>
     <div class="stat-line" id="statLine">리뷰 불러오는 중…</div>
@@ -481,13 +481,13 @@
   <!-- 하단 탭바: 지도 / 리뷰 남기기(강조) / 공항버스 -->
   <nav class="tabbar">
     <button class="tab active" id="tabMap" onclick="switchTab('map')">
-      <span class="t-ico">🗺️</span>지도
+      <span class="t-ico">🗺️</span><span id="lblMap">지도</span>
     </button>
-    <button class="tab primary" onclick="switchTab('write')">
-      <span class="t-ico">✏️</span>리뷰 남기기
+    <button class="tab primary" id="tabWrite" onclick="switchTab('write')">
+      <span class="t-ico">✏️</span><span id="lblWrite">리뷰 남기기</span>
     </button>
     <button class="tab" id="tabBus" onclick="switchTab('bus')">
-      <span class="t-ico">🚌</span>공항버스
+      <span class="t-ico">🚌</span><span id="lblBus">공항버스</span>
     </button>
   </nav>
 
@@ -1570,38 +1570,30 @@ let LANG = I18N["🇰🇷"]; // 기본값: 한국어
 
 function applyLang(flag) {
   LANG = I18N[flag] || I18N["🇺🇸"];
+  const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  const setPH = (id, txt) => { const el = document.getElementById(id); if (el) el.placeholder = txt; };
+  const setHTML = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+  const setQ = (sel, txt) => { const el = document.querySelector(sel); if (el) el.textContent = txt; };
 
-  // 앱 이름/부제목
-  const h1 = document.querySelector('h1');
-  if (h1) h1.innerHTML = LANG.appName + '<span class="dot">.</span>';
-  const sub = document.getElementById('statLine');
-  if (sub) sub.textContent = LANG.appSub;
+  // 앱 이름
+  setHTML('appTitle', LANG.appName + '<span class="dot">.</span>');
+  set('statLine', LANG.appSub);
 
-  // 하단 탭
-  const tabs = document.querySelectorAll('.tabbar button .tab-label');
-  if (tabs[0]) tabs[0].textContent = LANG.tabMap;
-  if (tabs[1]) tabs[1].textContent = LANG.tabWrite;
-  if (tabs[2]) tabs[2].textContent = LANG.tabBus;
+  // 탭바
+  set('lblMap',   LANG.tabMap);
+  set('lblWrite', LANG.tabWrite);
+  set('lblBus',   LANG.tabBus);
 
   // 리뷰 폼
-  const wTitle = document.querySelector('#writeSheet h2');
-  if (wTitle) wTitle.textContent = LANG.writeTitle;
-  const wSub = document.querySelector('#writeSheet .sheet-sub');
-  if (wSub) wSub.textContent = LANG.writeSub;
-  const placeL = document.querySelector('label[for="fPlaceSearch"]');
-  if (placeL) placeL.textContent = LANG.placeLabel;
-  const placeInput = document.getElementById('fPlaceSearch');
-  if (placeInput) placeInput.placeholder = LANG.placePH;
-  const nickL = document.querySelector('label[for="fNick"]');
-  if (nickL) nickL.textContent = LANG.nickLabel;
-  const starL = document.querySelector('label[for="fStar"]');
-  if (starL) starL.textContent = LANG.starLabel;
-  const textArea = document.getElementById('fText');
-  if (textArea) textArea.placeholder = LANG.textPH;
-  const submitBtn = document.getElementById('submitBtn');
-  if (submitBtn) submitBtn.textContent = LANG.submitBtn;
+  setQ('#writeSheet h2',       LANG.writeTitle);
+  setQ('#writeSheet .sheet-sub', LANG.writeSub);
+  setQ('label[for="fPlaceSearch"]', LANG.placeLabel);
+  setPH('fPlaceSearch', LANG.placePH);
+  setQ('label[for="fNick"]',   LANG.nickLabel);
+  setQ('label[for="fStar"]',   LANG.starLabel);
+  setPH('fText', LANG.textPH);
+  set('submitBtn', LANG.submitBtn);
 
-  // 저장
   try { localStorage.setItem('jb-lang', flag); } catch(e) {}
 }
 
@@ -1750,6 +1742,45 @@ function finishIntro() {
 
 // ═══════════════════════════════════════════════════
 // 투숙인증 QR 토큰 — 한 번 인증하면 계속 유지 (영구)
+
+// ─ 리뷰 자동 번역 ─
+async function translateText(text, targetLang) {
+  if (!targetLang || targetLang === 'ko') return text;
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data[0].map(d => d[0]).join('');
+  } catch(e) { return text; }
+}
+
+// 국기 → Google Translate 언어코드 매핑
+const LANG_CODE = {
+  "🇰🇷":"ko","🇺🇸":"en","🇬🇧":"en","🇦🇺":"en","🇨🇦":"en","🇳🇿":"en","🇸🇬":"en",
+  "🇯🇵":"ja","🇨🇳":"zh-CN","🇹🇼":"zh-TW","🇭🇰":"zh-TW","🇲🇴":"zh-TW",
+  "🇻🇳":"vi","🇹🇭":"th","🇮🇩":"id","🇲🇾":"ms","🇵🇭":"tl",
+  "🇫🇷":"fr","🇩🇪":"de","🇪🇸":"es","🇮🇹":"it","🇷🇺":"ru",
+  "🇳🇱":"nl","🇸🇪":"sv","🇮🇳":"hi","🇧🇷":"pt","🇲🇽":"es","🌍":"en"
+};
+
+function getLangCode() {
+  const flag = introFlag || localStorage.getItem('jb-lang') || '🇰🇷';
+  return LANG_CODE[flag] || 'en';
+}
+
+// 리뷰 카드 렌더링 시 번역 적용
+async function translateReviewCard(el, text) {
+  const langCode = getLangCode();
+  if (langCode === 'ko') return; // 한국어면 번역 불필요
+  const translated = await translateText(text, langCode);
+  if (translated && translated !== text) {
+    const textEl = el.querySelector('.rv-text');
+    if (textEl) {
+      textEl.innerHTML = `${translated}<br><small style="color:#aaa;font-size:11px">🌐 번역됨</small>`;
+    }
+  }
+}
+
 // ─ QR에는 [앱 주소 + 인증 토큰]이 함께 담김 (예: ?checkin=JB-2607)
 // ─ 최초 스캔 시 토큰을 이 기기의 개인 저장소에 저장
 // ─ 한 번이라도 투숙 인증한 게스트는 퇴실 후에도,
