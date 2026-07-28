@@ -1878,8 +1878,11 @@ searchInput.addEventListener('input', () => {
     radius: 40000,                   // 40km 반경
     size: 5
   });
-  fetch(`https://dapi.kakao.com/v2/local/search/keyword.json?${params}`, {
-    headers: { 'Authorization': 'KakaoAK 77cc6ad36ed0601b1aefce43b6145119' }
+  fetch(`https://qgkldtfmewnwjkooeygp.supabase.co/functions/v1/kakao-search?${params}`, {
+    headers: {
+      'Authorization': 'Bearer sb_publishable_rXjjNDnelY9CQSiEmtq12A_CraIHE7Q',
+      'apikey': 'sb_publishable_rXjjNDnelY9CQSiEmtq12A_CraIHE7Q'
+    }
   })
   .then(r => r.json())
   .then(data => {
