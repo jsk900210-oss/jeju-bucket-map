@@ -424,7 +424,7 @@
     </div>
     <button class="intro-btn-main" id="introNextBtn" onclick="goIntroStep2()" disabled>국적을 선택해 주세요 / Select your country</button>
   </div>
-  <di  <!-- 2단계: QR 인증 안내 -->
+  <!-- 2단계: QR 인증 안내 -->
   <div class="intro-step hidden" id="introStep2">
     <div style="margin-bottom:20px;text-align:center;animation:fade-up .4s both">
       <div style="font-size:22px;font-weight:900;color:var(--basalt);margin-bottom:4px">투숙 인증</div>
@@ -938,12 +938,12 @@ function renderMap() {
   // 상단 통계 + 빈 상태 카드 갱신
   const modeLabel =
     storageMode === "cloud"  ? "" :
-    storageMode === "local"  ? ` · <span style='color:var(--sea)'>${LANG.deviceOnly||'이 기기에 저장됨</span>" :
+    storageMode === "local"  ? ` · <span style='color:var(--sea)'>${LANG.deviceOnly || '이 기기에 저장됨'}</span>` :
     " · <span style='color:var(--reject)'>임시 모드 — 화면을 닫으면 사라져요</span>";
   document.getElementById('statLine').innerHTML =
     reviews.length === 0
-      ? `버킷이 비어있어요 🪣 · 첫 기록을 담아주세요!${modeLabel}`
-      : `🪣 버킷에 <b>${reviews.length}개</b>의 기록이 담겼어요 · <b>${reviewedPlaces}곳</b> 방문${modeLabel}`;
+      ? `${LANG.emptyBucket || '아직 버킷이 비어 있어요 🪣'}${modeLabel}`
+      : `${LANG.statFmt(reviews.length, reviewedPlaces)}${modeLabel}`;
   document.getElementById('emptyCard').style.display =
     reviews.length === 0 ? "block" : "none";
 }
@@ -1678,6 +1678,8 @@ async function goIntroStep2() {
   }
   // 지도 열람은 투숙 인증 없이 허용한다. QR 인증은 리뷰 작성 단계에서만 확인한다.
   try { localStorage.setItem('jb-intro-flag', introFlag); } catch(e) {}
+  // 지도 입장 경로에서는 finishIntro()가 호출되지 않으므로 여기서 언어를 적용한다.
+  applyLang(introFlag);
   stopCam();
   const intro = document.getElementById('intro');
   intro.classList.add('hide');
@@ -1767,6 +1769,7 @@ function finishIntro() {
     checkedIn    = true;
     checkinToken = urlToken;
     introFlag    = prev || '🇰🇷';
+    applyLang(introFlag);
     // localStorage에 즉시 저장
     try {
       localStorage.setItem('jb-checkin', JSON.stringify({ token: urlToken, ts: Date.now() }));
@@ -1785,6 +1788,7 @@ function finishIntro() {
   // ② 이전 방문 기록 + 인증 완료 → 인트로 스킵
   if (prev && checkedIn) {
     introFlag = prev;
+    applyLang(prev);
     const sel = document.getElementById('fFlag');
     if (sel) for (let i = 0; i < sel.options.length; i++) {
       if (sel.options[i].value === prev) { sel.selectedIndex = i; break; }
