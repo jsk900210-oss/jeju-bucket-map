@@ -210,6 +210,27 @@
   }
 
 
+
+  /* ── 인트로 로딩 화면 ── */
+  #introLoading {
+    position: fixed; inset: 0; z-index: 10000;
+    background: linear-gradient(160deg, #fff7ed 0%, #fff3e0 60%, #ffe0b2 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    transition: opacity .6s ease;
+  }
+  #introLoading.hide { opacity: 0; pointer-events: none; }
+  #introLoading img {
+    width: 220px; height: 220px; object-fit: contain;
+  }
+  #introLoading .loading-title {
+    font-size: 26px; font-weight: 900; color: #23272d;
+    margin-top: 16px; letter-spacing: -0.5px;
+  }
+  #introLoading .loading-sub {
+    font-size: 13px; color: #aaa; margin-top: 6px;
+  }
+
   /* ═══════════════════════════════════════
      인트로 스플래시 — 2단계
   ═══════════════════════════════════════ */
@@ -377,6 +398,11 @@
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 </head>
 <body>
+<div id="introLoading">
+  <img src="assets/bucketmate_loading.gif" alt="버킷메이트 로딩">
+  <div class="loading-title">버킷메이트</div>
+  <div class="loading-sub">BucketMate · 여행 기록이 담기는 버킷</div>
+</div>
 <div id="intro">
   <span class="intro-burst" style="top:36%;left:42%;--tx:-60px;--ty:-70px;animation-delay:.66s">✨</span>
   <span class="intro-burst" style="top:36%;left:56%;--tx:55px;--ty:-72px;animation-delay:.7s">🎉</span>
@@ -1752,6 +1778,20 @@ function finishIntro() {
   setTimeout(() => { intro.style.display = 'none'; }, 480);
 }
 
+// 로딩 화면 → 인트로 자동 전환
+(function startLoading() {
+  const loading = document.getElementById('introLoading');
+  const intro   = document.getElementById('intro');
+  if (!loading) return;
+  // GIF 재생 시간(2.5초) 후 국적 선택 화면으로 전환
+  setTimeout(() => {
+    loading.classList.add('hide');
+    setTimeout(() => {
+      loading.style.display = 'none';
+    }, 600);
+  }, 2500);
+})();
+
 (function checkPrevVisit() {
   // 저장된 언어 먼저 적용
   try {
@@ -1766,6 +1806,9 @@ function finishIntro() {
 
   // ① QR 토큰이 URL에 있으면 → 즉시 인증 완료 + 인트로 없이 바로 입장
   if (urlToken && /^JB-/.test(urlToken)) {
+    // QR 입장: 로딩 화면 즉시 스킵
+    const ld = document.getElementById('introLoading');
+    if (ld) { ld.style.display = 'none'; }
     checkedIn    = true;
     checkinToken = urlToken;
     introFlag    = prev || '🇰🇷';
@@ -1795,6 +1838,9 @@ function finishIntro() {
     }
     const intro = document.getElementById('intro');
     if (intro) intro.style.display = 'none';
+    // 재방문: 로딩도 스킵
+    const ld2 = document.getElementById('introLoading');
+    if (ld2) ld2.style.display = 'none';
   }
 })();
 
