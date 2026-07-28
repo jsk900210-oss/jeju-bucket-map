@@ -1245,7 +1245,7 @@ function openViewSheet(poi) {
         <span class="badge-verified">🛡 실방문 인증</span>
         ${r.onsite ? '<span class="badge-verified" style="color:var(--sea);background:rgba(43,122,140,.1)">📍 현장 인증</span>' : ''}
       </div>
-      <p>${escapeHtml(r.text)}</p>
+      <p class="rv-text" id="rv-text-${r.id}">${escapeHtml(r.text)}</p>
       ${r.mediaCount > 0
         ? `<div class="rev-media" id="med-${r.id}">
              <span style="font-size:11px;color:rgba(35,39,45,.4)">📸 첨부 ${r.mediaCount}개 불러오는 중…</span>
@@ -1258,6 +1258,22 @@ function openViewSheet(poi) {
   list.filter(r => r.mediaCount > 0).forEach(r => loadReviewMedia(r.id));
   document.getElementById('viewSheet').classList.add('open');
   map.panTo([poi.lat - 0.05, poi.lng]);
+
+  // 리뷰 자동 번역 (한국어 아닌 언어 선택 시)
+  const langCode = getLangCode();
+  if (langCode && langCode !== 'ko') {
+    list.forEach(rv => {
+      const el = document.getElementById('rv-text-' + rv.id);
+      if (el && rv.text) {
+        translateText(rv.text, langCode).then(translated => {
+          if (translated && translated !== rv.text && el) {
+            el.innerHTML = escapeHtml(translated) +
+              '<br><small style="color:#bbb;font-size:10px">🌐 auto-translated</small>';
+          }
+        });
+      }
+    });
+  }
 }
 
 // ═══════════════════════════════════════════════════
