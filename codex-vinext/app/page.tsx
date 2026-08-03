@@ -8,11 +8,12 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const user = await getChatGPTUser();
+  let displayName = user?.displayName ?? null;
 
   if (user) {
     const db = getDb();
     const existing = await db
-      .select({ id: users.id })
+      .select({ id: users.id, displayName: users.displayName })
       .from(users)
       .where(eq(users.id, user.id))
       .limit(1);
@@ -24,16 +25,21 @@ export default async function Home() {
         displayName: user.displayName,
       });
     } else {
+      displayName = existing[0].displayName;
       await db
         .update(users)
         .set({
           email: user.email,
-          displayName: user.displayName,
           updatedAt: new Date(),
         })
         .where(eq(users.id, user.id));
     }
   }
 
-  return <ClientHome user={user} />;
+  return (
+    <ClientHome
+      user={user && displayName ? { ...user, displayName } : user}
+    />
+  );
 }
+
