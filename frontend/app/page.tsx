@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import seedData from "../frontend/seed-data/bucket-jeju-m3-seed.synthetic.json";
+import seedData from "../seed-data/bucket-jeju-m3-seed.synthetic.json";
 
 type Tab = "home" | "place" | "join" | "profile";
 type JoinStatus = "모집중" | "모집완료" | "일정완료";
