@@ -27,6 +27,7 @@ export const joins = sqliteTable(
       .references(() => users.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
     description: text("description").notNull().default(""),
+    keyword: text("keyword").notNull().default("기타"),
     location: text("location").notNull(),
     scheduledAt: integer("scheduled_at", { mode: "timestamp" }).notNull(),
     maxParticipants: integer("max_participants").notNull(),
@@ -59,3 +60,4 @@ export const joinParticipants = sqliteTable(
     ),
   ],
 );
+
