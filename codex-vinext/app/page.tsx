@@ -26,7 +26,7 @@ const categoryIcons: Record<string, string> = {
 
 const joins = seedData.joinRequests.map((join, index) => ({
   id: index + 1,
-  title: join.title,
+  title: join.title.replace(/\s+\d+일차$/, ""),
   keyword: join.keywords[0] ?? join.category,
   location: join.location,
   icon: categoryIcons[join.category] ?? "🍊",
@@ -89,7 +89,7 @@ export default function Home() {
           </div>
           <div className="hero-art"><span className="sun"/><span className="cloud c1"/><span className="cloud c2"/><span className="mountain"/><span className="sea-line"/><span className="harubang"><i/><b>•‿•</b></span><span className="orange-tree">●</span><div className="art-sticker">오늘의 제주<br/><strong>바람 좋음</strong></div></div>
         </section>
-        <section className="join-preview"><div className="shell"><div className="section-heading light"><div><span className="mini-label">15 DAYS · 30 JOINS</span><h2>오늘, 같이 할래?</h2><p>합성 투숙객 30명이 만든 테스트 조인입니다.</p></div><button onClick={() => move("join")}>모두 보기 →</button></div><div className="join-grid">{joins.slice(0, 3).map((item) => <JoinCard key={item.id} item={item} joined={joined.includes(item.id)} onJoin={() => toggleJoin(item.id, item.status)}/>)}</div></div></section>
+        <section className="join-preview"><div className="shell"><div className="section-heading light"><div><span className="mini-label">15 DAYS · 30 JOINS</span><h2>오늘, 같이 할래?</h2></div><button onClick={() => move("join")}>모두 보기 →</button></div><div className="join-grid">{joins.slice(0, 3).map((item) => <JoinCard key={item.id} item={item} joined={joined.includes(item.id)} onJoin={() => toggleJoin(item.id, item.status)}/>)}</div></div></section>
       </>}
 
       {tab === "place" && <section className="subpage shell">
@@ -98,7 +98,7 @@ export default function Home() {
       </section>}
 
       {tab === "join" && <section className="subpage shell">
-        <div className="join-title-row"><div><span className="eyebrow">2026.08.01 — 08.15</span><h1>30개의 제주 Join</h1><p className="lead">가상 투숙객 30명과 만든 합성 시드 데이터입니다. 날짜별 1~4개로 조인이 많은 날과 적은 날이 다르게 배정됐어요.</p></div></div>
+        <div className="join-title-row"><div><span className="eyebrow">2026.08.01 — 08.15</span><h1>30개의 제주 Join</h1></div></div>
         <div className="distribution-strip" aria-label="날짜별 Join 개수">
           {joinDistribution.map(([date, count]) => <span key={date} title={`${date} · ${count}개`}><small>{date.slice(8)}일</small><i style={{height: `${12 + Number(count) * 5}px`}}/><b>{count}</b></span>)}
         </div>
