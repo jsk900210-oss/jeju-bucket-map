@@ -1,21 +1,59 @@
-# JEJU BUCKET — Claude × Codex 협업 저장소
+# JEJU BUCKET — 팀 통합 저장소
 
-이 저장소는 Claude와 Codex가 함께 관리합니다.
+버킷제주 게스트하우스 방문객을 위한 장소 발견, Join 커뮤니티, RAG 안내 서비스를 관리합니다.
 
-## 구현 위치
+- 운영 웹: https://bucket-jeju-join.ep01-sleepwar.chatgpt.site
+- 팀 기준 저장소: `gon311/DLthon_2nd:M3`
+- 포크 동기화 브랜치: `jsk900210-oss/DLthon_2nd:m3`
 
-- 저장소 루트: 기존 Claude 구현 및 운영 문서(`AGENTS.md`, `BOARD.md`, `CHANGELOG.md`)
-- `codex-vinext/`: Codex가 제작한 버킷 제주 Vinext 프로토타입
-- 배포 웹: https://bucket-jeju-join.ep01-sleepwar.chatgpt.site
+## 표준 파일 구조
 
-## 충돌 방지
+- `frontend/`: React 19 + TypeScript + Vinext 웹데모, Sites API, D1·Drizzle
+- `backend/`: FastAPI·RAG·ChromaDB 검색 코드
+- `data/`: POI CSV와 수집·가공 스크립트
+- `docs/`: API 계약, 지식베이스 스키마, 인수인계 문서
 
-1. 작업 전 `BOARD.md`와 각 구현 폴더의 `README.md`를 확인합니다.
-2. Claude는 `claude/<작업명>`, Codex는 `codex/<작업명>` 브랜치를 사용합니다.
-3. 다른 담당자가 진행 중인 파일은 동시에 수정하지 않습니다.
-4. `codex-vinext/app/page.tsx`와 `codex-vinext/app/globals.css`는 함께 움직이므로 한 작업자가 같이 수정합니다.
-5. 작업 완료 후 변경 파일, 결정 사항, 확인 방법, 커밋을 README 또는 BOARD에 기록합니다.
+1차·2차·3차 저장소가 위 경로를 공통으로 사용합니다.
 
-## Claude에게
+## 주요 기능
 
-먼저 `codex-vinext/README.md`를 읽어 현재 기능과 미완료 항목을 확인하세요. Codex 구현을 수정할 때는 `codex-vinext/` 범위 안에서 작업해 기존 루트 구현과 충돌하지 않도록 합니다.
+- 닉네임 변경
+- Join 작성·조회 및 메인 최신 Join 표시
+- 모집시간 경과 시 모집완료 자동 표시
+- 숙소 주변 장소 데이터 수집·정제
+- ChromaDB 기반 RAG 검색·응답 준비
+
+## 실행 위치
+
+### 프론트엔드
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### RAG 백엔드
+
+저장소 루트에서 Python 경로를 실행합니다.
+
+```bash
+pip install -r backend/requirements.txt
+python backend/build_index.py --csv data/processed/guesthouse_pois.csv --collection poi_demo --smoke-test
+```
+
+실행 전 `OPENAI_API_KEY`, `LODGING_LAT`, `LODGING_LNG` 환경변수가 필요합니다.
+
+## 디버깅 및 정리 내역
+
+- 팀 `M3`와 포크 `m3`의 충돌 문서를 통합했습니다.
+- 기존 `codex-vinext/` 내용을 표준 경로로 이동했습니다.
+- 웹데모용 D1·Drizzle 코드는 `frontend/`에 유지했습니다.
+- 중복된 루트 TypeScript DB·Supabase·Worker 백엔드는 삭제했습니다.
+- RAG 백엔드와 POI 데이터는 `backend/`, `data/`, `docs/`로 분리했습니다.
+- 재생성 가능한 ChromaDB 바이너리 캐시는 1차 저장소에서 제외했습니다.
+- `frontend/.openai/hosting.json`의 기존 `project_id`를 보존했습니다.
+
+## 배포 주의
+
+웹 배포는 `frontend/` 폴더를 기준으로 진행합니다. 기존 Sites 프로젝트와 운영 주소를 재사용하며 새 사이트를 만들지 않습니다.
