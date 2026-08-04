@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ChatGPTUser } from "./chatgpt-auth";
+import syntheticSeed from "../seed-data/bucket-jeju-m3-seed.synthetic.json";
 type Tab = "home" | "place" | "join" | "ask" | "profile";
 type JoinStatus = "모집중" | "모집완료" | "일정완료";
 type AskMessage = { role: "user" | "assistant"; text: string; sources?: string[] };
@@ -33,7 +34,26 @@ type JoinItem = {
   isOwner: boolean;
   joined: boolean;
   participantNames?: string[];
+  isSynthetic?: boolean;
 };
+
+const syntheticJoins: JoinItem[] = syntheticSeed.joinRequests.map((item, index) => ({
+  id: 1_000_000 + index,
+  title: item.title,
+  description: item.description,
+  keyword: item.category,
+  location: item.location,
+  icon: item.category === "식사" ? "🍜" : item.category === "운동" ? "🏃" : item.category === "사진" ? "📷" : item.category === "카페" ? "☕" : "🗺️",
+  date: item.scheduledDate,
+  time: item.scheduledTime,
+  max: item.maxParticipants,
+  people: item.currentParticipants,
+  status: item.status as JoinStatus,
+  host: item.hostNickname,
+  isOwner: false,
+  joined: false,
+  isSynthetic: true,
+}));
 
 export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
   const [tab, setTab] = useState<Tab>("home");
@@ -41,7 +61,7 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
   const [nicknameDraft, setNicknameDraft] = useState(user?.displayName ?? "");
   const [editingNickname, setEditingNickname] = useState(false);
   const [savingNickname, setSavingNickname] = useState(false);
-  const [joins, setJoins] = useState<JoinItem[]>([]);
+  const [joins, setJoins] = useState<JoinItem[]>(syntheticJoins);
   const [creatingJoin, setCreatingJoin] = useState(false);
   const [savingJoin, setSavingJoin] = useState(false);
   const [joinDraft, setJoinDraft] = useState({
@@ -73,7 +93,7 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
   useEffect(() => {
     fetch("/api/joins")
       .then((response) => response.json())
-      .then((result: { joins?: JoinItem[] }) => setJoins(result.joins ?? []))
+      .then((result: { joins?: JoinItem[] }) => setJoins([...(result.joins ?? []), ...syntheticJoins]))
       .catch(() => setToast("Join 목록을 불러오지 못했어요."));
 
     const timer = window.setInterval(() => setStatusNow(Date.now()), 30_000);
@@ -146,7 +166,7 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
   };
 
   const toggleJoin = async (item: JoinItem) => {
-    if (item.status !== "모집중" || item.isOwner) return;
+    if (item.status !== "모집중" || item.isOwner || item.isSynthetic) return;
     if (!user) {
       window.location.assign("/signin-with-chatgpt?return_to=/");
       return;
@@ -224,6 +244,9 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
 
       {tab === "join" && <section className="subpage shell">
         <div className="join-title-row"><div><span className="eyebrow">JOIN</span><h1>{displayJoins.length}개의 제주 Join</h1></div><button className="primary" onClick={() => user ? setCreatingJoin(true) : window.location.assign("/signin-with-chatgpt?return_to=/")}>Join 만들기 <span>＋</span></button></div>
+        <div className="synthetic-notice"><b>테스트용 합성 데이터</b><span>가상 투숙객 30명 · 무작위 Join 60건 · 2026.08.05–08.19</span><p>실제 인물, 예약 또는 모임이 아닙니다. 테스트 종료 후 일괄 삭제할 예정입니다.</p></div>
+        <details className="synthetic-guests"><summary>가상 투숙객 30명 보기</summary><div>{syntheticSeed.guests.map((guest) => <span key={guest.id}>👤 {guest.nickname}<small>{guest.checkInDate.slice(5)}–{guest.checkOutDate.slice(5)}</small></span>)}</div></details>
+        <div className="distribution-strip" aria-label="일자별 합성 Join 개수">{Object.entries(syntheticSeed._meta.joinDistribution).map(([date, count]) => <span key={date}><small>{date.slice(5)}</small><i style={{height: `${8 + Number(count) * 4}px`}}/><b>{count}건</b></span>)}</div>
         <div className="join-filters">{keywords.map((item) => <button key={item} className={keyword === item ? "selected" : ""} onClick={() => setKeyword(item)}>{item}</button>)}</div>
         {visible.length === 0 ? <div className="keyword-panel"><span className="mini-label">EMPTY JOIN</span><h2>등록된 Join이 아직 없어요</h2><p>로그인한 사용자가 첫 Join을 만들면 이곳에 표시됩니다.</p></div> : <div className="join-page-grid">{visible.map((item) => <JoinCard key={item.id} item={item} onJoin={() => toggleJoin(item)}/>)}</div>}
       </section>}
@@ -264,8 +287,8 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
 }
 
 function JoinCard({ item, onJoin }: { item: JoinItem; onJoin: () => void }) {
-  const buttonLabel = item.isOwner ? "내가 만든 모임" : item.joined ? "참여 완료 ✓" : item.status === "모집중" ? "함께하기" : item.status;
-  return <article className={`join-card ${item.status !== "모집중" ? "join-card-complete" : ""}`}><div className="join-visual green"><span>{item.icon}</span><i>{item.status}</i></div><div className="join-body"><div className="tags"><span>#{item.keyword}</span><span>#{item.date.slice(5)}</span></div><h3>{item.title}</h3><p className="join-description">{item.description}</p><p>🕒 {item.date} {item.time}</p><p>📍 {item.location}</p><p>👥 {item.people}/{item.max}명 · by {item.host}</p>{item.isOwner && <div className="participant-list"><b>참여자</b>{item.participantNames?.length ? <ul>{item.participantNames.map((name) => <li key={name}>👤 {name}</li>)}</ul> : <p>아직 참여자가 없어요.</p>}</div>}<button className={item.joined ? "joined" : ""} disabled={item.status !== "모집중" || item.isOwner} onClick={onJoin}>{buttonLabel}</button></div></article>;
+  const buttonLabel = item.isSynthetic ? "테스트 Join · 참여 불가" : item.isOwner ? "내가 만든 모임" : item.joined ? "참여 완료 ✓" : item.status === "모집중" ? "함께하기" : item.status;
+  return <article className={`join-card ${item.status !== "모집중" ? "join-card-complete" : ""} ${item.isSynthetic ? "join-card-synthetic" : ""}`}><div className="join-visual green"><span>{item.icon}</span><i>{item.status}</i>{item.isSynthetic && <em>합성 데이터</em>}</div><div className="join-body"><div className="tags"><span>#{item.keyword}</span><span>#{item.date.slice(5)}</span></div><h3>{item.title}</h3><p className="join-description">{item.description}</p><p>🕒 {item.date} {item.time}</p><p>📍 {item.location}</p><p>👥 {item.people}/{item.max}명 · by {item.host}</p>{item.isOwner && <div className="participant-list"><b>참여자</b>{item.participantNames?.length ? <ul>{item.participantNames.map((name) => <li key={name}>👤 {name}</li>)}</ul> : <p>아직 참여자가 없어요.</p>}</div>}<button className={item.joined ? "joined" : ""} disabled={item.status !== "모집중" || item.isOwner || item.isSynthetic} onClick={onJoin}>{buttonLabel}</button></div></article>;
 }
 
 function withEffectiveStatus(item: JoinItem, now: number): JoinItem {
