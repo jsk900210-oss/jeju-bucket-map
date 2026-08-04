@@ -78,8 +78,10 @@ footer{background:#183f37;color:white;padding:35px 0;margin-top:30px}footer .she
 .synthetic-guests{margin:0 0 18px;background:white;border:1px solid var(--line);border-radius:16px;padding:13px 16px}
 .synthetic-guests summary{cursor:pointer;color:var(--green);font-size:11px;font-weight:800}
 .synthetic-guests>div{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:13px}
-.synthetic-guests span{display:flex;justify-content:space-between;gap:5px;background:#f6f8f5;border-radius:9px;padding:7px;font-size:9px}
-.synthetic-guests small{color:#879691;font-size:8px}
+.synthetic-guests span{display:grid;gap:4px;background:#f6f8f5;border-radius:9px;padding:9px;font-size:9px}
+.synthetic-guests span b{font-size:10px;color:#284c43}
+.synthetic-guests small{color:#687c77;font-size:8px}
+.synthetic-guests span i{color:#98a39f;font-size:7px;font-style:normal}
 .join-visual em{position:absolute;right:12px;top:12px;background:#fff5d7;color:#8b5b08;border:1px solid #f2c66e;border-radius:12px;padding:4px 7px;font-size:8px;font-style:normal;font-weight:800}
 .join-card-synthetic{outline:1px dashed #e4b95e}
 @media(max-width:800px){.synthetic-guests>div{grid-template-columns:repeat(2,1fr)}}
