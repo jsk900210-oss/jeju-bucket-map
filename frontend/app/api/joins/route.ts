@@ -101,7 +101,10 @@ function toJoinItem(
   keyword: string,
   now: Date,
 ) {
-  const korea = new Date(row.scheduledAt.getTime() + 9 * 60 * 60 * 1000);
+  const scheduledAt = row.scheduledAt instanceof Date
+    ? row.scheduledAt
+    : new Date(row.scheduledAt);
+  const korea = new Date(scheduledAt.getTime() + 9 * 60 * 60 * 1000);
   return {
     id: row.id,
     title: row.title,
@@ -113,7 +116,7 @@ function toJoinItem(
     time: korea.toISOString().slice(11, 16),
     max: row.max,
     people: 1,
-    status: row.scheduledAt <= now && row.status === "모집중" ? "모집완료" : row.status,
+    status: scheduledAt.getTime() <= now.getTime() && row.status === "모집중" ? "모집완료" : row.status,
     host: row.host,
   };
 }
