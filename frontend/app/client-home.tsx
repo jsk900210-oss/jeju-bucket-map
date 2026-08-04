@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ChatGPTUser } from "./chatgpt-auth";
 import syntheticSeed from "../seed-data/bucket-jeju-m3-seed.synthetic.json";
+import { guesthouseFaq, localeCopy, type GuesthouseLocale } from "../seed-data/guesthouse-faq";
 type Tab = "home" | "place" | "join" | "ask" | "profile";
 type JoinStatus = "모집중" | "모집완료" | "일정완료";
 type AskMessage = { role: "user" | "assistant"; text: string; sources?: string[] };
 
-const askSuggestions = ["혼자 먹기 좋은 가까운 식당 알려줘", "숙소 근처 편의점은 어디야?", "가볍게 산책할 곳을 추천해줘"];
 const bucketKnowledge = [
   { name: "대정쌍둥이식당", description: "저렴한 가격에 맛있는 한식을 즐길 수 있고 혼자 방문하기 좋은 곳", distance: "약 100m", tags: ["맛집", "식당", "한식", "혼밥", "먹"] },
   { name: "산방산접짝뼈&돌우럭", description: "제주식 접짝뼈와 돌우럭 요리를 맛볼 수 있고 혼자 방문하기 좋은 식당", distance: "약 230m", tags: ["맛집", "식당", "해산물", "혼밥", "먹"] },
@@ -76,8 +76,9 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
   const [keyword, setKeyword] = useState("전체");
   const [toast, setToast] = useState("");
   const [askInput, setAskInput] = useState("");
+  const [locale, setLocale] = useState<GuesthouseLocale>("ko");
   const [askMessages, setAskMessages] = useState<AskMessage[]>([
-    { role: "assistant", text: "안녕하세요, 버킷 AI예요. 팀이 준비한 버킷제주 주변 장소 21곳의 자료를 바탕으로 맛집·편의시설·산책 장소를 안내해 드릴게요." },
+    { role: "assistant", text: localeCopy.ko.greeting },
   ]);
   const [statusNow, setStatusNow] = useState(() => Date.now());
   const displayJoins = useMemo(
@@ -89,6 +90,11 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
     () => displayJoins.filter((item) => keyword === "전체" || item.keyword === keyword),
     [displayJoins, keyword],
   );
+  const faqSuggestions = useMemo(
+    () => ["wifi", "facilities", "lost-found", "first-aid"]
+      .map((id) => guesthouseFaq.find((item) => item.id === id)!.question[locale]),
+    [locale],
+  );
 
   useEffect(() => {
     fetch("/api/joins")
@@ -99,6 +105,27 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
     const timer = window.setInterval(() => setStatusNow(Date.now()), 30_000);
     return () => window.clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("bucket-locale") as GuesthouseLocale | null;
+    const browser = navigator.languages?.[0] ?? navigator.language ?? "ko";
+    const detected: GuesthouseLocale = browser.toLowerCase().startsWith("ja")
+      ? "ja"
+      : browser.toLowerCase().startsWith("zh")
+        ? "zh"
+        : browser.toLowerCase().startsWith("en")
+          ? "en"
+          : "ko";
+    const next = saved && ["ko", "en", "ja", "zh"].includes(saved) ? saved : detected;
+    setLocale(next);
+    setAskMessages([{ role: "assistant", text: localeCopy[next].greeting }]);
+  }, []);
+
+  const changeLocale = (next: GuesthouseLocale) => {
+    setLocale(next);
+    window.localStorage.setItem("bucket-locale", next);
+    setAskMessages([{ role: "assistant", text: localeCopy[next].greeting }]);
+  };
 
   const move = (next: Tab) => {
     setTab(next);
@@ -191,6 +218,24 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
     const clean = question.trim();
     if (!clean) return;
     const normalized = clean.toLowerCase();
+    const faqMatches = guesthouseFaq
+      .map((item) => ({
+        item,
+        score: item.keywords.filter((tag) => normalized.includes(tag.toLowerCase())).length
+          + (normalized.includes(item.question[locale].toLowerCase()) ? 3 : 0),
+      }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score);
+    if (faqMatches.length) {
+      const answer = faqMatches.slice(0, 2).map(({ item }) => item.answer[locale]).join("\n\n");
+      setAskMessages((current) => [
+        ...current,
+        { role: "user", text: clean },
+        { role: "assistant", text: answer, sources: [localeCopy[locale].source] },
+      ]);
+      setAskInput("");
+      return;
+    }
     const matches = bucketKnowledge
       .map((place) => ({ place, score: place.tags.filter((tag) => normalized.includes(tag)).length }))
       .filter((item) => item.score > 0)
@@ -198,7 +243,7 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
       .slice(0, 3)
       .map((item) => item.place);
     const selected = matches.length ? matches : bucketKnowledge.filter((place) => place.tags.includes("산책")).slice(0, 2);
-    const intro = matches.length ? "" : "준비된 자료에서 질문과 정확히 일치하는 장소를 찾지 못했어요. 대신 가까운 산책 후보를 안내할게요.\n";
+    const intro = matches.length ? "" : `${localeCopy[locale].fallback}\n`;
     const answer = intro + selected.map((place, index) => `${index + 1}. ${place.name} — ${place.description}이며 숙소에서 ${place.distance} 거리예요.`).join("\n");
     setAskMessages((current) => [
       ...current,
@@ -221,7 +266,10 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
           <button className={tab === "ask" ? "active" : ""} onClick={() => move("ask")}>AI 질문</button>
           <button className={tab === "profile" ? "active" : ""} onClick={() => move("profile")}>나의 버킷</button>
         </nav>
-        <button className="user-chip" onClick={() => move("profile")}><span>👤</span><b>{displayName || "로그인"}</b></button>
+        <div className="topbar-actions">
+          <label className="language-picker"><span>{localeCopy[locale].language}</span><select aria-label={localeCopy[locale].language} value={locale} onChange={(event) => changeLocale(event.target.value as GuesthouseLocale)}><option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option><option value="zh">中文</option></select></label>
+          <button className="user-chip" onClick={() => move("profile")}><span>👤</span><b>{displayName || "로그인"}</b></button>
+        </div>
       </header>
 
       {tab === "home" && <>
@@ -260,8 +308,8 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
             <div className="ask-thread" aria-live="polite">{askMessages.map((message, index) => message.role === "assistant"
               ? <div className="assistant-message" key={index}><span className="ask-bot">귤</span><div><b>버킷 AI</b><p>{message.text}</p>{message.sources && <div className="answer-sources">{message.sources.map((source) => <span key={source}>근거 · {source}</span>)}</div>}</div></div>
               : <div className="user-message" key={index}>{message.text}</div>)}</div>
-            <div className="ask-suggestions"><span>이런 질문을 해보세요</span><div>{askSuggestions.map((suggestion) => <button key={suggestion} type="button" onClick={() => askBucket(suggestion)}>{suggestion}</button>)}</div></div>
-            <form className="ask-composer" onSubmit={(event) => { event.preventDefault(); askBucket(askInput); }}><label htmlFor="bucket-question">질문 입력</label><div><input id="bucket-question" value={askInput} onChange={(event) => setAskInput(event.target.value)} placeholder="예: 혼자 먹기 좋은 가까운 식당 알려줘" /><button type="submit" disabled={!askInput.trim()}>보내기</button></div><small>답변은 팀 저장소에 준비된 장소 자료만 사용하며, 근거가 없으면 찾지 못했다고 안내합니다.</small></form>
+            <div className="ask-suggestions"><span>{localeCopy[locale].suggestions}</span><div>{faqSuggestions.map((suggestion) => <button key={suggestion} type="button" onClick={() => askBucket(suggestion)}>{suggestion}</button>)}</div></div>
+            <form className="ask-composer" onSubmit={(event) => { event.preventDefault(); askBucket(askInput); }}><label htmlFor="bucket-question">{localeCopy[locale].suggestions}</label><div><input id="bucket-question" value={askInput} onChange={(event) => setAskInput(event.target.value)} placeholder={localeCopy[locale].placeholder} /><button type="submit" disabled={!askInput.trim()}>{localeCopy[locale].send}</button></div><small>숙소 공식 이용 안내와 팀 저장소의 장소 자료만 사용합니다.</small></form>
           </div>
           <aside className="knowledge-status">
             <span className="mini-label">KNOWLEDGE STATUS</span><h2>팀 자료 연결 완료</h2><p>음식점 12곳, 관광·문화 6곳, 편의시설 3곳의 정리된 자료를 사용합니다.</p>
