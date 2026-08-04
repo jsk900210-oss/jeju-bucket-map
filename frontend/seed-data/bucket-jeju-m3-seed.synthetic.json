@@ -772,7 +772,118 @@
         "독서",
         "숲",
         "요가",
-…839 tokens truncated… true
+        "일출"
+      ],
+      "profileKeywords": [
+        "트레킹",
+        "독서",
+        "숲",
+        "요가",
+        "일출"
+      ],
+      "stayVerificationStatus": "인증완료",
+      "isSynthetic": true
+    }
+  ],
+  "joinRequests": [
+    {
+      "id": "join-001",
+      "title": "하모해변 노을 러닝 1일차",
+      "description": "하모해변을 따라 가볍게 달린 뒤 함께 노을을 봐요.",
+      "category": "운동",
+      "keywords": [
+        "러닝",
+        "노을",
+        "해변"
+      ],
+      "scheduledDate": "2026-08-01",
+      "scheduledTime": "07:00",
+      "location": "하모해변",
+      "hostGuestId": "guest-001",
+      "hostNickname": "귤빛파도",
+      "maxParticipants": 3,
+      "currentParticipants": 2,
+      "status": "모집중",
+      "participantGuestIds": [
+        "guest-002"
+      ],
+      "isSynthetic": true
+    },
+    {
+      "id": "join-002",
+      "title": "모슬포 고기국수 저녁 1일차",
+      "description": "혼밥 대신 따뜻한 고기국수를 같이 먹어요.",
+      "category": "식사",
+      "keywords": [
+        "식사",
+        "고기국수",
+        "혼밥탈출"
+      ],
+      "scheduledDate": "2026-08-01",
+      "scheduledTime": "09:30",
+      "location": "버킷 제주 로비",
+      "hostGuestId": "guest-002",
+      "hostNickname": "오름한스푼",
+      "maxParticipants": 4,
+      "currentParticipants": 3,
+      "status": "모집중",
+      "participantGuestIds": [
+        "guest-003",
+        "guest-004"
+      ],
+      "isSynthetic": true
+    },
+    {
+      "id": "join-003",
+      "title": "송악산 둘레길 산책 1일차",
+      "description": "풍경을 보며 무리하지 않는 속도로 걸어요.",
+      "category": "여행",
+      "keywords": [
+        "산책",
+        "트레킹",
+        "오름"
+      ],
+      "scheduledDate": "2026-08-01",
+      "scheduledTime": "12:00",
+      "location": "송악산 주차장",
+      "hostGuestId": "guest-003",
+      "hostNickname": "돌담산책",
+      "maxParticipants": 5,
+      "currentParticipants": 4,
+      "status": "모집중",
+      "participantGuestIds": [
+        "guest-004",
+        "guest-005",
+        "guest-006"
+      ],
+      "isSynthetic": true
+    },
+    {
+      "id": "join-004",
+      "title": "산방산 일출 사진 1일차",
+      "description": "휴대폰이나 카메라로 산방산의 아침을 담아요.",
+      "category": "사진",
+      "keywords": [
+        "사진",
+        "일출",
+        "오름"
+      ],
+      "scheduledDate": "2026-08-01",
+      "scheduledTime": "15:30",
+      "location": "산방산 입구",
+      "hostGuestId": "guest-004",
+      "hostNickname": "한라구름",
+      "maxParticipants": 6,
+      "currentParticipants": 6,
+      "status": "모집완료",
+      "participantGuestIds": [
+        "guest-005",
+        "guest-006",
+        "guest-007",
+        "guest-008",
+        "guest-009"
+      ],
+      "isSynthetic": true
     },
     {
       "id": "join-005",
