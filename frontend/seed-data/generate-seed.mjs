@@ -1,7 +1,7 @@
 import { writeFileSync } from "node:fs";
 
-const generatedAt = "2026-07-31T12:00:00+09:00";
-const scheduleStart = "2026-08-01";
+const generatedAt = "2026-08-04T18:20:00+09:00";
+const scheduleStart = "2026-08-05";
 const scheduleDays = 15;
 const syntheticNotice =
   "SYNTHETIC DATA: 이 파일의 모든 투숙객·닉네임·객실·침대·숙박기간·조인 요청은 M3 개발 및 테스트를 위해 임의 생성한 합성 데이터이며 실제 인물, 예약 또는 모임을 나타내지 않습니다.";
@@ -60,10 +60,10 @@ const guests = nicknames.map((nickname, index) => {
     .sort(() => random() - 0.5)
     .slice(0, 5);
   const checkInDate = index < 10
-    ? pick(["2026-07-30", "2026-07-31"])
-    : addDays("2026-07-29", Math.floor(random() * 6));
+    ? pick(["2026-08-04", "2026-08-05"])
+    : addDays("2026-08-03", Math.floor(random() * 6));
   const checkOutDate = index < 10
-    ? "2026-08-16"
+    ? "2026-08-20"
     : addDays(checkInDate, 7 + Math.floor(random() * 9));
 
   return {
@@ -107,7 +107,7 @@ const times = ["07:00", "09:30", "12:00", "15:30", "18:30", "20:00"];
 
 // 총 60건을 15일에 불균등하게 배정한다.
 // 일별 건수 구성은 1~7건이며, 날짜 배치는 고정 난수 seed로 섞어 재현한다.
-const dailyJoinCounts = [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 4, 4];
+const dailyJoinCounts = [1, 2, 2, 3, 3, 4, 4, 4, 4, 4, 5, 5, 6, 6, 7];
 for (let index = dailyJoinCounts.length - 1; index > 0; index -= 1) {
   const swapIndex = Math.floor(random() * (index + 1));
   [dailyJoinCounts[index], dailyJoinCounts[swapIndex]] =
@@ -120,8 +120,7 @@ const joinDistribution = Object.fromEntries(
   dailyJoinCounts.map((count, dayOffset) => [addDays(scheduleStart, dayOffset), count]),
 );
 
-const joinRequests = Array.from({ length: 30 }, (_, index) => {
-  // 15일에 정확히 4건씩 분배한다.
+const joinRequests = Array.from({ length: 60 }, (_, index) => {
   const dayOffset = joinDayOffsets[index];
   const scheduledDate = addDays(scheduleStart, dayOffset);
   const eligibleGuests = guests.filter(
@@ -187,3 +186,4 @@ writeFileSync(
   `${JSON.stringify(seed, null, 2)}\n`,
   "utf8",
 );
+
