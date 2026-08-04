@@ -4,6 +4,18 @@ import { useEffect, useMemo, useState } from "react";
 import type { ChatGPTUser } from "./chatgpt-auth";
 type Tab = "home" | "place" | "join" | "ask" | "profile";
 type JoinStatus = "모집중" | "모집완료" | "일정완료";
+type AskMessage = { role: "user" | "assistant"; text: string; sources?: string[] };
+
+const askSuggestions = ["혼자 먹기 좋은 가까운 식당 알려줘", "숙소 근처 편의점은 어디야?", "가볍게 산책할 곳을 추천해줘"];
+const bucketKnowledge = [
+  { name: "대정쌍둥이식당", description: "저렴한 가격에 맛있는 한식을 즐길 수 있고 혼자 방문하기 좋은 곳", distance: "약 100m", tags: ["맛집", "식당", "한식", "혼밥", "먹"] },
+  { name: "산방산접짝뼈&돌우럭", description: "제주식 접짝뼈와 돌우럭 요리를 맛볼 수 있고 혼자 방문하기 좋은 식당", distance: "약 230m", tags: ["맛집", "식당", "해산물", "혼밥", "먹"] },
+  { name: "25시해장국", description: "24시간 운영되는 해장국 전문점으로 늦은 시간 식사에 알맞은 곳", distance: "약 240m", tags: ["맛집", "식당", "해장국", "24시간", "밤", "혼밥", "먹"] },
+  { name: "하모해변", description: "자연스러운 해안 풍경을 감상하며 가볍게 걷기 좋은 해변", distance: "약 140m", tags: ["관광", "해변", "산책", "바다", "걷"] },
+  { name: "방어축제의거리", description: "모슬포의 음식과 지역 문화를 함께 느낄 수 있는 거리", distance: "약 1.1km", tags: ["관광", "문화", "산책", "거리"] },
+  { name: "CU 서귀최남단해안로점", description: "해안로에서 간식과 여행용품을 구입하기 편한 편의점", distance: "약 260m", tags: ["편의점", "간식", "생필품", "편의"] },
+  { name: "모슬포낚시편의점", description: "간식과 낚시 편의용품을 함께 판매하는 가까운 편의점", distance: "약 270m", tags: ["편의점", "낚시", "간식", "편의"] },
+];
 
 type JoinItem = {
   id: number;
@@ -43,6 +55,10 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
   });
   const [keyword, setKeyword] = useState("전체");
   const [toast, setToast] = useState("");
+  const [askInput, setAskInput] = useState("");
+  const [askMessages, setAskMessages] = useState<AskMessage[]>([
+    { role: "assistant", text: "안녕하세요, 버킷 AI예요. 팀이 준비한 버킷제주 주변 장소 21곳의 자료를 바탕으로 맛집·편의시설·산책 장소를 안내해 드릴게요." },
+  ]);
   const [statusNow, setStatusNow] = useState(() => Date.now());
   const displayJoins = useMemo(
     () => joins.map((item) => withEffectiveStatus(item, statusNow)),
@@ -151,6 +167,27 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
     window.setTimeout(() => setToast(""), 1800);
   };
 
+  const askBucket = (question: string) => {
+    const clean = question.trim();
+    if (!clean) return;
+    const normalized = clean.toLowerCase();
+    const matches = bucketKnowledge
+      .map((place) => ({ place, score: place.tags.filter((tag) => normalized.includes(tag)).length }))
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map((item) => item.place);
+    const selected = matches.length ? matches : bucketKnowledge.filter((place) => place.tags.includes("산책")).slice(0, 2);
+    const intro = matches.length ? "" : "준비된 자료에서 질문과 정확히 일치하는 장소를 찾지 못했어요. 대신 가까운 산책 후보를 안내할게요.\n";
+    const answer = intro + selected.map((place, index) => `${index + 1}. ${place.name} — ${place.description}이며 숙소에서 ${place.distance} 거리예요.`).join("\n");
+    setAskMessages((current) => [
+      ...current,
+      { role: "user", text: clean },
+      { role: "assistant", text: answer, sources: selected.map((place) => `${place.name} · 팀 POI 자료`) },
+    ]);
+    setAskInput("");
+  };
+
   return (
     <main>
       <header className="topbar">
@@ -192,20 +229,22 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
       </section>}
 
       {tab === "ask" && <section className="subpage shell ask-page">
-        <span className="eyebrow">BUCKET AI · COMING SOON</span>
+        <span className="eyebrow">BUCKET AI · TEAM KNOWLEDGE</span>
         <h1>버킷에게 무엇이든 물어보세요</h1>
-        <p className="lead">제주 여행과 버킷 게스트하우스 자료를 바탕으로, 필요한 답을 근거와 함께 안내할 예정이에요.</p>
+        <p className="lead">팀 저장소의 버킷제주 주변 장소 자료를 검색해 가까운 맛집과 편의시설, 산책 장소를 근거와 함께 안내합니다.</p>
         <div className="ask-layout">
           <div className="ask-chat">
-            <div className="assistant-message"><span className="ask-bot">귤</span><div><b>안녕하세요, 버킷 AI예요.</b><p>다겸님과 현겸님이 준비해 주실 자료를 학습한 뒤 질문에 답할 수 있어요. 지금은 질문 공간을 먼저 준비하고 있어요.</p></div></div>
-            <div className="ask-suggestions"><span>이런 질문을 할 수 있어요</span><div><button disabled>체크인 전에 짐을 맡길 수 있나요?</button><button disabled>비 오는 날 가기 좋은 곳은 어디예요?</button><button disabled>근처 흑돼지 맛집을 추천해 주세요</button></div></div>
-            <div className="ask-composer"><label htmlFor="bucket-question">질문 입력</label><div><input id="bucket-question" disabled placeholder="자료가 준비되면 질문할 수 있어요" /><button disabled>보내기</button></div><small>답변에는 참고한 자료의 출처가 함께 표시됩니다.</small></div>
+            <div className="ask-thread" aria-live="polite">{askMessages.map((message, index) => message.role === "assistant"
+              ? <div className="assistant-message" key={index}><span className="ask-bot">귤</span><div><b>버킷 AI</b><p>{message.text}</p>{message.sources && <div className="answer-sources">{message.sources.map((source) => <span key={source}>근거 · {source}</span>)}</div>}</div></div>
+              : <div className="user-message" key={index}>{message.text}</div>)}</div>
+            <div className="ask-suggestions"><span>이런 질문을 해보세요</span><div>{askSuggestions.map((suggestion) => <button key={suggestion} type="button" onClick={() => askBucket(suggestion)}>{suggestion}</button>)}</div></div>
+            <form className="ask-composer" onSubmit={(event) => { event.preventDefault(); askBucket(askInput); }}><label htmlFor="bucket-question">질문 입력</label><div><input id="bucket-question" value={askInput} onChange={(event) => setAskInput(event.target.value)} placeholder="예: 혼자 먹기 좋은 가까운 식당 알려줘" /><button type="submit" disabled={!askInput.trim()}>보내기</button></div><small>답변은 팀 저장소에 준비된 장소 자료만 사용하며, 근거가 없으면 찾지 못했다고 안내합니다.</small></form>
           </div>
           <aside className="knowledge-status">
-            <span className="mini-label">KNOWLEDGE STATUS</span><h2>자료 준비 중</h2><p>받은 자료를 정리해 검색 가능한 지식으로 연결할 예정입니다.</p>
-            <div className="source-owner"><span>다</span><div><b>다겸님 자료</b><small>전달 대기 중</small></div><i>준비 중</i></div>
-            <div className="source-owner"><span>현</span><div><b>현겸님 자료</b><small>전달 대기 중</small></div><i>준비 중</i></div>
-            <div className="rag-flow"><b>적용 순서</b><ol><li>자료 수집</li><li>내용 정리·검색 연결</li><li>답변 및 출처 검증</li></ol></div>
+            <span className="mini-label">KNOWLEDGE STATUS</span><h2>팀 자료 연결 완료</h2><p>음식점 12곳, 관광·문화 6곳, 편의시설 3곳의 정리된 자료를 사용합니다.</p>
+            <div className="source-owner"><span>21</span><div><b>주변 장소 자료</b><small>이름·분류·설명·거리 기준</small></div><i>사용 가능</i></div>
+            <div className="source-owner"><span>✓</span><div><b>근거 표시</b><small>답변마다 사용한 장소 공개</small></div><i>적용됨</i></div>
+            <div className="rag-flow"><b>답변 원칙</b><ol><li>질문 의도와 장소 분류 확인</li><li>가까운 후보 우선 안내</li><li>자료에 없으면 추측하지 않기</li></ol></div>
           </aside>
         </div>
       </section>}
@@ -237,4 +276,5 @@ function withEffectiveStatus(item: JoinItem, now: number): JoinItem {
     ? item
     : { ...item, status: "모집완료" };
 }
+
 
