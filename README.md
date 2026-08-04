@@ -54,6 +54,10 @@ python backend/build_index.py --csv data/processed/guesthouse_pois.csv --collect
 - 재생성 가능한 ChromaDB 바이너리 캐시는 1차 저장소에서 제외했습니다.
 - `frontend/.openai/hosting.json`의 기존 `project_id`를 보존했습니다.
 
+## 작업 기록
+
+최신 기능·충돌 해결·저장소 동기화·경로 변경 내역은 [디버깅 및 통합 이력](docs/DEBUGGING_HISTORY.md)에서 확인할 수 있습니다.
+
 ## 배포 주의
 
 웹 배포는 `frontend/` 폴더를 기준으로 진행합니다. 기존 Sites 프로젝트와 운영 주소를 재사용하며 새 사이트를 만들지 않습니다.
