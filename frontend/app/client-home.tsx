@@ -18,6 +18,9 @@ type JoinItem = {
   status: JoinStatus;
   host: string;
   description: string;
+  isOwner: boolean;
+  joined: boolean;
+  participantNames?: string[];
 };
 
 export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
@@ -39,7 +42,6 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
     keyword: "여행",
   });
   const [keyword, setKeyword] = useState("전체");
-  const [joined, setJoined] = useState<number[]>([]);
   const [toast, setToast] = useState("");
   const [statusNow, setStatusNow] = useState(() => Date.now());
   const displayJoins = useMemo(
@@ -127,10 +129,25 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
     window.setTimeout(() => setToast(""), 1800);
   };
 
-  const toggleJoin = (id: number, status: JoinStatus) => {
-    if (status !== "모집중") return;
-    setJoined((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id]);
-    setToast(joined.includes(id) ? "참여를 취소했어요." : "조인에 참여했어요! 로비에서 만나요 🍊");
+  const toggleJoin = async (item: JoinItem) => {
+    if (item.status !== "모집중" || item.isOwner) return;
+    if (!user) {
+      window.location.assign("/signin-with-chatgpt?return_to=/");
+      return;
+    }
+
+    const response = await fetch(`/api/joins/${item.id}/participants`, { method: "POST" });
+    const result = (await response.json()) as { joined?: boolean; error?: string };
+    if (!response.ok || typeof result.joined !== "boolean") {
+      setToast(result.error ?? "참여 상태를 바꾸지 못했어요.");
+      window.setTimeout(() => setToast(""), 2200);
+      return;
+    }
+
+    setJoins((current) => current.map((join) => join.id === item.id
+      ? { ...join, joined: result.joined!, people: join.people + (result.joined ? 1 : -1) }
+      : join));
+    setToast(result.joined ? "조인에 참여했어요! 로비에서 만나요 🍊" : "참여를 취소했어요.");
     window.setTimeout(() => setToast(""), 1800);
   };
 
@@ -160,7 +177,7 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
           </div>
           <div className="hero-art"><span className="sun"/><span className="cloud c1"/><span className="cloud c2"/><span className="mountain"/><span className="sea-line"/><span className="harubang"><i/><b>•‿•</b></span><span className="orange-tree">●</span><div className="art-sticker">오늘의 제주<br/><strong>바람 좋음</strong></div></div>
         </section>
-        <section className="join-preview"><div className="shell"><div className="section-heading light"><div><span className="mini-label">JOIN · READY</span><h2>{displayJoins.length > 0 ? "지금 참여할 수 있는 Join" : "첫 Join을 기다리고 있어요"}</h2><p>{displayJoins.length > 0 ? `최근 등록된 ${Math.min(displayJoins.length, 3)}개의 모임을 확인해 보세요.` : "계정으로 로그인한 뒤 새로운 Join을 만들어보세요."}</p></div><button onClick={() => move("join")}>{displayJoins.length > 0 ? "전체 Join 보기 →" : "Join 만들기 →"}</button></div>{displayJoins.length > 0 && <div className="join-grid">{displayJoins.slice(0, 3).map((item) => <JoinCard key={item.id} item={item} joined={joined.includes(item.id)} onJoin={() => toggleJoin(item.id, item.status)} />)}</div>}</div></section>
+        <section className="join-preview"><div className="shell"><div className="section-heading light"><div><span className="mini-label">JOIN · READY</span><h2>{displayJoins.length > 0 ? "지금 참여할 수 있는 Join" : "첫 Join을 기다리고 있어요"}</h2><p>{displayJoins.length > 0 ? `최근 등록된 ${Math.min(displayJoins.length, 3)}개의 모임을 확인해 보세요.` : "계정으로 로그인한 뒤 새로운 Join을 만들어보세요."}</p></div><button onClick={() => move("join")}>{displayJoins.length > 0 ? "전체 Join 보기 →" : "Join 만들기 →"}</button></div>{displayJoins.length > 0 && <div className="join-grid">{displayJoins.slice(0, 3).map((item) => <JoinCard key={item.id} item={item} onJoin={() => toggleJoin(item)} />)}</div>}</div></section>
       </>}
 
       {tab === "place" && <section className="subpage shell">
@@ -171,7 +188,7 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
       {tab === "join" && <section className="subpage shell">
         <div className="join-title-row"><div><span className="eyebrow">JOIN</span><h1>{displayJoins.length}개의 제주 Join</h1></div><button className="primary" onClick={() => user ? setCreatingJoin(true) : window.location.assign("/signin-with-chatgpt?return_to=/")}>Join 만들기 <span>＋</span></button></div>
         <div className="join-filters">{keywords.map((item) => <button key={item} className={keyword === item ? "selected" : ""} onClick={() => setKeyword(item)}>{item}</button>)}</div>
-        {visible.length === 0 ? <div className="keyword-panel"><span className="mini-label">EMPTY JOIN</span><h2>등록된 Join이 아직 없어요</h2><p>로그인한 사용자가 첫 Join을 만들면 이곳에 표시됩니다.</p></div> : <div className="join-page-grid">{visible.map((item) => <JoinCard key={item.id} item={item} joined={joined.includes(item.id)} onJoin={() => toggleJoin(item.id, item.status)}/>)}</div>}
+        {visible.length === 0 ? <div className="keyword-panel"><span className="mini-label">EMPTY JOIN</span><h2>등록된 Join이 아직 없어요</h2><p>로그인한 사용자가 첫 Join을 만들면 이곳에 표시됩니다.</p></div> : <div className="join-page-grid">{visible.map((item) => <JoinCard key={item.id} item={item} onJoin={() => toggleJoin(item)}/>)}</div>}
       </section>}
 
       {tab === "ask" && <section className="subpage shell ask-page">
@@ -207,8 +224,9 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
   );
 }
 
-function JoinCard({ item, joined, onJoin }: { item: JoinItem; joined: boolean; onJoin: () => void }) {
-  return <article className="join-card"><div className="join-visual green"><span>{item.icon}</span><i>{item.status}</i></div><div className="join-body"><div className="tags"><span>#{item.keyword}</span><span>#{item.date.slice(5)}</span></div><h3>{item.title}</h3><p className="join-description">{item.description}</p><p>🕒 {item.date} {item.time}</p><p>📍 {item.location}</p><p>👥 {item.people + (joined ? 1 : 0)}/{item.max}명 · by {item.host}</p><button className={joined ? "joined" : ""} disabled={item.status !== "모집중"} onClick={onJoin}>{joined ? "참여 완료 ✓" : item.status === "모집중" ? "함께하기" : item.status}</button></div></article>;
+function JoinCard({ item, onJoin }: { item: JoinItem; onJoin: () => void }) {
+  const buttonLabel = item.isOwner ? "내가 만든 모임" : item.joined ? "참여 완료 ✓" : item.status === "모집중" ? "함께하기" : item.status;
+  return <article className={`join-card ${item.status !== "모집중" ? "join-card-complete" : ""}`}><div className="join-visual green"><span>{item.icon}</span><i>{item.status}</i></div><div className="join-body"><div className="tags"><span>#{item.keyword}</span><span>#{item.date.slice(5)}</span></div><h3>{item.title}</h3><p className="join-description">{item.description}</p><p>🕒 {item.date} {item.time}</p><p>📍 {item.location}</p><p>👥 {item.people}/{item.max}명 · by {item.host}</p>{item.isOwner && <div className="participant-list"><b>참여자</b>{item.participantNames?.length ? <ul>{item.participantNames.map((name) => <li key={name}>👤 {name}</li>)}</ul> : <p>아직 참여자가 없어요.</p>}</div>}<button className={item.joined ? "joined" : ""} disabled={item.status !== "모집중" || item.isOwner} onClick={onJoin}>{buttonLabel}</button></div></article>;
 }
 
 function withEffectiveStatus(item: JoinItem, now: number): JoinItem {
