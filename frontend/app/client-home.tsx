@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChatGPTUser } from "./chatgpt-auth";
 import syntheticSeed from "../seed-data/bucket-jeju-m3-seed.synthetic.json";
 import { guesthouseFaq, localeCopy, type GuesthouseLocale } from "../seed-data/guesthouse-faq";
@@ -17,6 +17,38 @@ const bucketKnowledge = [
   { name: "CU 서귀최남단해안로점", description: "해안로에서 간식과 여행용품을 구입하기 편한 편의점", distance: "약 260m", tags: ["편의점", "간식", "생필품", "편의"] },
   { name: "모슬포낚시편의점", description: "간식과 낚시 편의용품을 함께 판매하는 가까운 편의점", distance: "약 270m", tags: ["편의점", "낚시", "간식", "편의"] },
 ];
+
+// 버킷제주 고정 위치와 정보 제공 경계(울타리) 반경
+const BUCKET_ORIGIN: [number, number] = [33.2124518, 126.2598287];
+const COVERAGE_RADIUS_M = 2000; // 반경 2km
+
+declare global {
+  interface Window { L?: any }
+}
+
+let leafletPromise: Promise<any> | null = null;
+// Leaflet(오픈소스 지도 엔진)을 CDN에서 한 번만 불러온다. 이 저장소의 index.html과 동일한 방식.
+function ensureLeaflet(): Promise<any> {
+  if (typeof window === "undefined") return Promise.reject(new Error("no window"));
+  if (window.L) return Promise.resolve(window.L);
+  if (leafletPromise) return leafletPromise;
+  leafletPromise = new Promise((resolve, reject) => {
+    if (!document.getElementById("leaflet-css")) {
+      const link = document.createElement("link");
+      link.id = "leaflet-css";
+      link.rel = "stylesheet";
+      link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
+      document.head.appendChild(link);
+    }
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
+    script.async = true;
+    script.onload = () => resolve(window.L);
+    script.onerror = () => reject(new Error("leaflet load failed"));
+    document.head.appendChild(script);
+  });
+  return leafletPromise;
+}
 
 type JoinItem = {
   id: number;
@@ -81,6 +113,8 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
     { role: "assistant", text: localeCopy.ko.greeting },
   ]);
   const [statusNow, setStatusNow] = useState(() => Date.now());
+  const mapRef = useRef<HTMLDivElement | null>(null);
+  const mapInstanceRef = useRef<any>(null);
   const displayJoins = useMemo(
     () => joins.map((item) => withEffectiveStatus(item, statusNow)),
     [joins, statusNow],
@@ -120,6 +154,54 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
     setLocale(next);
     setAskMessages([{ role: "assistant", text: localeCopy[next].greeting }]);
   }, []);
+
+  // "근처 발견" 탭이 열릴 때 Leaflet 지도를 만들고 정보 제공 경계(반경 2km 울타리)를 그린다.
+  useEffect(() => {
+    if (tab !== "place") return;
+    let cancelled = false;
+    ensureLeaflet()
+      .then((L) => {
+        if (cancelled || !mapRef.current || mapInstanceRef.current) return;
+        const map = L.map(mapRef.current, { scrollWheelZoom: false, zoomControl: false });
+        mapInstanceRef.current = map;
+        map.setView(BUCKET_ORIGIN, 14); // 벡터 레이어·컨트롤 투영을 위해 초기 뷰 먼저 설정
+        L.control.zoom({ position: "bottomleft" }).addTo(map);
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "© OpenStreetMap",
+        }).addTo(map);
+        // 정보가 적용된 범위를 나타내는 점선 울타리(반경 2km)
+        const fence = L.circle(BUCKET_ORIGIN, {
+          radius: COVERAGE_RADIUS_M,
+          color: "#e8892b",
+          weight: 2,
+          dashArray: "6 7",
+          fillColor: "#f6b24a",
+          fillOpacity: 0.12,
+        }).addTo(map);
+        fence.bindTooltip("정보 제공 경계 · 반경 2km", { direction: "top", sticky: true });
+        const originIcon = L.divIcon({
+          className: "bucket-origin-pin",
+          html: "<span>귤</span>",
+          iconSize: [36, 36],
+          iconAnchor: [18, 18],
+        });
+        L.marker(BUCKET_ORIGIN, { icon: originIcon, keyboard: false })
+          .addTo(map)
+          .bindTooltip("버킷제주", { direction: "top" });
+        L.control.scale({ position: "bottomright", imperial: false }).addTo(map);
+        map.fitBounds(fence.getBounds(), { padding: [16, 16] });
+        window.setTimeout(() => map.invalidateSize(), 80);
+      })
+      .catch(() => setToast("지도를 불러오지 못했어요."));
+    return () => {
+      cancelled = true;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [tab]);
 
   const changeLocale = (next: GuesthouseLocale) => {
     setLocale(next);
@@ -286,8 +368,8 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
       </>}
 
       {tab === "place" && <section className="subpage shell">
-        <span className="eyebrow">AROUND BUCKET · 2KM</span><h1>버킷제주 근처를 발견해요</h1><p className="lead">버킷제주의 고정 위치를 중심으로 반경 2km 안의 장소만 안내합니다.</p>
-        <div className="map-panel"><div className="real-map"><iframe title="버킷제주 지도" src="https://www.openstreetmap.org/export/embed.html?bbox=126.2398%2C33.19245%2C126.2798%2C33.23245&layer=mapnik&marker=33.2124518%2C126.2598287" loading="lazy"/><div className="map-origin"><span className="brand-mark">귤</span><span><b>버킷제주</b><small>반경 2km 안내</small></span></div></div><div className="result-list"><div className="result-head"><b>가까운 곳</b><span>2km 이내</span></div>{[["하모해변","바다 · 도보 1분","🌊"],["대정쌍둥이식당","맛집 · 도보 10분","🍲"],["모슬포항","산책 · 도보 18분","⚓"],["운진항","여행 · 차량 6분","⛴️"]].map((place)=><button key={place[0]}><span className="place-icon mint">{place[2]}</span><span><small>{place[1]}</small><b>{place[0]}</b><p>버킷제주에서 가볍게 다녀오기 좋은 곳</p></span></button>)}</div></div>
+        <span className="eyebrow">AROUND BUCKET · 2KM</span><h1>버킷제주 근처를 발견해요</h1><p className="lead">버킷제주의 고정 위치를 중심으로 반경 2km 안의 장소만 안내합니다. 지도의 <b>점선 울타리</b>가 정보가 적용된 범위예요.</p>
+        <div className="map-panel"><div className="real-map"><div ref={mapRef} className="real-map-canvas" role="img" aria-label="버킷제주 중심 반경 2km 정보 제공 경계 지도"/><div className="map-origin"><span className="brand-mark">귤</span><span><b>버킷제주</b><small>반경 2km 안내 경계</small></span></div><div className="map-fence-legend"><span className="fence-swatch" aria-hidden="true"/><span>정보 제공 경계 · 반경 2km</span></div></div><div className="result-list"><div className="result-head"><b>가까운 곳</b><span>2km 경계 이내</span></div>{[["하모해변","바다 · 도보 1분","🌊"],["대정쌍둥이식당","맛집 · 도보 10분","🍲"],["모슬포항","산책 · 도보 18분","⚓"],["운진항","여행 · 차량 6분","⛴️"]].map((place)=><button key={place[0]}><span className="place-icon mint">{place[2]}</span><span><small>{place[1]}</small><b>{place[0]}</b><p>버킷제주에서 가볍게 다녀오기 좋은 곳</p></span></button>)}</div></div>
       </section>}
 
       {tab === "join" && <section className="subpage shell">
