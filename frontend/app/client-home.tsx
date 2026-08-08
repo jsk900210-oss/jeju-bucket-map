@@ -22,6 +22,40 @@ const bucketKnowledge = [
 const BUCKET_ORIGIN: [number, number] = [33.2124518, 126.2598287];
 const COVERAGE_RADIUS_M = 2000; // 반경 2km
 
+// 근처 플레이스 카테고리와 이모지
+const PLACE_CATEGORIES: { key: string; emoji: string }[] = [
+  { key: "식당", emoji: "🍽️" },
+  { key: "카페", emoji: "☕" },
+  { key: "약국", emoji: "💊" },
+  { key: "병원", emoji: "🏥" },
+  { key: "아이스크림", emoji: "🍦" },
+  { key: "헬스장", emoji: "🏋️" },
+  { key: "편의점", emoji: "🏪" },
+  { key: "해변", emoji: "🏖️" },
+  { key: "관광", emoji: "📷" },
+  { key: "항구", emoji: "⚓" },
+];
+const CATEGORY_EMOJI: Record<string, string> = Object.fromEntries(PLACE_CATEGORIES.map((c) => [c.key, c.emoji]));
+
+type MapPlace = { name: string; category: string; lat: number; lng: number; distance: string };
+// 버킷제주(33.2124518, 126.2598287) 반경 2km 내 대표 플레이스 — 프로토타입용 근사 좌표
+const mapPlaces: MapPlace[] = [
+  { name: "대정쌍둥이식당", category: "식당", lat: 33.21709, lng: 126.26185, distance: "약 550m" },
+  { name: "감귤빙수 카페", category: "카페", lat: 33.21511, lng: 126.26664, distance: "약 700m" },
+  { name: "제주아이스크림하우스", category: "아이스크림", lat: 33.21045, lng: 126.26639, distance: "약 650m" },
+  { name: "버킷피트니스", category: "헬스장", lat: 33.20757, lng: 126.26255, distance: "약 600m" },
+  { name: "하모수산식당", category: "식당", lat: 33.20078, lng: 126.26788, distance: "약 1.5km" },
+  { name: "모슬포항 카페거리", category: "카페", lat: 33.20312, lng: 126.25339, distance: "약 1.2km" },
+  { name: "방어축제의거리", category: "관광", lat: 33.19979, lng: 126.25432, distance: "약 1.5km" },
+  { name: "모슬포항", category: "항구", lat: 33.20229, lng: 126.24768, distance: "약 1.6km" },
+  { name: "모슬포약국", category: "약국", lat: 33.20752, lng: 126.24718, distance: "약 1.3km" },
+  { name: "하모해변", category: "해변", lat: 33.21478, lng: 126.24946, distance: "약 1.0km" },
+  { name: "하모약국", category: "약국", lat: 33.21513, lng: 126.25526, distance: "약 520m" },
+  { name: "대정보건지소", category: "병원", lat: 33.21913, lng: 126.25611, distance: "약 820m" },
+  { name: "CU 서귀최남단해안로점", category: "편의점", lat: 33.21907, lng: 126.26537, distance: "약 900m" },
+  { name: "운진항 여객터미널", category: "항구", lat: 33.19656, lng: 126.25402, distance: "약 1.9km" },
+];
+
 declare global {
   interface Window { L?: any }
 }
@@ -106,6 +140,8 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
     keyword: "여행",
   });
   const [keyword, setKeyword] = useState("전체");
+  const [joinSort, setJoinSort] = useState<"newest" | "oldest">("newest");
+  const [placeCat, setPlaceCat] = useState("전체");
   const [toast, setToast] = useState("");
   const [askInput, setAskInput] = useState("");
   const [locale, setLocale] = useState<GuesthouseLocale>("ko");
@@ -115,6 +151,7 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
   const [statusNow, setStatusNow] = useState(() => Date.now());
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
+  const markersLayerRef = useRef<any>(null);
   const displayJoins = useMemo(
     () => joins.map((item) => withEffectiveStatus(item, statusNow)),
     [joins, statusNow],
@@ -124,6 +161,23 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
     () => displayJoins.filter((item) => keyword === "전체" || item.keyword === keyword),
     [displayJoins, keyword],
   );
+  // 지난 일정과 예정 일정을 나누고, 선택한 정렬(최신순/오래된순)을 적용한다.
+  const joinBuckets = useMemo(() => {
+    const withTs = visible.map((item) => ({
+      item,
+      ts: new Date(`${item.date}T${item.time}:00+09:00`).getTime(),
+    }));
+    const cmp = (a: { ts: number }, b: { ts: number }) => (joinSort === "newest" ? b.ts - a.ts : a.ts - b.ts);
+    const upcoming = withTs
+      .filter((x) => Number.isNaN(x.ts) || x.ts >= statusNow)
+      .sort(cmp)
+      .map((x) => x.item);
+    const past = withTs
+      .filter((x) => !Number.isNaN(x.ts) && x.ts < statusNow)
+      .sort((a, b) => b.ts - a.ts) // 지난 일정은 항상 가장 최근에 지난 것부터
+      .map((x) => x.item);
+    return { upcoming, past };
+  }, [visible, joinSort, statusNow]);
   const faqSuggestions = useMemo(
     () => ["wifi", "facilities", "lost-found", "first-aid"]
       .map((id) => guesthouseFaq.find((item) => item.id === id)!.question[locale]),
@@ -156,6 +210,26 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
   }, []);
 
   // "근처 발견" 탭이 열릴 때 Leaflet 지도를 만들고 정보 제공 경계(반경 2km 울타리)를 그린다.
+  const renderPlaceMarkers = (L: any) => {
+    const layer = markersLayerRef.current;
+    if (!L || !layer) return;
+    layer.clearLayers();
+    mapPlaces
+      .filter((place) => placeCat === "전체" || place.category === placeCat)
+      .forEach((place) => {
+        const emoji = CATEGORY_EMOJI[place.category] ?? "📍";
+        const icon = L.divIcon({
+          className: "place-emoji-pin",
+          html: `<span>${emoji}</span>`,
+          iconSize: [30, 30],
+          iconAnchor: [15, 30],
+        });
+        L.marker([place.lat, place.lng], { icon })
+          .addTo(layer)
+          .bindTooltip(`${emoji} ${place.name} · ${place.category} · ${place.distance}`, { direction: "top" });
+      });
+  };
+
   useEffect(() => {
     if (tab !== "place") return;
     let cancelled = false;
@@ -190,6 +264,9 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
           .addTo(map)
           .bindTooltip("버킷제주", { direction: "top" });
         L.control.scale({ position: "bottomright", imperial: false }).addTo(map);
+        const markers = L.layerGroup().addTo(map);
+        markersLayerRef.current = markers;
+        renderPlaceMarkers(L);
         map.fitBounds(fence.getBounds(), { padding: [16, 16] });
         window.setTimeout(() => map.invalidateSize(), 80);
       })
@@ -200,8 +277,16 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
+      markersLayerRef.current = null;
     };
   }, [tab]);
+
+  // 카테고리 필터가 바뀌면 마커만 다시 그린다.
+  useEffect(() => {
+    if (tab !== "place") return;
+    const L = typeof window !== "undefined" ? window.L : undefined;
+    if (L && mapInstanceRef.current && markersLayerRef.current) renderPlaceMarkers(L);
+  }, [placeCat, tab]);
 
   const changeLocale = (next: GuesthouseLocale) => {
     setLocale(next);
@@ -369,7 +454,8 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
 
       {tab === "place" && <section className="subpage shell">
         <span className="eyebrow">AROUND BUCKET · 2KM</span><h1>버킷제주 근처를 발견해요</h1><p className="lead">버킷제주의 고정 위치를 중심으로 반경 2km 안의 장소만 안내합니다. 지도의 <b>점선 울타리</b>가 정보가 적용된 범위예요.</p>
-        <div className="map-panel"><div className="real-map"><div ref={mapRef} className="real-map-canvas" role="img" aria-label="버킷제주 중심 반경 2km 정보 제공 경계 지도"/><div className="map-origin"><span className="brand-mark">귤</span><span><b>버킷제주</b><small>반경 2km 안내 경계</small></span></div><div className="map-fence-legend"><span className="fence-swatch" aria-hidden="true"/><span>정보 제공 경계 · 반경 2km</span></div></div><div className="result-list"><div className="result-head"><b>가까운 곳</b><span>2km 경계 이내</span></div>{[["하모해변","바다 · 도보 1분","🌊"],["대정쌍둥이식당","맛집 · 도보 10분","🍲"],["모슬포항","산책 · 도보 18분","⚓"],["운진항","여행 · 차량 6분","⛴️"]].map((place)=><button key={place[0]}><span className="place-icon mint">{place[2]}</span><span><small>{place[1]}</small><b>{place[0]}</b><p>버킷제주에서 가볍게 다녀오기 좋은 곳</p></span></button>)}</div></div>
+        <div className="place-cat-row"><button className={placeCat === "전체" ? "active" : ""} onClick={() => setPlaceCat("전체")}>전체</button>{PLACE_CATEGORIES.map((c) => <button key={c.key} className={placeCat === c.key ? "active" : ""} onClick={() => setPlaceCat(c.key)}>{c.emoji} {c.key}</button>)}</div>
+        <div className="map-panel"><div className="real-map"><div ref={mapRef} className="real-map-canvas" role="img" aria-label="버킷제주 중심 반경 2km 정보 제공 경계 지도"/><div className="map-origin"><span className="brand-mark">귤</span><span><b>버킷제주</b><small>반경 2km 안내 경계</small></span></div><div className="map-fence-legend"><span className="fence-swatch" aria-hidden="true"/><span>정보 제공 경계 · 반경 2km</span></div></div><div className="result-list"><div className="result-head"><b>{placeCat === "전체" ? "가까운 곳" : `${CATEGORY_EMOJI[placeCat] ?? ""} ${placeCat}`}</b><span>{mapPlaces.filter((p) => placeCat === "전체" || p.category === placeCat).length}곳 · 2km 이내</span></div>{mapPlaces.filter((p) => placeCat === "전체" || p.category === placeCat).map((place) => <button key={place.name}><span className="place-icon mint">{CATEGORY_EMOJI[place.category] ?? "📍"}</span><span><small>{place.category} · {place.distance}</small><b>{place.name}</b><p>버킷제주에서 가볍게 다녀오기 좋은 곳</p></span></button>)}</div></div>
       </section>}
 
       {tab === "join" && <section className="subpage shell">
@@ -377,8 +463,18 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
         <div className="synthetic-notice"><b>테스트용 합성 데이터</b><span>가상 투숙객 30명 · 무작위 Join 60건 · 2026.08.05–08.19</span><p>실제 인물, 예약 또는 모임이 아닙니다. 테스트 종료 후 일괄 삭제할 예정입니다.</p></div>
         <details className="synthetic-guests"><summary>가상 테스트 계정 30명 보기</summary><div>{syntheticSeed.guests.map((guest) => <span key={guest.id}><b>👤 {guest.nickname}</b><small>{guest.syntheticName} · {guest.gender} · {guest.nationality}</small><i>{guest.testAccountId} · {guest.checkInDate.slice(5)}–{guest.checkOutDate.slice(5)}</i></span>)}</div></details>
         <div className="distribution-strip" aria-label="일자별 합성 Join 개수">{Object.entries(syntheticSeed._meta.joinDistribution).map(([date, count]) => <span key={date}><small>{date.slice(5)}</small><i style={{height: `${8 + Number(count) * 4}px`}}/><b>{count}건</b></span>)}</div>
-        <div className="join-filters">{keywords.map((item) => <button key={item} className={keyword === item ? "selected" : ""} onClick={() => setKeyword(item)}>{item}</button>)}</div>
-        {visible.length === 0 ? <div className="keyword-panel"><span className="mini-label">EMPTY JOIN</span><h2>등록된 Join이 아직 없어요</h2><p>로그인한 사용자가 첫 Join을 만들면 이곳에 표시됩니다.</p></div> : <div className="join-page-grid">{visible.map((item) => <JoinCard key={item.id} item={item} onJoin={() => toggleJoin(item)}/>)}</div>}
+        <div className="join-toolbar">
+          <div className="join-filters">{keywords.map((item) => <button key={item} className={keyword === item ? "selected" : ""} onClick={() => setKeyword(item)}>{item}</button>)}</div>
+          <label className="join-sort">정렬<select value={joinSort} onChange={(event) => setJoinSort(event.target.value as "newest" | "oldest")}><option value="newest">최신순</option><option value="oldest">오래된순</option></select></label>
+        </div>
+        {joinBuckets.upcoming.length === 0 && joinBuckets.past.length === 0
+          ? <div className="keyword-panel"><span className="mini-label">EMPTY JOIN</span><h2>등록된 Join이 아직 없어요</h2><p>로그인한 사용자가 첫 Join을 만들면 이곳에 표시됩니다.</p></div>
+          : <>
+              {joinBuckets.upcoming.length > 0
+                ? <div className="join-page-grid">{joinBuckets.upcoming.map((item) => <JoinCard key={item.id} item={item} onJoin={() => toggleJoin(item)}/>)}</div>
+                : <div className="join-empty-hint">예정된 Join이 없어요. 지난 일정만 남아 있어요.</div>}
+              {joinBuckets.past.length > 0 && <details className="past-joins"><summary>지난 일정 {joinBuckets.past.length}개 보기</summary><div className="join-page-grid past-grid">{joinBuckets.past.map((item) => <JoinCard key={item.id} item={item} onJoin={() => toggleJoin(item)}/>)}</div></details>}
+            </>}
       </section>}
 
       {tab === "ask" && <section className="subpage shell ask-page">
@@ -411,7 +507,7 @@ export default function ClientHome({ user }: { user: ChatGPTUser | null }) {
       {creatingJoin && <div className="modal-backdrop" role="presentation" onMouseDown={() => setCreatingJoin(false)}><section className="join-modal" role="dialog" aria-modal="true" aria-labelledby="join-create-title" onMouseDown={(event) => event.stopPropagation()}><button className="modal-close" type="button" aria-label="닫기" onClick={() => setCreatingJoin(false)}>×</button><span className="mini-label">NEW JOIN</span><h2 id="join-create-title">새로운 Join 만들기</h2><p>함께하고 싶은 일정과 모집 내용을 알려주세요.</p><form onSubmit={saveJoin}><label>제목<input required maxLength={40} value={joinDraft.title} onChange={(event) => setJoinDraft({...joinDraft, title:event.target.value})} placeholder="예: 함께 오름 일몰 보러 가요" /></label><label>소개<textarea required maxLength={300} rows={4} value={joinDraft.description} onChange={(event) => setJoinDraft({...joinDraft, description:event.target.value})} placeholder="어떤 시간을 함께 보내고 싶은지 적어주세요" /></label><div className="form-grid"><label>장소<input required maxLength={60} value={joinDraft.location} onChange={(event) => setJoinDraft({...joinDraft, location:event.target.value})} placeholder="만나는 장소" /></label><label>주제<select value={joinDraft.keyword} onChange={(event) => setJoinDraft({...joinDraft, keyword:event.target.value})}><option>여행</option><option>맛집</option><option>산책</option><option>액티비티</option><option>기타</option></select></label><label>날짜<input required type="date" value={joinDraft.date} onChange={(event) => setJoinDraft({...joinDraft, date:event.target.value})} /></label><label>시간<input required type="time" value={joinDraft.time} onChange={(event) => setJoinDraft({...joinDraft, time:event.target.value})} /></label><label>모집 인원<input required type="number" min={2} max={20} value={joinDraft.max} onChange={(event) => setJoinDraft({...joinDraft, max:event.target.value})} /></label></div><button className="primary submit-join" type="submit" disabled={savingJoin}>{savingJoin ? "등록 중…" : "Join 등록하기"}</button></form></section></div>}
       {editingNickname && <div className="modal-backdrop" role="presentation" onMouseDown={() => setEditingNickname(false)}><section className="nickname-modal" role="dialog" aria-modal="true" aria-labelledby="nickname-title" onMouseDown={(event) => event.stopPropagation()}><button className="modal-close" type="button" aria-label="닫기" onClick={() => setEditingNickname(false)}>×</button><span className="mini-label">MY PROFILE</span><h2 id="nickname-title">닉네임 바꾸기</h2><p>Join과 프로필에 표시할 이름을 정해 주세요.</p><form onSubmit={saveNickname}><label htmlFor="nickname">닉네임</label><input id="nickname" autoFocus minLength={2} maxLength={20} value={nicknameDraft} onChange={(event) => setNicknameDraft(event.target.value)} placeholder="2~20자로 입력" /><small>{nicknameDraft.trim().length}/20</small><button className="primary" type="submit" disabled={savingNickname || nicknameDraft.trim().length < 2}>{savingNickname ? "저장 중…" : "닉네임 저장"}</button></form></section></div>}
       {toast && <div className="toast" role="status">{toast}</div>}
-      <footer><div className="shell"><span className="brand-mark">귤</span><p><b>BUCKET GUESTHOUSE · JEJU</b><small>오늘의 인연이 내일의 추억으로.</small></p><i>v5 · Join Reset</i></div></footer>
+      <footer><div className="shell"><span className="brand-mark">귤</span><p><b>BUCKET GUESTHOUSE · JEJU</b><small>오늘의 인연이 내일의 추억으로.</small></p><i>v6 · 지도 발견 · Join 정렬</i></div></footer>
     </main>
   );
 }
