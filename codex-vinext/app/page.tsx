@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Tab = "home" | "place" | "join" | "profile";
 type JoinStatus = "모집중" | "모집완료" | "일정완료";
@@ -30,6 +30,38 @@ const keywords = [
   { label: "카페", value: 31, count: 5, color: "#a98c72" },
 ];
 
+// 버킷 제주 고정 위치와 정보 제공 경계(울타리) 반경
+const BUCKET_ORIGIN: [number, number] = [33.2124518, 126.2598287];
+const COVERAGE_RADIUS_M = 2000; // 반경 2km
+
+declare global {
+  interface Window { L?: any }
+}
+
+let leafletPromise: Promise<any> | null = null;
+// Leaflet(오픈소스 지도 엔진)을 CDN에서 한 번만 불러온다. 이 저장소의 index.html과 동일한 방식.
+function ensureLeaflet(): Promise<any> {
+  if (typeof window === "undefined") return Promise.reject(new Error("no window"));
+  if (window.L) return Promise.resolve(window.L);
+  if (leafletPromise) return leafletPromise;
+  leafletPromise = new Promise((resolve, reject) => {
+    if (!document.getElementById("leaflet-css")) {
+      const link = document.createElement("link");
+      link.id = "leaflet-css";
+      link.rel = "stylesheet";
+      link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
+      document.head.appendChild(link);
+    }
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
+    script.async = true;
+    script.onload = () => resolve(window.L);
+    script.onerror = () => reject(new Error("leaflet load failed"));
+    document.head.appendChild(script);
+  });
+  return leafletPromise;
+}
+
 export default function Home() {
   const [tab, setTab] = useState<Tab>("home");
   const [query, setQuery] = useState("");
@@ -39,6 +71,8 @@ export default function Home() {
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [draft, setDraft] = useState({ title: "", description: "", max: 4, status: "모집중" as JoinStatus, category: "식사", time: "", location: "버킷 제주 로비" });
   const [toast, setToast] = useState("");
+  const mapRef = useRef<HTMLDivElement | null>(null);
+  const mapInstanceRef = useRef<any>(null);
 
   const visibleJoins = useMemo(
     () => joinItems.filter((join) => filter === "전체" || join.tags.includes(filter) || join.status === filter),
@@ -83,6 +117,54 @@ export default function Home() {
     setTab(next);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  // "근처 발견" 탭이 열릴 때 Leaflet 지도를 만들고 정보 제공 경계(반경 2km 울타리)를 그린다.
+  useEffect(() => {
+    if (tab !== "place") return;
+    let cancelled = false;
+    ensureLeaflet()
+      .then((L) => {
+        if (cancelled || !mapRef.current || mapInstanceRef.current) return;
+        const map = L.map(mapRef.current, { scrollWheelZoom: false, zoomControl: false });
+        mapInstanceRef.current = map;
+        map.setView(BUCKET_ORIGIN, 14); // 벡터 레이어·컨트롤 투영을 위해 초기 뷰 먼저 설정
+        map.attributionControl.setPosition("bottomleft");
+        L.control.zoom({ position: "bottomleft" }).addTo(map);
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "© OpenStreetMap",
+        }).addTo(map);
+        // 정보가 적용된 범위를 나타내는 점선 울타리(반경 2km)
+        const fence = L.circle(BUCKET_ORIGIN, {
+          radius: COVERAGE_RADIUS_M,
+          color: "#e8892b",
+          weight: 2,
+          dashArray: "6 7",
+          fillColor: "#f6b24a",
+          fillOpacity: 0.12,
+        }).addTo(map);
+        fence.bindTooltip("정보 제공 경계 · 반경 2km", { direction: "top", sticky: true });
+        const originIcon = L.divIcon({
+          className: "bucket-origin-pin",
+          html: "<span>ㅂ</span>",
+          iconSize: [36, 36],
+          iconAnchor: [18, 18],
+        });
+        L.marker(BUCKET_ORIGIN, { icon: originIcon, keyboard: false })
+          .addTo(map)
+          .bindTooltip("버킷 제주", { direction: "top" });
+        map.fitBounds(fence.getBounds(), { padding: [16, 16] });
+        window.setTimeout(() => map.invalidateSize(), 80);
+      })
+      .catch(() => showToast("지도를 불러오지 못했어요."));
+    return () => {
+      cancelled = true;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [tab]);
 
   return (
     <main>
@@ -164,23 +246,19 @@ export default function Home() {
         <section className="subpage shell">
           <span className="eyebrow">AROUND BUCKET · DAEJEONG</span>
           <h1>오늘은 어디로 가볼까요?</h1>
-          <p className="lead">버킷 제주(서귀포시 대정읍 하모백사로14번길 1)를 중심으로 가까운 곳부터 보여드려요.</p>
+          <p className="lead">버킷 제주(서귀포시 대정읍 하모백사로14번길 1)를 중심으로 가까운 곳부터 보여드려요. 지도의 <b>점선 울타리</b>가 정보가 적용된 범위(반경 2km)예요.</p>
           <div className="search-box">
             <span>⌕</span><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="하모해변 근처 카페, 맛집, 산책 검색" aria-label="장소 검색"/><button onClick={() => showToast(query ? `버킷 제주에서 '${query}'까지 찾아봤어요` : "검색어를 입력해 주세요")}>검색</button>
           </div>
           <div className="category-row">{["전체", "☕ 카페", "🍚 맛집", "🌊 바다", "🥾 산책", "🚌 교통"].map((item) => <button key={item} onClick={() => setQuery(item.replace(/^[^\s]+ /, ""))}>{item}</button>)}</div>
           <div className="map-panel">
             <div className="real-map">
-              <iframe
-                title="버킷 제주 실제 지도"
-                src="https://www.openstreetmap.org/export/embed.html?bbox=126.2498%2C33.20245%2C126.2698%2C33.22245&layer=mapnik&marker=33.2124518%2C126.2598287"
-                loading="lazy"
-                referrerPolicy="strict-origin-when-cross-origin"
-              />
+              <div ref={mapRef} className="real-map-canvas" role="img" aria-label="버킷 제주 중심 반경 2km 정보 제공 경계 지도" />
               <div className="map-origin">
                 <span className="brand-mark">ㅂ</span>
                 <span><b>버킷 제주</b><small>하모백사로14번길 1</small></span>
               </div>
+              <div className="map-fence-legend"><span className="fence-swatch" aria-hidden="true" /><span>정보 제공 경계 · 반경 2km</span></div>
               <a href="https://www.openstreetmap.org/?mlat=33.2124518&mlon=126.2598287#map=16/33.2124518/126.2598287" target="_blank" rel="noreferrer">큰 지도에서 보기 ↗</a>
             </div>
             <div className="result-list">
