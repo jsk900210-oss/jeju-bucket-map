@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 type Tab = "home" | "place" | "join" | "profile";
 type JoinStatus = "모집중" | "모집완료" | "일정완료";
 type JoinItem = {
-  id: number; title: string; description: string; tags: string[]; time: string;
+  id: number; title: string; description: string; tags: string[]; date: string; clock: string;
   location: string; people: number; max: number; host: string; icon: string;
   tone: string; status: JoinStatus;
 };
@@ -17,9 +17,9 @@ const places = [
 ];
 
 const joins: JoinItem[] = [
-  { id: 1, title: "하모해변 노을 러닝", description: "버킷 제주 앞에서 출발해 바닷길을 천천히 달려요. 초보도 환영해요!", tags: ["러닝", "노을"], time: "오늘 18:30", location: "버킷 제주 로비", people: 3, max: 5, host: "파도타는귤", icon: "🏃", tone: "coral", status: "모집중" },
-  { id: 2, title: "모슬포 고기국수 같이 먹어요", description: "혼밥 대신 함께 저녁 먹어요. 메뉴는 만나서 같이 골라도 좋아요.", tags: ["식사", "로컬맛집"], time: "오늘 19:00", location: "버킷 제주 입구", people: 4, max: 4, host: "오름이", icon: "🍜", tone: "yellow", status: "모집완료" },
-  { id: 3, title: "아침 하모해변 산책", description: "바닷바람 맞으며 가볍게 걷고 사진도 남겨요.", tags: ["산책", "사진"], time: "어제 08:00", location: "하모해변", people: 4, max: 6, host: "제주한스푼", icon: "📷", tone: "green", status: "일정완료" },
+  { id: 1, title: "하모해변 노을 러닝", description: "버킷 제주 앞에서 출발해 바닷길을 천천히 달려요. 초보도 환영해요!", tags: ["러닝", "노을"], date: "2026-08-12", clock: "18:30", location: "버킷 제주 로비", people: 3, max: 5, host: "파도타는귤", icon: "🏃", tone: "coral", status: "모집중" },
+  { id: 2, title: "모슬포 고기국수 같이 먹어요", description: "혼밥 대신 함께 저녁 먹어요. 메뉴는 만나서 같이 골라도 좋아요.", tags: ["식사", "로컬맛집"], date: "2026-08-09", clock: "19:00", location: "버킷 제주 입구", people: 4, max: 4, host: "오름이", icon: "🍜", tone: "yellow", status: "모집완료" },
+  { id: 3, title: "아침 하모해변 산책", description: "바닷바람 맞으며 가볍게 걷고 사진도 남겨요.", tags: ["산책", "사진"], date: "2026-08-04", clock: "08:00", location: "하모해변", people: 4, max: 6, host: "제주한스푼", icon: "📷", tone: "green", status: "일정완료" },
 ];
 
 const keywords = [
@@ -33,6 +33,40 @@ const keywords = [
 // 버킷 제주 고정 위치와 정보 제공 경계(울타리) 반경
 const BUCKET_ORIGIN: [number, number] = [33.2124518, 126.2598287];
 const COVERAGE_RADIUS_M = 2000; // 반경 2km
+
+// 근처 플레이스 카테고리와 이모지
+const PLACE_CATEGORIES: { key: string; emoji: string }[] = [
+  { key: "식당", emoji: "🍽️" },
+  { key: "카페", emoji: "☕" },
+  { key: "약국", emoji: "💊" },
+  { key: "병원", emoji: "🏥" },
+  { key: "아이스크림", emoji: "🍦" },
+  { key: "헬스장", emoji: "🏋️" },
+  { key: "편의점", emoji: "🏪" },
+  { key: "해변", emoji: "🏖️" },
+  { key: "관광", emoji: "📷" },
+  { key: "항구", emoji: "⚓" },
+];
+const CATEGORY_EMOJI: Record<string, string> = Object.fromEntries(PLACE_CATEGORIES.map((c) => [c.key, c.emoji]));
+
+type MapPlace = { name: string; category: string; lat: number; lng: number; distance: string };
+// 버킷 제주(33.2124518, 126.2598287) 반경 2km 내 대표 플레이스 — 프로토타입용 근사 좌표
+const mapPlaces: MapPlace[] = [
+  { name: "대정쌍둥이식당", category: "식당", lat: 33.21709, lng: 126.26185, distance: "약 550m" },
+  { name: "감귤빙수 카페", category: "카페", lat: 33.21511, lng: 126.26664, distance: "약 700m" },
+  { name: "제주아이스크림하우스", category: "아이스크림", lat: 33.21045, lng: 126.26639, distance: "약 650m" },
+  { name: "버킷피트니스", category: "헬스장", lat: 33.20757, lng: 126.26255, distance: "약 600m" },
+  { name: "하모수산식당", category: "식당", lat: 33.20078, lng: 126.26788, distance: "약 1.5km" },
+  { name: "모슬포항 카페거리", category: "카페", lat: 33.20312, lng: 126.25339, distance: "약 1.2km" },
+  { name: "방어축제의거리", category: "관광", lat: 33.19979, lng: 126.25432, distance: "약 1.5km" },
+  { name: "모슬포항", category: "항구", lat: 33.20229, lng: 126.24768, distance: "약 1.6km" },
+  { name: "모슬포약국", category: "약국", lat: 33.20752, lng: 126.24718, distance: "약 1.3km" },
+  { name: "하모해변", category: "해변", lat: 33.21478, lng: 126.24946, distance: "약 1.0km" },
+  { name: "하모약국", category: "약국", lat: 33.21513, lng: 126.25526, distance: "약 520m" },
+  { name: "대정보건지소", category: "병원", lat: 33.21913, lng: 126.25611, distance: "약 820m" },
+  { name: "CU 서귀최남단해안로점", category: "편의점", lat: 33.21907, lng: 126.26537, distance: "약 900m" },
+  { name: "운진항 여객터미널", category: "항구", lat: 33.19656, lng: 126.25402, distance: "약 1.9km" },
+];
 
 declare global {
   interface Window { L?: any }
@@ -73,11 +107,26 @@ export default function Home() {
   const [toast, setToast] = useState("");
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
+  const markersLayerRef = useRef<any>(null);
+  const [joinSort, setJoinSort] = useState<"newest" | "oldest">("newest");
+  const [placeCat, setPlaceCat] = useState("전체");
 
   const visibleJoins = useMemo(
     () => joinItems.filter((join) => filter === "전체" || join.tags.includes(filter) || join.status === filter),
     [filter, joinItems],
   );
+  // 지난 일정과 예정 일정을 나누고, 선택한 정렬(최신순/오래된순)을 적용한다.
+  const joinBuckets = useMemo(() => {
+    const now = Date.now();
+    const withTs = visibleJoins.map((join) => ({
+      join,
+      ts: new Date(`${join.date}T${join.clock}:00+09:00`).getTime(),
+    }));
+    const cmp = (a: { ts: number }, b: { ts: number }) => (joinSort === "newest" ? b.ts - a.ts : a.ts - b.ts);
+    const upcoming = withTs.filter((x) => Number.isNaN(x.ts) || x.ts >= now).sort(cmp).map((x) => x.join);
+    const past = withTs.filter((x) => !Number.isNaN(x.ts) && x.ts < now).sort((a, b) => b.ts - a.ts).map((x) => x.join);
+    return { upcoming, past };
+  }, [visibleJoins, joinSort]);
 
   const showToast = (message: string) => {
     setToast(message);
@@ -103,7 +152,7 @@ export default function Home() {
     const icons: Record<string, string> = { 러닝: "🏃", 식사: "🍜", 산책: "🥾", 사진: "📷", 여행: "🚌" };
     setJoinItems((current) => [{
       id: Date.now(), title: draft.title.trim(), description: draft.description.trim(),
-      max: draft.max, status: draft.status, tags: [draft.category], time: draft.time,
+      max: draft.max, status: draft.status, tags: [draft.category], date: draft.time.slice(0, 10), clock: draft.time.slice(11, 16),
       location: draft.location.trim() || "버킷 제주 로비", people: 1, host: "감귤러버",
       icon: icons[draft.category] || "🍊", tone: "green",
     }, ...current]);
@@ -118,7 +167,28 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // "근처 발견" 탭이 열릴 때 Leaflet 지도를 만들고 정보 제공 경계(반경 2km 울타리)를 그린다.
+  // 카테고리 필터에 맞춰 플레이스 이모지 마커를 지도에 다시 그린다.
+  const renderPlaceMarkers = (L: any) => {
+    const layer = markersLayerRef.current;
+    if (!L || !layer) return;
+    layer.clearLayers();
+    mapPlaces
+      .filter((place) => placeCat === "전체" || place.category === placeCat)
+      .forEach((place) => {
+        const emoji = CATEGORY_EMOJI[place.category] ?? "📍";
+        const icon = L.divIcon({
+          className: "place-emoji-pin",
+          html: `<span>${emoji}</span>`,
+          iconSize: [30, 30],
+          iconAnchor: [15, 30],
+        });
+        L.marker([place.lat, place.lng], { icon })
+          .addTo(layer)
+          .bindTooltip(`${emoji} ${place.name} · ${place.category} · ${place.distance}`, { direction: "top" });
+      });
+  };
+
+  // "근처 발견" 탭이 열릴 때 Leaflet 지도를 만들고 정보 제공 경계(반경 2km 울타리)와 플레이스 마커를 그린다.
   useEffect(() => {
     if (tab !== "place") return;
     let cancelled = false;
@@ -153,6 +223,9 @@ export default function Home() {
         L.marker(BUCKET_ORIGIN, { icon: originIcon, keyboard: false })
           .addTo(map)
           .bindTooltip("버킷 제주", { direction: "top" });
+        const markers = L.layerGroup().addTo(map);
+        markersLayerRef.current = markers;
+        renderPlaceMarkers(L);
         map.fitBounds(fence.getBounds(), { padding: [16, 16] });
         window.setTimeout(() => map.invalidateSize(), 80);
       })
@@ -163,8 +236,16 @@ export default function Home() {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
+      markersLayerRef.current = null;
     };
   }, [tab]);
+
+  // 카테고리 필터가 바뀌면 마커만 다시 그린다.
+  useEffect(() => {
+    if (tab !== "place") return;
+    const L = typeof window !== "undefined" ? window.L : undefined;
+    if (L && mapInstanceRef.current && markersLayerRef.current) renderPlaceMarkers(L);
+  }, [placeCat, tab]);
 
   return (
     <main>
@@ -250,7 +331,7 @@ export default function Home() {
           <div className="search-box">
             <span>⌕</span><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="하모해변 근처 카페, 맛집, 산책 검색" aria-label="장소 검색"/><button onClick={() => showToast(query ? `버킷 제주에서 '${query}'까지 찾아봤어요` : "검색어를 입력해 주세요")}>검색</button>
           </div>
-          <div className="category-row">{["전체", "☕ 카페", "🍚 맛집", "🌊 바다", "🥾 산책", "🚌 교통"].map((item) => <button key={item} onClick={() => setQuery(item.replace(/^[^\s]+ /, ""))}>{item}</button>)}</div>
+          <div className="category-row place-cat-row"><button className={placeCat === "전체" ? "active" : ""} onClick={() => setPlaceCat("전체")}>전체</button>{PLACE_CATEGORIES.map((c) => <button key={c.key} className={placeCat === c.key ? "active" : ""} onClick={() => setPlaceCat(c.key)}>{c.emoji} {c.key}</button>)}</div>
           <div className="map-panel">
             <div className="real-map">
               <div ref={mapRef} className="real-map-canvas" role="img" aria-label="버킷 제주 중심 반경 2km 정보 제공 경계 지도" />
@@ -262,14 +343,10 @@ export default function Home() {
               <a href="https://www.openstreetmap.org/?mlat=33.2124518&mlon=126.2598287#map=16/33.2124518/126.2598287" target="_blank" rel="noreferrer">큰 지도에서 보기 ↗</a>
             </div>
             <div className="result-list">
-              <div className="result-head"><b>가까운 순</b><span>6곳 발견</span></div>
-              {places.concat([
-                { name: "송악산 둘레길", kind: "산책", distance: "차량 12분", note: "바다와 산방산을 함께 보는 대표 산책길", icon: "🥾", color: "green" },
-                { name: "모슬포 방어축제의 거리", kind: "맛집", distance: "차량 5분", note: "대정의 제철 해산물과 로컬 식당 거리", icon: "🍚", color: "orange" },
-                { name: "가파도·마라도", kind: "여행", distance: "운진항 출발", note: "날씨와 배편을 확인하고 떠나는 섬 여행", icon: "🏝️", color: "blue" },
-              ]).filter((p) => !query || p.name.includes(query) || p.kind.includes(query)).map((place) => (
+              <div className="result-head"><b>{placeCat === "전체" ? "가까운 순" : `${CATEGORY_EMOJI[placeCat] ?? ""} ${placeCat}`}</b><span>{mapPlaces.filter((p) => (placeCat === "전체" || p.category === placeCat) && (!query || p.name.includes(query) || p.category.includes(query))).length}곳 발견</span></div>
+              {mapPlaces.filter((p) => (placeCat === "전체" || p.category === placeCat) && (!query || p.name.includes(query) || p.category.includes(query))).map((place) => (
                 <button key={place.name} onClick={() => showToast(`${place.name} 정보를 열었어요`)}>
-                  <span className={`place-icon ${place.color}`}>{place.icon}</span><span><small>{place.kind} · {place.distance}</small><b>{place.name}</b><p>{place.note}</p></span><i>›</i>
+                  <span className="place-icon mint">{CATEGORY_EMOJI[place.category] ?? "📍"}</span><span><small>{place.category} · {place.distance}</small><b>{place.name}</b><p>버킷 제주에서 가볍게 다녀오기 좋은 곳</p></span><i>›</i>
                 </button>
               ))}
             </div>
@@ -280,9 +357,18 @@ export default function Home() {
       {tab === "join" && (
         <section className="subpage shell">
           <div className="join-title-row"><div><span className="eyebrow">FIND YOUR PEOPLE</span><h1>제주에서, 같이 할래요?</h1><p className="lead">제목·상세 모집글·최대인원·모집상태를 한눈에 관리해요.</p></div><button className="primary" onClick={() => setShowJoinForm(true)}>＋ Join 만들기</button></div>
-          <div className="join-filters">{["전체", "러닝", "식사", "산책", "사진", "모집중", "모집완료", "일정완료"].map((item) => <button className={filter === item ? "selected" : ""} key={item} onClick={() => setFilter(item)}>{item}</button>)}</div>
-          <div className="join-page-grid">{visibleJoins.map((item) => <JoinCard key={item.id} item={item} joined={joined.includes(item.id)} onJoin={() => join(item.id)} />)}</div>
-          {visibleJoins.length === 0 && <div className="empty">아직 열린 Join이 없어요. 첫 Join을 만들어 볼까요? 🌱</div>}
+          <div className="join-toolbar">
+            <div className="join-filters">{["전체", "러닝", "식사", "산책", "사진", "모집중", "모집완료", "일정완료"].map((item) => <button className={filter === item ? "selected" : ""} key={item} onClick={() => setFilter(item)}>{item}</button>)}</div>
+            <label className="join-sort">정렬<select value={joinSort} onChange={(event) => setJoinSort(event.target.value as "newest" | "oldest")}><option value="newest">최신순</option><option value="oldest">오래된순</option></select></label>
+          </div>
+          {joinBuckets.upcoming.length === 0 && joinBuckets.past.length === 0
+            ? <div className="empty">아직 열린 Join이 없어요. 첫 Join을 만들어 볼까요? 🌱</div>
+            : <>
+                {joinBuckets.upcoming.length > 0
+                  ? <div className="join-page-grid">{joinBuckets.upcoming.map((item) => <JoinCard key={item.id} item={item} joined={joined.includes(item.id)} onJoin={() => join(item.id)} />)}</div>
+                  : <div className="join-empty-hint">예정된 Join이 없어요. 지난 일정만 남아 있어요.</div>}
+                {joinBuckets.past.length > 0 && <details className="past-joins"><summary>지난 일정 {joinBuckets.past.length}개 보기</summary><div className="join-page-grid past-grid">{joinBuckets.past.map((item) => <JoinCard key={item.id} item={item} joined={joined.includes(item.id)} onJoin={() => join(item.id)} />)}</div></details>}
+              </>}
         </section>
       )}
 
@@ -346,7 +432,7 @@ function JoinCard({ item, joined, onJoin }: { item: JoinItem; joined: boolean; o
     <div className="join-body">
       <div className="tags">{item.tags.map((tag) => <span key={tag}>#{tag}</span>)}</div><h3>{item.title}</h3>
       <p className="join-description">{item.description}</p>
-      <p>◷ {item.time}</p><p>⌖ {item.location}</p><p>☺ {item.people + (joined ? 1 : 0)}/{item.max}명 · by {item.host}</p>
+      <p>◷ {item.date} {item.clock}</p><p>⌖ {item.location}</p><p>☺ {item.people + (joined ? 1 : 0)}/{item.max}명 · by {item.host}</p>
       <button className={joined ? "joined" : ""} disabled={item.status !== "모집중"} onClick={onJoin}>{joined ? "참여 완료 ✓" : item.status === "모집중" ? "함께하기" : item.status}</button>
     </div>
   </article>;

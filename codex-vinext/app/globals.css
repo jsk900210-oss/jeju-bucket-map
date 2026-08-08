@@ -63,3 +63,21 @@ footer{background:#183f37;color:white;padding:35px 0;margin-top:30px}footer .she
 .map-fence-legend .fence-swatch{width:16px;height:16px;flex:0 0 auto;border-radius:50%;border:2px dashed #e8892b;background:rgba(246,178,74,.20)}
 .real-map .leaflet-tooltip{font-size:11px;font-weight:800;color:#4a3a1a;border:0;border-radius:9px;box-shadow:0 3px 10px rgba(35,70,62,.18)}
 @media(max-width:800px){.map-fence-legend{top:auto;bottom:12px;right:auto;left:50%;transform:translateX(-50%)}}
+
+/* ── Join 정렬 툴바 + 지난 일정 접이식 ── */
+.join-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:35px}
+.join-toolbar .join-filters{margin-bottom:0}
+.join-sort{display:flex;align-items:center;gap:8px;color:#687c77;font-size:12px;font-weight:800;white-space:nowrap}
+.join-sort select{border:1px solid var(--line);background:white;border-radius:11px;padding:8px 12px;color:var(--ink);font-weight:700}
+.join-empty-hint{color:#8b9895;padding:22px 2px}
+.past-joins{margin-top:32px;border-top:1px dashed var(--line);padding-top:6px}
+.past-joins>summary{cursor:pointer;list-style:none;padding:14px 4px;color:#8b9895;font-size:13px;font-weight:800;display:flex;align-items:center;gap:8px}
+.past-joins>summary::-webkit-details-marker{display:none}
+.past-joins>summary::before{content:"▸";color:#b3c0bb;font-size:11px}
+.past-joins[open]>summary::before{content:"▾"}
+.past-joins .past-grid{margin-top:16px;opacity:.7}
+/* ── 근처 발견: 카테고리 칩 + 플레이스 이모지 마커 ── */
+.place-cat-row{justify-content:flex-start}
+.place-cat-row button.active{background:var(--green);color:#fff;border-color:var(--green)}
+.place-emoji-pin{background:none;border:0}
+.place-emoji-pin span{display:grid;place-items:center;width:30px;height:30px;font-size:16px;background:#fff;border-radius:50% 50% 50% 6px;transform:rotate(-2deg);box-shadow:0 3px 8px rgba(35,70,62,.3);border:1.5px solid #fff}
